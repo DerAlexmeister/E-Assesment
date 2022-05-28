@@ -2,6 +2,11 @@
 
 Learning and Assessment Plattform for RA.
 
+## Requriements
+
+1. Python 3.4+
+2. Python-pip3
+
 ## Running the server
 
 1. Active the venv as uswell
