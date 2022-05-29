@@ -2,6 +2,13 @@
 
 Learning and Assessment Plattform for RA.
 
+## Foldersturcture
+
+- EAss: E-Assessment App
+- KAtQu: Categories-and-Questions App
+- LAna: Learning Analytics App
+- EAssLAna: Server config
+
 ## Requriements
 
 1. Python 3.4+
