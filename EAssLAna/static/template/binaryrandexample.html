@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Binary</h1><br>
+
+Please translate the following binarynumber into decimal: {{binarycode}} <br>
+
+<h4>{{message}}</h4>
+
+<form action="/eassessments/examplebin/", method="post">
+    {% csrf_token %}
+    {{Form}}
+    <button type="submit">Answer</button>
+</form>
+
+</body>
+</html> 
