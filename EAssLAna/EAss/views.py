@@ -1,7 +1,9 @@
 from django.http.response import HttpResponse
 from django.shortcuts import render
 
-from .models import BinaryStatement, ClozeModel, Cloze, Gap
+from . import cloze as c
+
+from .models import BinaryStatement, Cloze
 from .forms import BinaryAnswerForm, ClozeForm
 
 from random import randint
@@ -37,13 +39,17 @@ def generateBinaryExpression(request):
 
 
 def clozeText(request):
-    cloze
-    cloze = Cloze("Alphabet", [
-        Gap("A, ", ", ", {"B"}),
-        Gap("C, ", ", E", {"D"}),
-    ])
+    cloze = c.from_model(
+        Cloze.objects\
+            .first()\
+            .qaw
+    )
+
     if request.method == 'POST':
-        gaps = [request.POST[f"gap_{i}"] for i in range(len(request.POST)-1)]
+        gaps = [
+            request.POST[ClozeForm.get_gap_key(i)]
+            for i in range(len(cloze.gaps))
+        ]
 
         maximal = len(cloze.gaps)
         count = 0
@@ -54,21 +60,16 @@ def clozeText(request):
 
         return HttpResponse(f"{count} of {maximal} are correct.")
     else:
-        #cloze = ClozeModel\
-        #    .objects\
-        #    .first()\
-        #    .to_cloze()
+            cloze_form = ClozeForm(len(cloze.gaps))
+            cloze_items = []
 
-        cloze_form = ClozeForm(len(cloze.gaps))
-        cloze_items = []
+            for i, gap in enumerate(cloze.gaps):
+                cloze_items.extend([
+                    gap.preceeding_text,
+                    cloze_form[ClozeForm.get_gap_key(i)],
+                    gap.succeeding_text,
+                ])
 
-        for gap, form in zip(cloze.gaps, cloze_form.visible_fields()):
-            cloze_items.extend([
-                gap.preceeding_text,
-                form,
-                gap.succeeding_text,
-            ])
-
-        return render(request, 'cloze_text.html',  {
-            'cloze_items': cloze_items,
-        })
+            return render(request, 'cloze_text.html',  {
+                'cloze_items': cloze_items,
+            })
