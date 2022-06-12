@@ -5,6 +5,7 @@ from django.db import models
 class QAWSet(models.Model):
 
     title = models.CharField(max_length=16384, blank=False, null=False)
+    Categorie = models.CharField(max_length=1024, blank=False, null=True, default=None)
 
     def __str__(self):
         return self.title
@@ -35,8 +36,8 @@ class WrongStatements(models.Model):
 
 class BinaryStatement(models.Model):
 
-    Length = models.IntegerField(blank=False, null=False)
+    MaxValue = models.IntegerField(blank=False, null=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=False, on_delete=models.CASCADE)
     
     def __str__(self):
-        return "Random expression: {}".format(self.Length)
+        return "Random expression: {}".format(self.MaxValue)
