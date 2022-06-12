@@ -6,6 +6,8 @@ class BinaryAnswerForm(forms.Form):
 
 
 class ClozeForm(forms.Form):
+    cloze_id = forms.IntegerField(widget=forms.HiddenInput())
+
     def __init__(self, num_gaps: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for i in range(num_gaps):
