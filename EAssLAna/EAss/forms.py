@@ -31,3 +31,15 @@ class MCAnswerForm(forms.Form):
         except Exception as error:
             print(error)
 
+
+class TtAnswerForm(forms.Form):
+    
+
+    def __init__(self, *args, **kwargs):
+        try:
+            super(TtAnswerForm, self).__init__(*args, **kwargs)
+           
+        except Exception as error:
+            print(error)
+
+
