@@ -1,4 +1,3 @@
-from tkinter import CASCADE
 from django.db import models
 
 
@@ -41,3 +40,21 @@ class BinaryStatement(models.Model):
     
     def __str__(self):
         return "Random expression: {}".format(self.MaxValue)
+
+
+class Gap(models.Model):
+    preceeding_text = models.TextField(blank=False)
+    succeeding_text = models.TextField(blank=False)
+
+
+class GapSolution(models.Model):
+    solution = models.TextField(blank=False, null=False)
+    gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
+
+
+class Cloze(models.Model):
+    qaw = models.ForeignKey(QAWSet, on_delete=models.CASCADE)
+    gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
+    position = models.PositiveIntegerField()
+    
+

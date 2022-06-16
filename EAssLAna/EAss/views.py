@@ -1,19 +1,24 @@
 import urllib.parse
 
+from django.http.response import HttpResponse
 from django.shortcuts import render
 
 from .models import Answer
 from .models import Question
 from .models import BinaryStatement
 from .models import WrongStatements
+from .models import Cloze
 
 from .forms import BinaryAnswerForm
 from .forms import MCAnswerForm
+from .forms import ClozeForm
 
 from random import randint
 from random import shuffle
 
 from .core import generateNumbers
+
+from . import cloze as c
 
 ################################################
 ############### Model und Assmbler #############
@@ -93,6 +98,52 @@ def generateBinaryExpression(request):
         print(error)
         return render(request, 'multiplechoiceexample.html')
 
+def clozeText(request):
+    if request.method == 'POST':
+        cloze_id = request.POST['cloze_id']
+        qaw = QAWSet.objects.get(id=cloze_id)
+
+        cloze = c.from_model(qaw)
+
+        gaps = [
+            request.POST[ClozeForm.get_gap_key(i)]
+            for i in range(len(cloze.gaps))
+        ]
+
+        maximal = len(cloze.gaps)
+        count = 0
+
+        for guess, solution in zip(gaps, cloze.gaps):
+            if guess in solution.solutions:
+                count += 1
+
+        return HttpResponse(f"{count} of {maximal} are correct.")
+    else:
+        qaw = Cloze.objects\
+             .first()\
+             .qaw
+        cloze = c.from_model(qaw)
+
+        cloze_form = ClozeForm(
+            len(cloze.gaps),
+            initial={
+                'cloze_id': qaw.id,
+            },
+        )
+
+        cloze_items = []
+
+        for i, gap in enumerate(cloze.gaps):
+            cloze_items.extend([
+                gap.preceeding_text,
+                cloze_form[ClozeForm.get_gap_key(i)],
+                gap.succeeding_text,
+            ])
+
+        return render(request, 'cloze_text.html',  {
+            'cloze_items': cloze_items,
+            'form': cloze_form,
+        })
 
 def generateDragNDropExample(request):
     try:
@@ -100,4 +151,5 @@ def generateDragNDropExample(request):
     except Exception as error:
         print(error)
         return render(request, 'multiplechoiceexample.html')
+
 
