@@ -85,9 +85,6 @@ def generateBinaryExpression(request):
             return render(request, 'binaryrandexample.html', {'message': message})
         else: 
             binex = BinaryStatement.objects.first()
-
-            print(binex, binex.MaxValue)
-            
             expression = randint(5, binex.MaxValue)
             expression = format(expression, "b")
             answerform = BinaryAnswerForm(initial={'Question': expression})

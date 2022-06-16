@@ -8,7 +8,7 @@ class QAWSet(models.Model):
     Categorie = models.CharField(max_length=1024, blank=False, null=True, default=None)
 
     def __str__(self):
-        return self.title
+        return "{} - {}".format(self.title, self.Categorie)
 
 class Question(models.Model):
     
