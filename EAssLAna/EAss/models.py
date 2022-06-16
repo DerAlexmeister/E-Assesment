@@ -10,14 +10,24 @@ TOPICS = (
     ('Quantencomputing','Quantencomputing'),
 )
 
+DIFF = (
+    ('None','None'),
+    ('Easy', 'Easy'),
+    ('Medium','Medium'),
+    ('Hard','Hard'),
+    ('Insane','Insane'),
+)
+
 class QAWSet(models.Model):
 
     title = models.CharField(max_length=16384, blank=False, null=False)
     Categorie = models.CharField(max_length=1024, blank=False, null=True, default=None)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
+    Target = models.CharField(max_length=1024, default='', null=False, blank=False)
+    Difficulty = models.CharField(max_length=24, choices=DIFF, default='None', null=False, blank=False)
 
     def __str__(self):
-        return "{} - {}".format(self.title, self.Categorie)
+        return "{} - {} - {}".format(self.title, self.Categorie, self.Difficulty)
 
 class Question(models.Model):
     
@@ -51,6 +61,13 @@ class BinaryStatement(models.Model):
     def __str__(self):
         return "Random expression: {}".format(self.MaxValue)
 
+class OctaStatement(models.Model):
+
+    MaxValue = models.IntegerField(blank=False, null=False)
+    Set = models.ForeignKey(QAWSet, blank=False, null=False, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return "Random expression: {}".format(self.MaxValue)
 
 class Gap(models.Model):
     preceeding_text = models.TextField(blank=False)

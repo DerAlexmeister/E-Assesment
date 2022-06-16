@@ -10,7 +10,7 @@
 
 {{Categorie}} - {{Question}} <br>
 
-<form action="/eassessments/examplemc/", method="post">
+<form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
     {% csrf_token %}
     {{Form.as_p}}
     <button type="submit">Answer</button>

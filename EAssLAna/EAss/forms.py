@@ -4,6 +4,9 @@ class BinaryAnswerForm(forms.Form):
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Answer = forms.IntegerField()
 
+class OctaAnswerForm(forms.Form):
+    Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Answer = forms.IntegerField()
 
 class ClozeForm(forms.Form):
     cloze_id = forms.IntegerField(widget=forms.HiddenInput())

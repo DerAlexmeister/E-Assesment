@@ -8,7 +8,9 @@
 {% if ComputerModels|length > 0 %}
     <h2>Assembler</h2>
     {% for qwaset in Assembler %}
-        <p>{{qwaset.title}}</p>
+        <p>
+            <a href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}">({{qwaset.Difficulty}}) - {{qwaset.title}}</a>
+        </p>
     {% endfor %}
 {% endif %}
 
@@ -17,7 +19,9 @@
 {% if ComputerModels|length > 0 %}
     <h2>Computer Models</h2>
     {% for qwaset in ComputerModels %}
-        <p>{{qwaset.title}}</p>
+        <p>
+            <a href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}">({{qwaset.Difficulty}}) - {{qwaset.title}}</a>
+        </p>
     {% endfor %}
 {% endif %}
 
@@ -26,7 +30,7 @@
 {% if Gates|length > 0 %}
     <h2>Gates</h2>
     {% for qwaset in Gates %}
-        <p>{{qwaset.title}}</p>
+        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
     {% endfor %}
 {% endif %}
 
@@ -35,7 +39,7 @@
 {% if Calculus|length > 0 %}
     <h2>Calculus</h2>
     {% for qwaset in Calculus %}
-        <p>{{qwaset.title}}</p>
+        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
     {% endfor %}
 {% endif %}
 
@@ -44,7 +48,7 @@
 {% if Optimization|length > 0 %}
     <h2>Optimization</h2>
     {% for qwaset in Optimization %}
-        <p>{{qwaset.title}}</p>
+        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
     {% endfor %}
 {% endif %}
 
@@ -53,7 +57,7 @@
 {% if Quantencomputing|length > 0 %}
     <h2>Quantencomputing</h2>
     {% for qwaset in Quantencomputing %}
-        <p>{{qwaset.title}}</p>
+        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
     {% endfor %}
 {% endif %}
 </body>
