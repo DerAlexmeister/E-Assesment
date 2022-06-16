@@ -1,13 +1,23 @@
 from django.db import models
 
+TOPICS = (
+    ('None','None'),
+    ('Computer-Models', 'Computer-Models'),
+    ('Gates','Gates'),
+    ('Calculus','Calculus'),
+    ('Optimization','Optimization'),
+    ('Assembler','Assembler'),
+    ('Quantencomputing','Quantencomputing'),
+)
 
 class QAWSet(models.Model):
 
     title = models.CharField(max_length=16384, blank=False, null=False)
     Categorie = models.CharField(max_length=1024, blank=False, null=True, default=None)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
-        return self.title
+        return "{} - {}".format(self.title, self.Categorie)
 
 class Question(models.Model):
     
@@ -45,7 +55,7 @@ class BinaryStatement(models.Model):
 class Gap(models.Model):
     preceeding_text = models.TextField(blank=False)
     succeeding_text = models.TextField(blank=False)
-
+    Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
 
 class GapSolution(models.Model):
     solution = models.TextField(blank=False, null=False)

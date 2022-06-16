@@ -8,6 +8,7 @@ from .models import Question
 from .models import BinaryStatement
 from .models import WrongStatements
 from .models import Cloze
+from .models import QAWSet
 
 from .forms import BinaryAnswerForm
 from .forms import MCAnswerForm
@@ -19,6 +20,24 @@ from random import shuffle
 from .core import generateNumbers
 
 from . import cloze as c
+
+################################################
+################# General ######################
+################################################
+
+def index(request):
+    try:
+        topics, data = ['Computer-Models', 'Gates', 'Calculus', 'Optimization', 'Assembler', 'Quantencomputing'], {}
+
+        for topic in topics:
+            data[topic.replace("-", "")] = assets if (assets := QAWSet.objects.filter(Topic=topic)) is not None and len(assets) else []
+
+        print(data)
+
+        return render(request, 'index.html', data)
+    except Exception as error:
+        print(error)
+
 
 ################################################
 ############### Model und Assmbler #############
@@ -49,7 +68,6 @@ def generateMCExample(request):
                     answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__Categorie='DLX-Pipeline'))]
             answerscorrection = [ans in answerset for ans in answers]
-            print(answerscorrection, answerset)
             if False in answerscorrection or len(answerscorrection) < 1:
                 message = "Your answer is not correct."
             else:
@@ -90,13 +108,10 @@ def generateBinaryExpression(request):
             return render(request, 'binaryrandexample.html', {'message': message})
         else: 
             binex = BinaryStatement.objects.first()
-
-            print(binex, binex.MaxValue)
-            
             expression = randint(5, binex.MaxValue)
             expression = format(expression, "b")
             answerform = BinaryAnswerForm(initial={'Question': expression})
-        return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform})
+            return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform})
     except Exception as error:
         print(error)
         return render(request, 'multiplechoiceexample.html')
