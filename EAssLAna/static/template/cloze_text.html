@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form action="/eassessments/cloze/", method="post">
+    {% csrf_token %}
+    {% for cloze in cloze_items %}
+    {{cloze}}
+    {% endfor %}
+    {{form.cloze_id}}
+    <button type="submit">Answer</button>
+</form>
+
+</body>
+</html>

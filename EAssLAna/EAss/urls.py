@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.urls import path
 
-from .views import generateMCExample
-from .views import generateBinaryExpression
+from .views import generateExample
+from .views import generateBinaryExpression, clozeText
 
 urlpatterns = [
-   path('examplemc/', generateMCExample),
-   path('examplebin/', generateBinaryExpression),
+    path('example/', generateExample),
+    path('examplebin/', generateBinaryExpression),
+    path('cloze/', clozeText)
 ]
