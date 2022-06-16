@@ -4,5 +4,17 @@
 
 <h1>Example MC</h1>
 
+{{message}} <br><br>
+
+<hr>
+
+{{Categorie}} - {{Question}} <br>
+
+<form action="/eassessments/examplemc/", method="post">
+    {% csrf_token %}
+    {{Form.as_p}}
+    <button type="submit">Answer</button>
+</form>
+
 </body>
 </html> 
