@@ -12,6 +12,7 @@ from .models import QAWSet
 
 from .forms import BinaryAnswerForm
 from .forms import MCAnswerForm
+from .forms import TtAnswerForm
 from .forms import ClozeForm
 
 from random import randint
@@ -55,6 +56,52 @@ def generateMCQuestions(request):
 ################################################
 ############### Examples #######################
 ################################################
+def generateTtExample(request):
+    try:
+        if request.method == "POST":
+            useransweredwithright = request.POST['Right']
+            useransweredwithwrong = request.POST['Wrong']
+            
+            result = {}
+
+            for x in useransweredwithright:
+                if x in list(Answer.objects.filter(Set__Categorie='TEST')):
+                    result.update({x:[True, True]})
+                else:
+                    result.update({x:[True, False]})
+
+            for x in useransweredwithwrong:
+                if x in list(WrongStatements.objects.filter(Set__Categorie='TEST')):
+                    result.update({x:[False, True]})
+                else:
+                    result.update({x:[False, False]})
+
+            correctcounter = [ True if i else False for i in result.values()].count(True)
+
+            message = "You answered {}/6 statements correctly.".format(correctcounter)
+           
+            return render(request, 'multiplechoiceexample.html', {'message': message, 'result': result})
+        else:
+            answerset = Answer.objects.filter(Set__Categorie='TEST')
+            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie='TEST')
+
+            countstatements = 6
+            countanswers = generateNumbers(countstatements.count(), 1)[0]
+
+            answernumbers = generateNumbers(answerset.count() - 1, countanswers)
+            wrongstatementsnumbers = generateNumbers(wrongstatementsset.count() - 1, countstatements - countanswers)
+
+            statements = [str(answerset[i]) for i in answernumbers]
+            statements = [str(wrongstatementsset[i]) for i in wrongstatementsnumbers]
+
+            shuffle(statements)
+
+            mcform = TtAnswerForm(initial={'Categorie': 'TEST', 'Options': statements})
+            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': 'TEST'})
+    except Exception as error:
+        print(error)
+    return render(request, 'multiplechoiceexample.html')
+
 
 def generateMCExample(request):
     try:
