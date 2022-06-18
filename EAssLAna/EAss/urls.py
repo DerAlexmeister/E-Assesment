@@ -9,10 +9,11 @@ from .views import clozeText
 from .views import generateMCQuestions
 from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
+from .views import returnMasterTemplate
 
 urlpatterns = [
     ## Production
-    path('', index),
+    path('', index, name="homeview"),
     path('mcgenerator/', generateMCQuestions),
     path('bingenerator/', generateBinaryQuestions),
     path('octagenerator/', generateOctaQuestions),
@@ -21,4 +22,7 @@ urlpatterns = [
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
     path('examplecloze/', clozeText),
+
+    ## Testing
+    path('master/', returnMasterTemplate),
 ]
