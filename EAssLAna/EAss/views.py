@@ -4,6 +4,7 @@ from django.http.response import HttpResponse
 from django.shortcuts import render
 
 from .models import Answer
+from .models import OctaStatement
 from .models import Question
 from .models import BinaryStatement
 from .models import WrongStatements
@@ -11,6 +12,7 @@ from .models import Cloze
 from .models import QAWSet
 
 from .forms import BinaryAnswerForm
+from .forms import OctaAnswerForm
 from .forms import MCAnswerForm
 from .forms import TtAnswerForm
 from .forms import ClozeForm
@@ -33,25 +35,98 @@ def index(request):
         for topic in topics:
             data[topic.replace("-", "")] = assets if (assets := QAWSet.objects.filter(Topic=topic)) is not None and len(assets) else []
 
-        print(data)
-
         return render(request, 'index.html', data)
     except Exception as error:
         print(error)
 
 
 ################################################
-############### Model und Assmbler #############
+############### Generator ######################
 ################################################
+
+def generateOctaQuestions(request):
+    try:
+        cat = request.GET.get('t', '')
+        if request.method == "POST":
+            message = "You are wrong"
+            question = int(request.POST['Question'], 8)
+            answer = int(request.POST['Answer'], 10)
+            if question == answer:
+                message = "Well done"
+            return render(request, 'octarandexample.html', {'message': message})
+        else: 
+            octaex = OctaStatement.objects.filter(Set__Categorie=(str(cat)))[0]
+            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
+            expression = randint(5, octaex.MaxValue)
+            expression = format(expression, "o")
+            answerform = OctaAnswerForm(initial={'Question': expression})
+            return render(request, 'octarandexample.html', {'octacode': expression, "Form": answerform, "Target": target})
+    except Exception as error:
+        print(error)
+        return render(request, 'index.html')
+
+def generateBinaryQuestions(request):
+    try:
+        cat = request.GET.get('t', '')
+        if request.method == "POST":
+            message = "You are wrong"
+            question = int(request.POST['Question'], 2)
+            answer = int(request.POST['Answer'], 10)
+            if question == answer:
+                message = "Well done"
+            return render(request, 'binaryrandexample.html', {'message': message})
+        else: 
+            binex = BinaryStatement.objects.filter(Set__Categorie=(str(cat)))[0]
+            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
+            expression = randint(5, binex.MaxValue)
+            expression = format(expression, "b")
+            answerform = BinaryAnswerForm(initial={'Question': expression})
+            return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform, "Target": target})
+    except Exception as error:
+        print(error)
+        return render(request, 'index.html')
 
 def generateMCQuestions(request):
     try:
+        cat = request.GET.get('t', '')
         if request.method == "POST":
-            pass
+            message = "You are wrong"
+            raw_request = request.body.decode("UTF-8")
+            raw_request_split = raw_request.split("&")
+            answers = []
+            for element in raw_request_split:
+                if element.startswith("Options_q="):
+                    answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
+            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__Categorie=(str(cat))))]
+            answerscorrection = [ans in answerset for ans in answers]
+            if False in answerscorrection or len(answerscorrection) < 1:
+                message = "Your answer is not correct."
+            else:
+                message = "Your answer is correct."
+            return render(request, 'multiplechoiceexample.html', {'message': message})
         else:
-            pass
+            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
+            questionsset = Question.objects.filter(Set__Categorie=(str(cat)))
+            answerset = Answer.objects.filter(Set__Categorie=(str(cat)))
+            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie=(str(cat)))
+            answer = randint(0, answerset.count() - 1)
+            question = randint(0, questionsset.count() - 1)
+            numbers = generateNumbers(wrongstatementsset.count() - 1, 3)
+
+            statements = [str(wrongstatementsset[i]) for i in numbers]
+            statements.append(answerset[answer])
+            question_f = questionsset[question]
+
+            shuffle(statements)
+
+            statements_f = []
+            for i in statements: statements_f.append((i, i))
+
+            mcform = MCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
+            return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
+    return render(request, 'multiplechoiceexample.html')
 
 ################################################
 ############### Examples #######################
@@ -161,7 +236,7 @@ def generateBinaryExpression(request):
             return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform})
     except Exception as error:
         print(error)
-        return render(request, 'multiplechoiceexample.html')
+        return render(request, 'index.html')
 
 def clozeText(request):
     if request.method == 'POST':
