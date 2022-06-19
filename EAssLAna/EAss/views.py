@@ -128,7 +128,6 @@ def generateMCQuestions(request):
             for i in statements: statements_f.append((i, i))
 
             mcform = MCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
-            print(mcform)
             return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
@@ -149,7 +148,7 @@ def clozeTextGenerator(request):
 
         return HttpResponse(f"{count} of {maximal} are correct.")
     else:
-        qaw = Cloze.objects.first().qaw
+        qaw = Cloze.objects.first().qaw #TODO fix this
         print(qaw)
         cloze = c.from_model(qaw)
 
@@ -187,7 +186,7 @@ def generateTruthTables(request):
             answerset = Answer.objects.filter(Set__NameID=(str(cat)))
             wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
 
-            countstatements = 6
+            countstatements = 3
             countanswers = generateNumbers(countstatements, 1)[0]
 
             answernumbers = sample(range(0, answerset.count()), countanswers)
@@ -198,8 +197,9 @@ def generateTruthTables(request):
 
             shuffle(statements)
 
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
             mcform = TtAnswerForm(initial={'Categorie': (str(cat)), 'Options': statements})
-            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': (str(cat))})
+            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return render(request, 'multiplechoiceexample.html')
