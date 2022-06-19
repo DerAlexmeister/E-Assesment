@@ -1,3 +1,4 @@
+from optparse import Values
 import urllib.parse
 
 from django.http.response import HttpResponse
@@ -146,9 +147,9 @@ def generateTtExample(request):
             postresult.pop('csrfmiddlewaretoken')
             for k, v in postresult.items():
                 if k in checklist:
-                    result[k].append([v, True])
+                    result[k] = [v[0], True]
                 else:
-                    result[k].append([v, False])
+                    result[k] = [v[0], False]
             
             """
             useransweredwithright = request.POST['Right1']
