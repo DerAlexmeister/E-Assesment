@@ -37,11 +37,17 @@ class MCAnswerForm(forms.Form):
 
 class TtAnswerForm(forms.Form):
     Categorie = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Options_q = forms.TypedChoiceField(coerce=lambda x: x =='True', choices=((False, 'Wrong'), (True, 'Right')))
+    #Options_q = forms.TypedChoiceField(coerce=lambda x: x =='True', choices=((False, 'Wrong'), (True, 'Right')))
 
     def __init__(self, *args, **kwargs):
         try:
             super(TtAnswerForm, self).__init__(*args, **kwargs)
+            if 'initial' in kwargs.keys():
+                
+                for x in ((kwargs['initial'])['Options']):
+                    self.fields[x] = forms.TypedChoiceField(coerce=lambda x: x =='True', choices=((False, 'Wrong'), (True, 'Right')))
+
+                #self.fields['Options_q'].label = (kwargs['initial'])['Options'][0]
            
         except Exception as error:
             print(error)

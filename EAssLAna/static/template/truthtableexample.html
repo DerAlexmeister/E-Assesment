@@ -5,6 +5,7 @@
 <h1>Example Truthtables</h1>
 
 {{message}} <br><br>
+{{result}} <br><br>
 
 <hr>
 
@@ -12,7 +13,7 @@
 
 <form action="/eassessments/examplett/", method="post">
     {% csrf_token %}
-    {{ form }}
+    {{ Form.as_table }}<br>
     <button type="submit">Answer</button>
 </form>
 
