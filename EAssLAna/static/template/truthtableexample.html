@@ -1,21 +1,33 @@
-<!DOCTYPE html>
-<html>
-<body>
+{% extends "master.html" %}
 
-<h1>Example Truthtables</h1>
+{% block title %} Index E-Assessments {% endblock %}
 
-{{message}} <br><br>
-{{result}} <br><br>
+{% block content %}
 
-<hr>
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
 
-{{Categorie}} <br>
+    <p class="form-group">
+        Please translate the following binarynumber into decimal: <b class="badge badge-pill badge-primary" style="background-color: #bba457; color: #424242">{{binarycode}}</b> <br>
 
-<form action="/eassessments/examplett/", method="post">
-    {% csrf_token %}
-    {{ Form.as_table }}<br>
-    <button type="submit">Answer</button>
-</form>
+        <h4>{{message}}</h4>
+        <h4>{{result}}</h4>
+        
+        <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
+            {% csrf_token %}
+            <table id="table1">
+            {{ Form.as_table }}
+            </table>
+            <br>
+            <br>
+            <button type="submit" class="btn btn-info">Answer</button>
+            
+            <script>
+                document.getElementById("table1").style.fontSize = "20px";
+                document.getElementById("table1").style.border = "1px solid #000";
+                document.getElementById("table1").style.width = "25%";
+            </script>
+        </form>       
+    </p>
+</div>
 
-</body>
-</html> 
+{% endblock %}
