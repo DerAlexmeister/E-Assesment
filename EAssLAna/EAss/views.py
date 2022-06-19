@@ -1,3 +1,4 @@
+from tabnanny import check
 import urllib.parse
 
 from django.http.response import HttpResponse
@@ -170,14 +171,18 @@ def generateTtExample(request):
 
             result = {}
 
-            checklist = list(Answer.objects.filter(Set__Categorie='test'))
+            checklist = [i['Answer'] for i in Answer.objects.filter(Set__Categorie='test').values()]
+            print(checklist)
             postresult.pop('csrfmiddlewaretoken')
+            postresult.pop('Categorie')
             for k, v in postresult.items():
                 if k in checklist:
-                    result[k].append([v, True])
+                    result[k] = (v[0], True)
                 else:
-                    result[k].append([v, False])
-            
+                    result[k] = (v[0], False)
+
+            print(result)
+
             """
             useransweredwithright = request.POST['Right1']
             useransweredwithwrong = request.POST['Wrong']
@@ -195,7 +200,9 @@ def generateTtExample(request):
                     result.update({x:[False, False]})
             """
 
-            correctcounter = [ True if i else False for i in result.values([1])].count(True)
+            correctcounter = [True if (bool(i[0]) == i[1]) else False for i in result.values()].count(True)
+
+            #correctcounter = [ True if i else False for i in result.values([1])].count(True)
 
             message = "You answered {}/6 statements correctly.".format(correctcounter)
            
@@ -204,7 +211,7 @@ def generateTtExample(request):
             answerset = Answer.objects.filter(Set__Categorie='test')
             wrongstatementsset = WrongStatements.objects.filter(Set__Categorie='test')
 
-            countstatements = 6
+            countstatements = 3
             countanswers = generateNumbers(countstatements, 1)[0]
 
             answernumbers = sample(range(0, answerset.count()), countanswers)
