@@ -165,6 +165,7 @@ def clozeTextGenerator(request):
 ################################################
 def generateTtExample(request):
     try:
+        cat = request.GET.get('t', '')
         if request.method == "POST":
            
             postresult = dict(request.POST)
@@ -202,7 +203,7 @@ def generateTtExample(request):
 
             correctcounter = [True if (bool(i[0]) == i[1]) else False for i in result.values()].count(True)
 
-            #correctcounter = [ True if i else False for i in result.values([1])].count(True)
+            #correctcounter = [ True if i else False for i in result.values()[1]].count(True)
 
             message = "You answered {}/6 statements correctly.".format(correctcounter)
            
