@@ -160,17 +160,14 @@ def clozeTextGenerator(request):
 
         return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, })
 
-
-################################################
-############### Examples #######################
-################################################
-def generateTtExample(request):
+def generateTruthTables(request):
     try:
+        cat = request.GET.get('t', '')
         if request.method == "POST":
            
             postresult = dict(request.POST)
             result = {}
-            checklist = [i['Answer'] for i in Answer.objects.filter(Set__Categorie='test').values()]
+            checklist = [i['Answer'] for i in Answer.objects.filter(Set__Categorie=(str(cat))).values()]
             postresult.pop('csrfmiddlewaretoken')
             postresult.pop('Categorie')
 
@@ -186,8 +183,8 @@ def generateTtExample(request):
            
             return render(request, 'multiplechoiceexample.html', {'message': message, 'result': result})
         else:
-            answerset = Answer.objects.filter(Set__Categorie='test')
-            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie='test')
+            answerset = Answer.objects.filter(Set__Categorie=(str(cat)))
+            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie=(str(cat)))
 
             countstatements = 6
             countanswers = generateNumbers(countstatements, 1)[0]
@@ -200,12 +197,15 @@ def generateTtExample(request):
 
             shuffle(statements)
 
-            mcform = TtAnswerForm(initial={'Categorie': 'test', 'Options': statements})
-            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': 'test'})
+            mcform = TtAnswerForm(initial={'Categorie': (str(cat)), 'Options': statements})
+            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': (str(cat))})
     except Exception as error:
         print(error)
     return render(request, 'multiplechoiceexample.html')
 
+################################################
+############### Examples #######################
+################################################
 
 def generateMCExample(request):
     try:
