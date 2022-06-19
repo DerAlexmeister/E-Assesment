@@ -1,14 +1,24 @@
-<!DOCTYPE html>
-<html>
-<body>
-<form action="/eassessments/cloze/", method="post">
-    {% csrf_token %}
-    {% for cloze in cloze_items %}
-    {{cloze}}
-    {% endfor %}
-    {{form.cloze_id}}
-    <button type="submit">Answer</button>
-</form>
+{% extends "master.html" %}
 
-</body>
-</html>
+{% block title %} Index E-Assessments {% endblock %}
+
+{% block content %}
+
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
+
+    <p class="form-group">
+        <h4>{{message}}</h4>
+        
+        <form action="/eassessments/{{Target}}/", method="post">
+            {% csrf_token %}
+            {% for cloze in cloze_items %}
+            {{cloze}}
+            {% endfor %}
+            {{form.cloze_id}}
+            <br><br>
+            <button type="submit" class="btn btn-info">Answer</button>
+        </form>
+    </p>
+</div>
+
+{% endblock %}

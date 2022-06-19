@@ -83,7 +83,6 @@ def generateBinaryQuestions(request):
         else: 
             binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            cat = (QAWSet.objects.filter(NameID=(str(cat))))[0].NameID
             expression = randint(5, binex.MaxValue)
             expression = format(expression, "b")
             answerform = BinaryAnswerForm(initial={'Question': expression})
@@ -112,8 +111,6 @@ def generateMCQuestions(request):
             return render(request, 'multiplechoiceexample.html', {'message': message})
         else:
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            cat = (QAWSet.objects.filter(NameID=(str(cat))))[0].NameID
-            print(">>>  ", cat)
             questionsset = Question.objects.filter(Set__NameID=(str(cat)))
             answerset = Answer.objects.filter(Set__NameID=(str(cat)))
             wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
@@ -162,7 +159,7 @@ def clozeTextGenerator(request):
         for i, gap in enumerate(cloze.gaps):
             cloze_items.extend([gap.preceeding_text, cloze_form[ClozeForm.get_gap_key(i)], gap.succeeding_text, ])
 
-        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, })
+        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": str(cat), "Target": qaw.Target})
 
 def generateTruthTables(request):
     try:
