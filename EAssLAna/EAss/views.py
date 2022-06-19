@@ -1,4 +1,5 @@
 from optparse import Values
+from tabnanny import check
 import urllib.parse
 
 from django.http.response import HttpResponse
@@ -132,6 +133,34 @@ def generateMCQuestions(request):
         print(error)
     return redirect('homeview')
 
+def clozeTextGenerator(request):
+    cat = request.GET.get('t', '')
+    if request.method == 'POST':
+        cloze_id = request.POST['cloze_id']
+        qaw = QAWSet.objects.get(id=cloze_id)
+        cloze = c.from_model(qaw)
+
+        gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
+        maximal, count = len(cloze.gaps), 0
+
+        for guess, solution in zip(gaps, cloze.gaps):
+            if guess in solution.solutions: count += 1
+
+        return HttpResponse(f"{count} of {maximal} are correct.")
+    else:
+        qaw = Cloze.objects.first().qaw
+        print(qaw)
+        cloze = c.from_model(qaw)
+
+        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': qaw.id,}, )
+        cloze_items = []
+
+        for i, gap in enumerate(cloze.gaps):
+            cloze_items.extend([gap.preceeding_text, cloze_form[ClozeForm.get_gap_key(i)], gap.succeeding_text, ])
+
+        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, })
+
+
 ################################################
 ############### Examples #######################
 ################################################
@@ -140,35 +169,18 @@ def generateTtExample(request):
         if request.method == "POST":
            
             postresult = dict(request.POST)
-
             result = {}
-
-            checklist = list(Answer.objects.filter(Set__Categorie='test'))
+            checklist = [i['Answer'] for i in Answer.objects.filter(Set__Categorie='test').values()]
             postresult.pop('csrfmiddlewaretoken')
+            postresult.pop('Categorie')
+
             for k, v in postresult.items():
                 if k in checklist:
-                    result[k] = [v[0], True]
+                    result[k] = (v[0], True)
                 else:
-                    result[k] = [v[0], False]
-            
-            """
-            useransweredwithright = request.POST['Right1']
-            useransweredwithwrong = request.POST['Wrong']
-            
-            for x in useransweredwithright:
-                if x in list(Answer.objects.filter(Set__Categorie='test')):
-                    result.update({x:[True, True]})
-                else:
-                    result.update({x:[True, False]})
+                    result[k] = (v[0], False)
 
-            for x in useransweredwithwrong:
-                if x in list(WrongStatements.objects.filter(Set__Categorie='test')):
-                    result.update({x:[False, True]})
-                else:
-                    result.update({x:[False, False]})
-            """
-
-            correctcounter = [ True if i else False for i in result.values([1])].count(True)
+            correctcounter = [True if (bool(i[0]) == i[1]) else False for i in result.values()].count(True)
 
             message = "You answered {}/6 statements correctly.".format(correctcounter)
            
@@ -254,53 +266,6 @@ def generateBinaryExpression(request):
     except Exception as error:
         print(error)
         return render(request, 'index.html')
-
-def clozeText(request):
-    if request.method == 'POST':
-        cloze_id = request.POST['cloze_id']
-        qaw = QAWSet.objects.get(id=cloze_id)
-
-        cloze = c.from_model(qaw)
-
-        gaps = [
-            request.POST[ClozeForm.get_gap_key(i)]
-            for i in range(len(cloze.gaps))
-        ]
-
-        maximal = len(cloze.gaps)
-        count = 0
-
-        for guess, solution in zip(gaps, cloze.gaps):
-            if guess in solution.solutions:
-                count += 1
-
-        return HttpResponse(f"{count} of {maximal} are correct.")
-    else:
-        qaw = Cloze.objects\
-             .first()\
-             .qaw
-        cloze = c.from_model(qaw)
-
-        cloze_form = ClozeForm(
-            len(cloze.gaps),
-            initial={
-                'cloze_id': qaw.id,
-            },
-        )
-
-        cloze_items = []
-
-        for i, gap in enumerate(cloze.gaps):
-            cloze_items.extend([
-                gap.preceeding_text,
-                cloze_form[ClozeForm.get_gap_key(i)],
-                gap.succeeding_text,
-            ])
-
-        return render(request, 'cloze_text.html',  {
-            'cloze_items': cloze_items,
-            'form': cloze_form,
-        })
 
 def generateDragNDropExample(request):
     try:

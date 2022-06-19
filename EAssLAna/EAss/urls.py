@@ -5,7 +5,7 @@ from django.urls import path
 from .views import index
 from .views import generateMCExample
 from .views import generateBinaryExpression
-from .views import clozeText
+from .views import clozeTextGenerator
 from .views import generateMCQuestions
 from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
@@ -18,11 +18,12 @@ urlpatterns = [
     path('mcgenerator/', generateMCQuestions),
     path('bingenerator/', generateBinaryQuestions),
     path('octagenerator/', generateOctaQuestions),
+    path('clozegenerator/', clozeTextGenerator),
 
     ## Examples 
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
-    path('examplecloze/', clozeText),
+    #path('examplecloze/', clozeText),
     path('examplett/', generateTtExample),
 
     ## Testing
