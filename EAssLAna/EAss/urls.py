@@ -9,6 +9,7 @@ from .views import clozeTextGenerator
 from .views import generateMCQuestions
 from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
+from .views import generateTtExample
 from .views import returnMasterTemplate
 
 urlpatterns = [
@@ -23,6 +24,7 @@ urlpatterns = [
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
     #path('examplecloze/', clozeText),
+    path('examplett/', generateTtExample),
 
     ## Testing
     path('master/', returnMasterTemplate),

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Example Truthtables</h1>
+
+{{message}} <br><br>
+{{result}} <br><br>
+
+<hr>
+
+{{Categorie}} <br>
+
+<form action="/eassessments/examplett/", method="post">
+    {% csrf_token %}
+    {{ Form.as_table }}<br>
+    <button type="submit">Answer</button>
+</form>
+
+</body>
+</html> 
