@@ -19,12 +19,13 @@ urlpatterns = [
     path('bingenerator/', generateBinaryQuestions),
     path('octagenerator/', generateOctaQuestions),
     path('clozegenerator/', clozeTextGenerator),
+    path('ttgenerator/', generateTruthTables),
 
     ## Examples 
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
     #path('examplecloze/', clozeText),
-    path('examplett/', generateTruthTables),
+    #path('examplett/', generateTruthTables),
 
     ## Testing
     path('master/', returnMasterTemplate),

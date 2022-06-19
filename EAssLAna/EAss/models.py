@@ -18,16 +18,26 @@ DIFF = (
     ('Insane','Insane'),
 )
 
+ITEMTYPES = (
+    ('None','None'),
+    ('MultipleChoice', 'MultipleChoice'),
+    ('SingleChoice','SingleChoice'),
+    ('ClozeText','ClozeText'),
+    ('TruthTable','TruthTable'),
+    ('Calculus','Calculus'),
+)
+
 class QAWSet(models.Model):
 
     title = models.CharField(max_length=16384, blank=False, null=False)
-    Categorie = models.CharField(max_length=1024, blank=False, null=True, default=None)
+    NameID = models.CharField(max_length=1024, blank=False, null=True, default=None, unique=True)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
     Target = models.CharField(max_length=1024, default='', null=False, blank=False)
     Difficulty = models.CharField(max_length=24, choices=DIFF, default='None', null=False, blank=False)
+    ItemType = models.CharField(max_length=24, choices=ITEMTYPES, default='None', null=False, blank=False)
 
     def __str__(self):
-        return "{} - {} - {}".format(self.title, self.Categorie, self.Difficulty)
+        return "{} - {} - {}".format(self.title, self.NameID, self.Difficulty)
 
 class Question(models.Model):
     

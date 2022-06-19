@@ -60,8 +60,8 @@ def generateOctaQuestions(request):
                 message = "Well done"
             return render(request, 'octarandexample.html', {'message': message})
         else: 
-            octaex = OctaStatement.objects.filter(Set__Categorie=(str(cat)))[0]
-            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
+            octaex = OctaStatement.objects.filter(Set__NameID=(str(cat)))[0]
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
             expression = randint(5, octaex.MaxValue)
             expression = format(expression, "o")
             answerform = OctaAnswerForm(initial={'Question': expression})
@@ -81,8 +81,9 @@ def generateBinaryQuestions(request):
                 message = "Well done"
             return render(request, 'binaryrandexample.html', {'message': message})
         else: 
-            binex = BinaryStatement.objects.filter(Set__Categorie=(str(cat)))[0]
-            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
+            binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            cat = (QAWSet.objects.filter(NameID=(str(cat))))[0].NameID
             expression = randint(5, binex.MaxValue)
             expression = format(expression, "b")
             answerform = BinaryAnswerForm(initial={'Question': expression})
@@ -102,7 +103,7 @@ def generateMCQuestions(request):
             for element in raw_request_split:
                 if element.startswith("Options_q="):
                     answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
-            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__Categorie=(str(cat))))]
+            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
             answerscorrection = [ans in answerset for ans in answers]
             if False in answerscorrection or len(answerscorrection) < 1:
                 message = "Your answer is not correct."
@@ -110,10 +111,12 @@ def generateMCQuestions(request):
                 message = "Your answer is correct."
             return render(request, 'multiplechoiceexample.html', {'message': message})
         else:
-            target = (QAWSet.objects.filter(Categorie=(str(cat))))[0].Target
-            questionsset = Question.objects.filter(Set__Categorie=(str(cat)))
-            answerset = Answer.objects.filter(Set__Categorie=(str(cat)))
-            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie=(str(cat)))
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            cat = (QAWSet.objects.filter(NameID=(str(cat))))[0].NameID
+            print(">>>  ", cat)
+            questionsset = Question.objects.filter(Set__NameID=(str(cat)))
+            answerset = Answer.objects.filter(Set__NameID=(str(cat)))
+            wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
             answer = randint(0, answerset.count() - 1)
             question = randint(0, questionsset.count() - 1)
             numbers = generateNumbers(wrongstatementsset.count() - 1, 3)
@@ -128,6 +131,7 @@ def generateMCQuestions(request):
             for i in statements: statements_f.append((i, i))
 
             mcform = MCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
+            print(mcform)
             return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
@@ -167,9 +171,9 @@ def generateTruthTables(request):
            
             postresult = dict(request.POST)
             result = {}
-            checklist = [i['Answer'] for i in Answer.objects.filter(Set__Categorie=(str(cat))).values()]
+            checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
             postresult.pop('csrfmiddlewaretoken')
-            postresult.pop('Categorie')
+            postresult.pop('NameID')
 
             for k, v in postresult.items():
                 if k in checklist:
@@ -181,10 +185,10 @@ def generateTruthTables(request):
 
             message = "You answered {}/6 statements correctly.".format(correctcounter)
            
-            return render(request, 'multiplechoiceexample.html', {'message': message, 'result': result})
+            return render(request, 'truthtableexample.html', {'message': message, 'result': result})
         else:
-            answerset = Answer.objects.filter(Set__Categorie=(str(cat)))
-            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie=(str(cat)))
+            answerset = Answer.objects.filter(Set__NameID=(str(cat)))
+            wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
 
             countstatements = 6
             countanswers = generateNumbers(countstatements, 1)[0]
@@ -217,7 +221,7 @@ def generateMCExample(request):
             for element in raw_request_split:
                 if element.startswith("Options_q="):
                     answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
-            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__Categorie='DLX-Pipeline'))]
+            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID='DLX-Pipeline'))]
             answerscorrection = [ans in answerset for ans in answers]
             if False in answerscorrection or len(answerscorrection) < 1:
                 message = "Your answer is not correct."
@@ -225,9 +229,9 @@ def generateMCExample(request):
                 message = "Your answer is correct."
             return render(request, 'multiplechoiceexample.html', {'message': message})
         else:
-            questionsset = Question.objects.filter(Set__Categorie='DLX-Pipeline')
-            answerset = Answer.objects.filter(Set__Categorie='DLX-Pipeline')
-            wrongstatementsset = WrongStatements.objects.filter(Set__Categorie='DLX-Pipeline')
+            questionsset = Question.objects.filter(Set__NameID='DLX-Pipeline')
+            answerset = Answer.objects.filter(Set__NameID='DLX-Pipeline')
+            wrongstatementsset = WrongStatements.objects.filter(Set__NameID='DLX-Pipeline')
             answer = randint(0, answerset.count() - 1)
             question = randint(0, questionsset.count() - 1)
             numbers = generateNumbers(wrongstatementsset.count() - 1, 3)
