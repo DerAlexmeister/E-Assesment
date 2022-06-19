@@ -1,8 +1,35 @@
 <!DOCTYPE html>
 <html>
+    {% load static %}
+    <head>
+        <link  href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark" style="z-index: 10000;position: fixed; width: 100%;">
+        <a class="navbar-brand" style="padding-left: 20px; color:#33ff4f" href="#">EasyArch</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="/eassessments/ " style="color:white" >E-Assesments</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/eassessments/ " style="color:white" >Learning Analytics</a>
+              </li>
+          </ul>
+        </div>
+      </nav>
 
-<h1>Master</h1>
+      <div style="position:absolute; top:40px; left:0px; width:100%;">
+        {% block content %}
 
+        {% endblock %}
+      </div>
+
+      <script src="/static/bootstrap/js/jquery-3.3.1.slim.min.js"></script>
+      <script src="/static/bootstrap/js/popper.min.js" ></script>
+      <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html> 

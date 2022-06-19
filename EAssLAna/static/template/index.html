@@ -1,64 +1,120 @@
-<!DOCTYPE html>
-<html>
-<body>
+{% extends "master.html" %}
 
-<h1>Easy Arch</h1>
-<hr><br><br>
+{% block title %} Index E-Assessments {% endblock %}
 
-{% if ComputerModels|length > 0 %}
-    <h2>Assembler</h2>
-    {% for qwaset in Assembler %}
-        <p>
-            <a href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}">({{qwaset.Difficulty}}) - {{qwaset.title}}</a>
-        </p>
-    {% endfor %}
-{% endif %}
+{% block content %}
+<img src="/static/imgs/eassessment-computer.jpg" alt="Computer" style="position: absolute; top:0px; left:0px; z-index: 10;" height="400px" width="100%">   
+<div style="position:absolute; left:0px; right:0px; top:250px; width:100%; background-color: white; padding-left: 40px; padding-top: 40px; z-index: 100;">
+        {% if ComputerModels|length > 0 %}
+            <h2>Assembler</h2>
+            {% for qwaset in Assembler %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
 
-<br>
+        <br>
 
-{% if ComputerModels|length > 0 %}
-    <h2>Computer Models</h2>
-    {% for qwaset in ComputerModels %}
-        <p>
-            <a href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}">({{qwaset.Difficulty}}) - {{qwaset.title}}</a>
-        </p>
-    {% endfor %}
-{% endif %}
+        {% if ComputerModels|length > 0 %}
+            <h2>Computer Models</h2>
+            {% for qwaset in ComputerModels %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
 
-<br>
+        <br>
 
-{% if Gates|length > 0 %}
-    <h2>Gates</h2>
-    {% for qwaset in Gates %}
-        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
-    {% endfor %}
-{% endif %}
+        {% if Gates|length > 0 %}
+            <h2>Gates</h2>
+            {% for qwaset in Gates %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
 
-<br>
+        <br>
 
-{% if Calculus|length > 0 %}
-    <h2>Calculus</h2>
-    {% for qwaset in Calculus %}
-        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
-    {% endfor %}
-{% endif %}
+        {% if Calculus|length > 0 %}
+            <h2>Calculus</h2>
+            {% for qwaset in Calculus %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
 
-<br>
+        <br>
 
-{% if Optimization|length > 0 %}
-    <h2>Optimization</h2>
-    {% for qwaset in Optimization %}
-        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
-    {% endfor %}
-{% endif %}
+        {% if Optimization|length > 0 %}
+            <h2>Optimization</h2>
+            {% for qwaset in Optimization %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
 
-<br>
+        <br>
 
-{% if Quantencomputing|length > 0 %}
-    <h2>Quantencomputing</h2>
-    {% for qwaset in Quantencomputing %}
-        <p>({{qwaset.Difficulty}}) - {{qwaset.title}}</p>
-    {% endfor %}
-{% endif %}
-</body>
-</html> 
+        {% if Quantencomputing|length > 0 %}
+            <h2>Quantencomputing</h2>
+            {% for qwaset in Quantencomputing %}
+                <p>
+                    {% if qwaset.Difficulty == "Easy" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Medium" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Hard" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #fc432c; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% elif qwaset.Difficulty == "Insane" %}
+                        <a style="color: #424242; text-decoration:none" href="/eassessments/{{qwaset.Target}}/?t={{qwaset.Categorie}}"><span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

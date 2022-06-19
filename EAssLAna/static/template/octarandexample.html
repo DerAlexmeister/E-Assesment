@@ -1,18 +1,22 @@
-<!DOCTYPE html>
-<html>
-<body>
+{% extends "master.html" %}
 
-<h1>Octa</h1><br>
+{% block title %} Index E-Assessments {% endblock %}
 
-Please translate the following octanumber into decimal: {{octacode}} <br>
+{% block content %}
 
-<h4>{{message}}</h4>
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
 
-<form action="/eassessments/{{Target}}/", method="post">
-    {% csrf_token %}
-    {{Form}}
-    <button type="submit">Answer</button>
-</form>
+    <p class="form-group">
+        Please translate the following octanumber into decimal: <b class="badge badge-pill badge-primary" style="background-color: #bba457; color: #424242">{{octacode}}</b> <br>
 
-</body>
-</html> 
+        <h4>{{message}}</h4>
+    
+        <form action="/eassessments/{{Target}}/", method="post">
+            {% csrf_token %}
+            {{Form}}
+            <button type="submit" class="btn btn-info">Answer</button>
+        </form>
+    </p>
+</div>
+
+{% endblock %}

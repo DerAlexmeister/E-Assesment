@@ -2,6 +2,7 @@ import urllib.parse
 
 from django.http.response import HttpResponse
 from django.shortcuts import render
+from django.shortcuts import redirect
 
 from .models import Answer
 from .models import OctaStatement
@@ -39,6 +40,7 @@ def index(request):
         return render(request, 'index.html', data)
     except Exception as error:
         print(error)
+    return redirect('homeview')
 
 
 ################################################
@@ -64,7 +66,7 @@ def generateOctaQuestions(request):
             return render(request, 'octarandexample.html', {'octacode': expression, "Form": answerform, "Target": target})
     except Exception as error:
         print(error)
-        return render(request, 'index.html')
+    return redirect('homeview')
 
 def generateBinaryQuestions(request):
     try:
@@ -85,7 +87,7 @@ def generateBinaryQuestions(request):
             return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform, "Target": target})
     except Exception as error:
         print(error)
-        return render(request, 'index.html')
+    return redirect('homeview')
 
 def generateMCQuestions(request):
     try:
@@ -127,7 +129,7 @@ def generateMCQuestions(request):
             return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
-    return render(request, 'multiplechoiceexample.html')
+    return redirect('homeview')
 
 ################################################
 ############### Examples #######################
@@ -307,3 +309,9 @@ def generateDragNDropExample(request):
         return render(request, 'multiplechoiceexample.html')
 
 
+################################################
+################ Testing #######################
+################################################
+
+def returnMasterTemplate(request):
+    return render(request, 'master.html')

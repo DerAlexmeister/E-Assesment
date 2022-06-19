@@ -78,7 +78,6 @@ class GapSolution(models.Model):
     solution = models.TextField(blank=False, null=False)
     gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
 
-
 class Cloze(models.Model):
     qaw = models.ForeignKey(QAWSet, on_delete=models.CASCADE)
     gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
