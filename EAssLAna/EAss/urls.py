@@ -6,23 +6,23 @@ from .views import index
 from .views import generateMCExample
 from .views import generateBinaryExpression
 from .views import clozeTextGenerator
+from .views import generateSCQuestions
 from .views import generateMCQuestions
 from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
 from .views import generateTruthTables
 from .views import returnMasterTemplate
 
-from .normal_forms.view import normal_form
-
 urlpatterns = [
     ## Production
     path('', index, name="homeview"),
     path('mcgenerator/', generateMCQuestions),
+    path('scgenerator/', generateSCQuestions),
     path('bingenerator/', generateBinaryQuestions),
     path('octagenerator/', generateOctaQuestions),
     path('clozegenerator/', clozeTextGenerator),
     path('ttgenerator/', generateTruthTables),
-    path('normalform/', normal_form),
+
     ## Examples 
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),

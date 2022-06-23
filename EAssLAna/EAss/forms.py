@@ -21,6 +21,19 @@ class ClozeForm(forms.Form):
     def get_gap_key(index: int) -> str:
         return str(index)
 
+class SCAnswerForm(forms.Form):
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Options_q = forms.ChoiceField(choices=[], label="Statements")
+
+    def __init__(self, *args, **kwargs):
+        try:
+            super(SCAnswerForm, self).__init__(*args, **kwargs)
+            if 'initial' in kwargs.keys():
+                self.fields['Options_q'].choices = (kwargs['initial'])['Options']
+        except Exception as error:
+            print(error)
+
 class MCAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
