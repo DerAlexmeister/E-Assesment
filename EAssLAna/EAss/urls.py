@@ -12,6 +12,8 @@ from .views import generateOctaQuestions
 from .views import generateTruthTables
 from .views import returnMasterTemplate
 
+from .normal_forms.view import normal_form
+
 urlpatterns = [
     ## Production
     path('', index, name="homeview"),
@@ -20,7 +22,7 @@ urlpatterns = [
     path('octagenerator/', generateOctaQuestions),
     path('clozegenerator/', clozeTextGenerator),
     path('ttgenerator/', generateTruthTables),
-
+    path('normalform/', normal_form),
     ## Examples 
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
