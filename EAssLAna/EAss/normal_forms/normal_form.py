@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-from abc import ABC, abstractmethod
 
 from dataclasses import dataclass
 
@@ -18,12 +17,12 @@ class Difficulty:
 
 
 class TruthTable:
-    def __init__(self, table, function_name):
+    def __init__(self, table, result_name):
         self.table = table
-        self.function = function_name
+        self.result_name = result_name
 
     @staticmethod
-    def create(variables, function_name, results):
+    def create(variables, function_name, results) -> "TruthTable":
         num_bits = len(variables)
         num_input = 2**num_bits
         assert len(results) == num_input
@@ -35,31 +34,48 @@ class TruthTable:
 
 
         columns = list(sorted(variables))
-        function = f"{function_name}({', '.join(columns)})"
-        columns.append(function)
+        result_name = f"{function_name}({', '.join(columns)})"
+        columns.append(result_name)
         table = pd.DataFrame(table, columns=columns)
-        return TruthTable(table, function)
+
+        return TruthTable(table, result_name)
 
     @property
     def variables(self):
-        return self.table.loc[:, self.table.columns != self.function]
+        return self.table.loc[:, self.table.columns != self.result_name]
 
     @property
     def results(self):
-        return self.table[self.function]
+        return self.table[self.result_name]
+
+
+@dataclass
+class Question:
+    NORMAL_FORM_KEY = 'type'
+    TABLE_KEY = 'table'
+    RESULT_NAME_KEY = 'result'
+
+    normal_form: str
+    function: TruthTable
 
     def to_dict(self):
         return {
-            'function_name': self.function,
-            'table': self.table.to_dict(),
+            self.NORMAL_FORM_KEY: self.normal_form,
+            self.TABLE_KEY: self.function.table.to_dict(),
+            self.RESULT_NAME_KEY: self.function.result_name,
         }
 
     @staticmethod
-    def from_dict(dictionary):
-        function_name = dictionary['function_name']
-        table = pd.DataFrame(dictionary['table'])
+    def from_dict(d):
+        normal_form = d[Question.NORMAL_FORM_KEY]
+        table = pd.DataFrame(d[Question.TABLE_KEY])
+        result_name = d[Question.RESULT_NAME_KEY]
 
-        return TruthTable(table, function_name)
+        return Question(
+            normal_form,
+            TruthTable(table, result_name),
+        )
+
 
 
 @dataclass
@@ -78,15 +94,18 @@ def normalise_formula(clauses):
 
 class NormalForm:
     def __init__(self, clauses):
-        self.clause = normalise_formula(
+        self.clauses = normalise_formula(
             map(normalise_clause, clauses)
         )
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, NormalForm):
+            return self.clauses == other.clauses
 
-@dataclass
-class Question:
-    normal_form: str
-    function: TruthTable
+        return False
+
+    def __ne__(self, other: object) -> bool:
+        return not self == other
 
 
 @dataclass
@@ -104,15 +123,7 @@ def to_dnf(formula: TruthTable) -> NormalForm:
         clauses.append(clause)
     return NormalForm(clauses)
 
+
 def to_cnf(formula: TruthTable) -> NormalForm:
     pass
 
-
-class Assessment(ABC):
-    @abstractmethod
-    def assess(self, guess: Guess) -> str:
-        pass
-
-class BooleanAssessment(Assessment):
-    def assess(self, guess: Guess) -> str:
-        pass
