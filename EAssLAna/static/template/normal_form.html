@@ -17,5 +17,8 @@
                 <button type="submit">Save</button>
             </form>
         </div>
+        {% if correction %}
+        {{correction|safe}}
+        {% endif %}
     </body>
 </html>

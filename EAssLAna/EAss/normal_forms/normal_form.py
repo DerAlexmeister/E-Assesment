@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import pandas as pd
 import numpy as np
 
@@ -50,35 +51,6 @@ class TruthTable:
 
 
 @dataclass
-class Question:
-    NORMAL_FORM_KEY = 'type'
-    TABLE_KEY = 'table'
-    RESULT_NAME_KEY = 'result'
-
-    normal_form: str
-    function: TruthTable
-
-    def to_dict(self):
-        return {
-            self.NORMAL_FORM_KEY: self.normal_form,
-            self.TABLE_KEY: self.function.table.to_dict(),
-            self.RESULT_NAME_KEY: self.function.result_name,
-        }
-
-    @staticmethod
-    def from_dict(d):
-        normal_form = d[Question.NORMAL_FORM_KEY]
-        table = pd.DataFrame(d[Question.TABLE_KEY])
-        result_name = d[Question.RESULT_NAME_KEY]
-
-        return Question(
-            normal_form,
-            TruthTable(table, result_name),
-        )
-
-
-
-@dataclass
 class Literal:
     variable: str
     sign: bool
@@ -106,6 +78,35 @@ class NormalForm:
 
     def __ne__(self, other: object) -> bool:
         return not self == other
+
+
+@dataclass
+class Question:
+    NORMAL_FORM_KEY = 'type'
+    TABLE_KEY = 'table'
+    RESULT_NAME_KEY = 'result'
+
+    normal_form: str
+    function: TruthTable
+
+    def to_dict(self):
+        return {
+            self.NORMAL_FORM_KEY: self.normal_form,
+            self.TABLE_KEY: self.function.table.to_dict(),
+            self.RESULT_NAME_KEY: self.function.result_name,
+        }
+
+    @staticmethod
+    def from_dict(d):
+        normal_form = d[Question.NORMAL_FORM_KEY]
+        table = pd.DataFrame(d[Question.TABLE_KEY])
+        result_name = d[Question.RESULT_NAME_KEY]
+
+        return Question(
+            normal_form,
+            TruthTable(table, result_name),
+        )
+
 
 
 @dataclass

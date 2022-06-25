@@ -1,8 +1,15 @@
 from django import forms
 from parsec import ParseError
-from . import normal_form as nf
 
-from .parser import disjunctive_normal_form
+from .parser import disjunctive_normal_form, conjunctive_normal_form
+from .normal_form import DISJUNCTION, CONJUNCTION, Guess
+
+
+PARSERS = {
+    CONJUNCTION: conjunctive_normal_form,
+    DISJUNCTION: disjunctive_normal_form,
+}
+
 
 class NormalForm(forms.Form):
     guess = forms.CharField(label_suffix=" = ")
@@ -16,9 +23,9 @@ class NormalForm(forms.Form):
     def clean_guess(self):
         value = self.cleaned_data['guess']
         try:
-            parser = disjunctive_normal_form(self._question.function.variables)
-            normal_form = parser.parse(value)
-            return nf.Guess(self._question, normal_form)
+            parser = PARSERS[self._question.normal_form](self._question.function.variables)
+            normal_form = parser.parse_strict(value)
+            return Guess(self._question, normal_form)
 
         except ParseError as e:
             raise forms.ValidationError(str(e))

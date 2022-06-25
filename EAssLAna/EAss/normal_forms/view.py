@@ -29,9 +29,10 @@ def normal_form(request):
                 'question': guess.question,
                 'table': guess.question.function.table.to_html(),
                 'input': response,
+                'correction': "You are correct",
             })
         else:
-            return HttpResponse(guess.errors.get('guess'))
+            return HttpResponse(response.errors.get('guess'))
 
     else:
         variables = {"a", "b"}
