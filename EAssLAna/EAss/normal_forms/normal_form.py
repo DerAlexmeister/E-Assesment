@@ -113,18 +113,3 @@ class Question:
 class Guess:
     question: Question
     answer: NormalForm
-
-
-def to_dnf(formula: TruthTable) -> NormalForm:
-    clauses = []
-    for _, assignment in formula.table[formula.results==1].iterrows():
-        clause = []
-        for v in formula.variables:
-            clause.append(Literal(v, bool(assignment[v])))
-        clauses.append(clause)
-    return NormalForm(clauses)
-
-
-def to_cnf(formula: TruthTable) -> NormalForm:
-    pass
-

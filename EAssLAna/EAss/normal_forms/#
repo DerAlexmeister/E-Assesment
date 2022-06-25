@@ -13,14 +13,16 @@ from ..core import generateNumbers
 
 QUESTION_KEY = 'question'
 
-
 def render_question(request, question, answer, correction = None):
-    return render(request, 'normal_form.html', {
+    params = {
         'question': question,
         'table': question.function.table.to_html(),
         'input': answer,
-        'correction': correction,
-    })
+    }
+    if correction:
+        params['correction'] = correction,
+
+    return render(request, 'normal_form.html', params)
 
 
 def normal_form(request):
@@ -32,11 +34,11 @@ def normal_form(request):
 
         if answer.is_valid():
             guess = answer.cleaned_data['guess']
-            return render_question(
+            return render(
                 request,
                 guess.question,
                 answer,
-                assessment.assess(guess),
+                "You are correct!"
             )
         else:
             return HttpResponse(answer.errors.get('guess'))
@@ -51,8 +53,8 @@ def normal_form(request):
 
         request.session[QUESTION_KEY] = question.to_dict()
 
-        return render_question(
+        return render(
             request,
             question,
-            NormalForm(question)
+            NormalForm(question),
         )

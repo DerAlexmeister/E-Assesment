@@ -3,13 +3,15 @@
     <body>
         <h1>Normal forms</h1>
         <div>
-            <p> A boolean function {{question.function_name}}({{question.function.variables|join:", "}})
-                is given by the following truth table. Derive its <b>{{question.normal_form}}</b> normal form.
+            <p> A boolean function {{question.function_name}}
+                ({{question.function.variables|join:", "}})
+                is given by the following truth table.
+                Derive its <b>{{question.normal_form}}</b> normal form.
             </p>
             {{table|safe}}
         </div>
         <div>
-            <p>Denote AND as "*", OR as "+" and NOT as "-". </p>
+            <p>Denote conjunction as *, disjunction as + and negation as -. </p>
             <form action="/eassessments/normalform/", method="post">
                 {% csrf_token %}
                 {{input}}
