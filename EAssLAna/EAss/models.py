@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 TOPICS = (
     ('None','None'),
@@ -25,6 +26,12 @@ ITEMTYPES = (
     ('ClozeText','ClozeText'),
     ('TruthTable','TruthTable'),
     ('Calculus','Calculus'),
+)
+
+CALCTYPES = (
+    ('None','None'),
+    ('Bin', 'Bin'),
+    ('Octa', 'Octa'),
 )
 
 class QAWSet(models.Model):
@@ -101,3 +108,17 @@ class Cloze(models.Model):
 
     def __str__(self):
         return "{} -> (P:{})".format(self.gap, self.position)
+
+class AssemblerCode(models.Model):
+    pass
+
+class CalculusSingleUserAnswer(models.Model):
+
+    Answer = models.IntegerField(blank=False, null=False)
+    Question = models.IntegerField(blank=False, null=True)
+    Correct = models.BooleanField(blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    CalcType = models.CharField(max_length=24, choices=CALCTYPES, default='None', null=False, blank=False)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)

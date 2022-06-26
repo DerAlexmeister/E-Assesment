@@ -14,8 +14,11 @@ from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
 
+from .models import CalculusSingleUserAnswer
+
 from .forms import BinaryAnswerForm
 from .forms import OctaAnswerForm
+from .forms import SCAnswerForm
 from .forms import MCAnswerForm
 from .forms import TtAnswerForm
 from .forms import ClozeForm
@@ -53,11 +56,13 @@ def generateOctaQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = False, "You are wrong"
             question = int(request.POST['Question'], 8)
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                message = "Well done"
+                iscorrect, message = True, "Well done"
+            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question)
+            useranswer.save()
             return render(request, 'octarandexample.html', {'message': message})
         else: 
             octaex = OctaStatement.objects.filter(Set__NameID=(str(cat)))[0]
@@ -74,11 +79,13 @@ def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = False, "You are wrong"
             question = int(request.POST['Question'], 2)
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                message = "Well done"
+                iscorrect, message = True, "Well done"
+            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
+            useranswer.save()
             return render(request, 'binaryrandexample.html', {'message': message})
         else: 
             binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
@@ -87,6 +94,48 @@ def generateBinaryQuestions(request):
             expression = format(expression, "b")
             answerform = BinaryAnswerForm(initial={'Question': expression})
             return render(request, 'binaryrandexample.html', {'binarycode': expression, "Form": answerform, "Target": target})
+    except Exception as error:
+        print(error)
+    return redirect('homeview')
+
+def generateSCQuestions(request):
+    try:
+        cat = request.GET.get('t', '')
+        if request.method == "POST":
+            message = "You are wrong"
+            raw_request = request.body.decode("UTF-8")
+            raw_request_split = raw_request.split("&")
+            answers = []
+            for element in raw_request_split:
+                if element.startswith("Options_q="):
+                    answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
+            answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
+            answerscorrection = [ans in answerset for ans in answers]
+            if False in answerscorrection or len(answerscorrection) < 1:
+                message = "Your answer is not correct."
+            else:
+                message = "Your answer is correct."
+            return render(request, 'singlechoiceexample.html', {'message': message})
+        else:
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            questionsset = Question.objects.filter(Set__NameID=(str(cat)))
+            answerset = Answer.objects.filter(Set__NameID=(str(cat)))
+            wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
+            answer = randint(0, answerset.count() - 1)
+            question = randint(0, questionsset.count() - 1)
+            numbers = generateNumbers(wrongstatementsset.count() - 1, 3)
+
+            statements = [str(wrongstatementsset[i]) for i in numbers]
+            statements.append(answerset[answer])
+            question_f = questionsset[question]
+
+            shuffle(statements)
+
+            statements_f = []
+            for i in statements: statements_f.append((i, i))
+
+            mcform = SCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
+            return render(request, 'singlechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return redirect('homeview')

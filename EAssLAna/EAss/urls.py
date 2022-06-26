@@ -6,6 +6,7 @@ from .views import index
 from .views import generateMCExample
 from .views import generateBinaryExpression
 from .views import clozeTextGenerator
+from .views import generateSCQuestions
 from .views import generateMCQuestions
 from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
@@ -16,6 +17,7 @@ urlpatterns = [
     ## Production
     path('', index, name="homeview"),
     path('mcgenerator/', generateMCQuestions),
+    path('scgenerator/', generateSCQuestions),
     path('bingenerator/', generateBinaryQuestions),
     path('octagenerator/', generateOctaQuestions),
     path('clozegenerator/', clozeTextGenerator),

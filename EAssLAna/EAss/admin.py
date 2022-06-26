@@ -11,6 +11,9 @@ from .models import Cloze
 from .models import Gap
 from .models import GapSolution
 
+from .models import CalculusSingleUserAnswer
+
+# Questiontypes
 admin.site.register(QAWSet)
 admin.site.register(Question)
 admin.site.register(WrongStatements)
@@ -20,3 +23,6 @@ admin.site.register(OctaStatement)
 admin.site.register(Cloze)
 admin.site.register(Gap)
 admin.site.register(GapSolution)
+
+# Answertypes for Users
+admin.site.register(CalculusSingleUserAnswer)
