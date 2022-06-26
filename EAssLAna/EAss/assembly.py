@@ -166,6 +166,11 @@ class MiniAssembler():
             print(error)
             return False
 
+    def checkForStatement(self):
+        try:
+            pass
+        except Exception as error:
+            pass
 
 OPINST = {
     "ADD": addfunc,

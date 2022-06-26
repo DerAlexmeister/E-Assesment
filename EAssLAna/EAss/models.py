@@ -116,6 +116,7 @@ class OpenAssemblerCodeQuestions(models.Model):
     Question = models.TextField(blank=False, null=False)
     RegisterAnswer = models.TextField(blank=False, null=False)
     Created = models.DateTimeField(default=timezone.now)
+    NeededInstructions = models.CharField(max_length=2048, blank=True)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -141,6 +142,7 @@ class OpenAssemblerAnswer(models.Model):
     Answer = models.TextField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
+    MissedStatements = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)

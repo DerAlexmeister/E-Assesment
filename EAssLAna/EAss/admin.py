@@ -25,7 +25,7 @@ admin.site.register(Cloze)
 admin.site.register(Gap)
 admin.site.register(GapSolution)
 admin.site.register(OpenAssemblerCodeQuestions)
-admin.site.register(OpenAssemblerAnswer)
 
 # Answertypes for Users
 admin.site.register(CalculusSingleUserAnswer)
+admin.site.register(OpenAssemblerAnswer)
