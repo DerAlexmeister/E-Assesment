@@ -1,4 +1,3 @@
-import imp
 from django.contrib import admin
 
 from .models import QAWSet
@@ -10,8 +9,10 @@ from .models import OctaStatement
 from .models import Cloze
 from .models import Gap
 from .models import GapSolution
+from .models import OpenAssemblerCodeQuestions
 
 from .models import CalculusSingleUserAnswer
+from .models import OpenAssemblerAnswer
 
 # Questiontypes
 admin.site.register(QAWSet)
@@ -23,6 +24,8 @@ admin.site.register(OctaStatement)
 admin.site.register(Cloze)
 admin.site.register(Gap)
 admin.site.register(GapSolution)
+admin.site.register(OpenAssemblerCodeQuestions)
+admin.site.register(OpenAssemblerAnswer)
 
 # Answertypes for Users
 admin.site.register(CalculusSingleUserAnswer)

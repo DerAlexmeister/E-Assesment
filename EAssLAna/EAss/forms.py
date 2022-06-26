@@ -47,7 +47,6 @@ class MCAnswerForm(forms.Form):
         except Exception as error:
             print(error)
 
-
 class TtAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
 
@@ -62,4 +61,7 @@ class TtAnswerForm(forms.Form):
         except Exception as error:
             print(error)
 
+class OpenAssemblerAnswerForm(forms.Form):
 
+    Question = forms.CharField(max_length=16384, widget=forms.HiddenInput())
+    CodeAnswer = forms.CharField(max_length=16384, label=False, widget=forms.Textarea(attrs={"rows":5, "cols":20}))

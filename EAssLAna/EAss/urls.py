@@ -12,6 +12,7 @@ from .views import generateBinaryQuestions
 from .views import generateOctaQuestions
 from .views import generateTruthTables
 from .views import returnMasterTemplate
+from .views import generateOpenAssemblerQuestions
 
 urlpatterns = [
     ## Production
@@ -22,6 +23,7 @@ urlpatterns = [
     path('octagenerator/', generateOctaQuestions),
     path('clozegenerator/', clozeTextGenerator),
     path('ttgenerator/', generateTruthTables),
+    path('oagenerator/', generateOpenAssemblerQuestions),
 
     ## Examples 
     path('example/', generateMCExample),

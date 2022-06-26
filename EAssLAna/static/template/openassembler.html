@@ -1,0 +1,23 @@
+{% extends "master.html" %}
+
+{% block title %} Index E-Assessments {% endblock %}
+
+{% block content %}
+
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
+
+    <p class="form-group">
+        Code the following: <i><b>{{Question}}</b></i> <br>
+        <hr>
+        <h4>{{message}}</h4>
+        
+        <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
+            {% csrf_token %}
+            {{Form.as_p}}
+            <button type="submit" class="btn btn-info">Answer</button>
+        </form>
+    </p>
+
+</div>
+
+{% endblock %}
