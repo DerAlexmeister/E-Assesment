@@ -14,6 +14,8 @@ from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
 
+from .models import CalculusSingleUserAnswer
+
 from .forms import BinaryAnswerForm
 from .forms import OctaAnswerForm
 from .forms import MCAnswerForm
@@ -53,11 +55,13 @@ def generateOctaQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = False, "You are wrong"
             question = int(request.POST['Question'], 8)
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                message = "Well done"
+                iscorrect, message = True, "Well done"
+            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question)
+            useranswer.save()
             return render(request, 'octarandexample.html', {'message': message})
         else: 
             octaex = OctaStatement.objects.filter(Set__NameID=(str(cat)))[0]
@@ -74,11 +78,13 @@ def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = False, "You are wrong"
             question = int(request.POST['Question'], 2)
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                message = "Well done"
+                iscorrect, message = True, "Well done"
+            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
+            useranswer.save()
             return render(request, 'binaryrandexample.html', {'message': message})
         else: 
             binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
