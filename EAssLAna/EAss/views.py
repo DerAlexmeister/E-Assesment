@@ -1,4 +1,4 @@
-from optparse import Values
+from optparse import Option, Values
 from tabnanny import check
 import urllib.parse
 
@@ -15,6 +15,13 @@ from .models import Cloze
 from .models import QAWSet
 
 from .models import CalculusSingleUserAnswer
+from .models import SingleChoiceUserAnswer
+from .models import MultipleChoiceUserAnswer
+from .models import SingleMultipleChoiceUserAnswer
+from .models import TruthTableUserAnswer
+from .models import SingleTruthTableUserAnswer
+from .models import ClozeUserAnswer
+from .models import SingleFieldClozeUserAnswer
 
 from .forms import BinaryAnswerForm
 from .forms import OctaAnswerForm
@@ -102,19 +109,27 @@ def generateSCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = True, "Your answer is correct."
+            question = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
             answers = []
+
             for element in raw_request_split:
                 if element.startswith("Options_q="):
                     answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
+                if element.startswith("Question="):
+                    question += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Question=", "")))
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
             answerscorrection = [ans in answerset for ans in answers]
+
             if False in answerscorrection or len(answerscorrection) < 1:
                 message = "Your answer is not correct."
-            else:
-                message = "Your answer is correct."
+                iscorrect = False
+    
+            useranswer = SingleChoiceUserAnswer(Answer=answers[0], Correct=iscorrect, Question=question, Topic=str(cat))
+            useranswer.save()
+
             return render(request, 'singlechoiceexample.html', {'message': message})
         else:
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
@@ -144,19 +159,32 @@ def generateMCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            message = "You are wrong"
+            iscorrect, message = True, "Your answer is correct."
+            question = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
             answers = []
             for element in raw_request_split:
                 if element.startswith("Options_q="):
                     answers.append(urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Options_q=", ""))))
+                if element.startswith("Question="):
+                    question += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Question=", "")))
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
             answerscorrection = [ans in answerset for ans in answers]
             if False in answerscorrection or len(answerscorrection) < 1:
                 message = "Your answer is not correct."
-            else:
-                message = "Your answer is correct."
+                iscorrect = False
+
+            useranswer = MultipleChoiceUserAnswer(AllCorrect=iscorrect, Question=question, Topic=str(cat))
+            useranswer.save()
+
+            answercorrect = False
+            for element in answers:
+                if element in answerset:
+                    answercorrect = True
+                singleuseranswer = SingleMultipleChoiceUserAnswer(Correct=answercorrect, Answer=element, AllAnswers=useranswer)
+                singleuseranswer.save()
+    
             return render(request, 'multiplechoiceexample.html', {'message': message})
         else:
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
@@ -185,6 +213,7 @@ def generateMCQuestions(request):
 def clozeTextGenerator(request):
     cat = request.GET.get('t', '')
     if request.method == 'POST':
+        iscorrect = True
         cloze_id = request.POST['cloze_id']
         qaw = QAWSet.objects.get(id=cloze_id)
         cloze = c.from_model(qaw)
@@ -192,8 +221,22 @@ def clozeTextGenerator(request):
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
 
+        useranswer = ClozeUserAnswer(Topic=str(cat))
+        useranswer.save()
+
         for guess, solution in zip(gaps, cloze.gaps):
-            if guess in solution.solutions: count += 1
+
+            if guess in solution.solutions: 
+                count += 1
+                singleuseranswer = SingleFieldClozeUserAnswer(Correct=True, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
+                singleuseranswer.save()
+            else:
+                singleuseranswer = SingleFieldClozeUserAnswer(Correct=False, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
+                singleuseranswer.save()
+                iscorrect = False
+        
+        useranswer.AllCorrect = iscorrect
+        useranswer.save()
 
         return HttpResponse(f"{count} of {maximal} are correct.")
     else:
@@ -213,20 +256,30 @@ def generateTruthTables(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-           
+            iscorrect = True
             postresult = dict(request.POST)
             result = {}
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
             postresult.pop('csrfmiddlewaretoken')
             postresult.pop('NameID')
+            useranswer = TruthTableUserAnswer(Topic=str(cat))
+            useranswer.save()
 
             for k, v in postresult.items():
                 if k in checklist:
                     result[k] = (v[0], True)
+                    singleuseranswer = SingleTruthTableUserAnswer(Correct=True, Answer=v[0], Question=k, AllAnswers=useranswer)
+                    singleuseranswer.save()
                 else:
                     result[k] = (v[0], False)
+                    singleuseranswer = SingleTruthTableUserAnswer(Correct=False, Answer=v[0], Question=k, AllAnswers=useranswer)
+                    singleuseranswer.save()
+                    iscorrect = False
 
             correctcounter = [True if (bool(i[0]) == i[1]) else False for i in result.values()].count(True)
+
+            useranswer.AllCorrect = iscorrect
+            useranswer.save()
 
             message = "You answered {}/6 statements correctly.".format(correctcounter)
            
