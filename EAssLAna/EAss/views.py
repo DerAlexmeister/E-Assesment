@@ -1,6 +1,7 @@
 from optparse import Option, Values
 from tabnanny import check
 import urllib.parse
+import json
 
 from django.http.response import HttpResponse
 from django.shortcuts import render
@@ -13,6 +14,7 @@ from .models import BinaryStatement
 from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
+from .models import OpenAssemblerCodeQuestions
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -22,6 +24,7 @@ from .models import TruthTableUserAnswer
 from .models import SingleTruthTableUserAnswer
 from .models import ClozeUserAnswer
 from .models import SingleFieldClozeUserAnswer
+from .models import OpenAssemblerAnswer
 
 from .forms import BinaryAnswerForm
 from .forms import OctaAnswerForm
@@ -29,12 +32,14 @@ from .forms import SCAnswerForm
 from .forms import MCAnswerForm
 from .forms import TtAnswerForm
 from .forms import ClozeForm
+from .forms import OpenAssemblerAnswerForm
 
 from random import randint
 from random import shuffle
 from random import sample
 
 from .core import generateNumbers
+from .assembly import parser
 
 from . import cloze as c
 
@@ -85,6 +90,7 @@ def generateOctaQuestions(request):
 def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
+        print("t=", cat)
         if request.method == "POST":
             iscorrect, message = False, "You are wrong"
             question = int(request.POST['Question'], 2)
@@ -304,7 +310,36 @@ def generateTruthTables(request):
             return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
-    return render(request, 'multiplechoiceexample.html')
+    return redirect('homeview')
+
+def generateOpenAssemblerQuestions(request):
+    try:
+        cat = request.GET.get('t', '')
+        if request.method == "POST":
+            form = OpenAssemblerAnswerForm(request.POST)
+            if form.is_valid():
+                usercode = form.cleaned_data['CodeAnswer'].replace("\r", "")
+                parsed = parser(usercode)
+                parsed.eval()
+                AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
+                answerdict = json.loads(AssemblerQuestion.RegisterAnswer)
+                correct = parsed.equalsState(answerdict)
+                useranswer = OpenAssemblerAnswer(
+                    Question=AssemblerQuestion.Question,
+                    Answer=usercode,
+                    Correct=correct
+                )
+                useranswer.save()
+                return render(request, 'openassembler.html', {'message': "Your answer is {}".format(correct)})
+            return render(request, 'openassembler.html', {'message': "Cannot handle your request!"})
+        else:
+            AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
+            Target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            form = OpenAssemblerAnswerForm(initial={'Question': AssemblerQuestion.Question})
+            return render(request, 'openassembler.html', {'Form': form, 'Categorie': (str(cat)), 'Target': Target, 'Question': AssemblerQuestion.Question,})
+    except Exception as error:
+        print(error)
+    return redirect('homeview')
 
 ################################################
 ############### Examples #######################

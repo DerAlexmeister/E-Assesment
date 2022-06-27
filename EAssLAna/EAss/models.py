@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 from django.db import models
 from django.utils import timezone
 
@@ -26,6 +27,7 @@ ITEMTYPES = (
     ('ClozeText','ClozeText'),
     ('TruthTable','TruthTable'),
     ('Calculus','Calculus'),
+    ('Assembler','Assembler'),
 )
 
 CALCTYPES = (
@@ -109,8 +111,19 @@ class Cloze(models.Model):
     def __str__(self):
         return "{} -> (P:{})".format(self.gap, self.position)
 
-class AssemblerCode(models.Model):
-    pass
+class OpenAssemblerCodeQuestions(models.Model):
+    
+    Question = models.TextField(blank=False, null=False)
+    RegisterAnswer = models.TextField(blank=False, null=False)
+    Created = models.DateTimeField(default=timezone.now)
+    NeededInstructions = models.CharField(max_length=2048, blank=True)
+    Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{}".format(self.Question)
+
+#class AssemblerCloze(models.Model):
+#    pass
 
 class CalculusSingleUserAnswer(models.Model):
 
@@ -174,3 +187,13 @@ class SingleFieldClozeUserAnswer(models.Model):
     UserAnswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+class OpenAssemblerAnswer(models.Model):
+
+    Question = models.TextField(blank=False, null=False)
+    Answer = models.TextField(blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    Correct = models.BooleanField(blank=False, null=False)
+    MissedStatements = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
