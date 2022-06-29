@@ -4,19 +4,28 @@
 
 {% block content %}
 
-<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
-
-    <p class="form-group">
-        Please translate the following octanumber into decimal: <b class="badge badge-pill badge-primary" style="background-color: #bba457; color: #424242">{{octacode}}</b> <br>
-
-        <h4>{{message}}</h4>
-    
-        <form action="/eassessments/{{Target}}/", method="post">
-            {% csrf_token %}
-            {{Form}}
-            <button type="submit" class="btn btn-info">Answer</button>
-        </form>
-    </p>
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
+    {% if message %}
+        {% if correct %}
+            <div class="alert alert-success" role="alert">
+                {{message}}
+            </div>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                {{message}}
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="form-group">
+            Please translate the following octanumber into decimal: <b class="badge badge-pill badge-primary" style="background-color: #bba457; color: #424242">{{octacode}}</b> <br>
+        
+            <form action="/eassessments/{{Target}}/", method="post">
+                {% csrf_token %}
+                {{Form}}
+                <button type="submit" class="btn btn-info">Answer</button>
+            </form>
+        </p>
+    {% endif %}
 </div>
 
 {% endblock %}

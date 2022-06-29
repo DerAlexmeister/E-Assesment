@@ -1,3 +1,9 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 
-# Create your views here.
+def index(request):
+    try:
+        return render(request, 'laindex.html')
+    except Exception as error:
+        print(error)
+    return redirect('lahomeview')

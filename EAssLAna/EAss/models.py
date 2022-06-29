@@ -117,6 +117,9 @@ class OpenAssemblerCodeQuestions(models.Model):
     RegisterAnswer = models.TextField(blank=False, null=False)
     Created = models.DateTimeField(default=timezone.now)
     NeededInstructions = models.CharField(max_length=2048, blank=True)
+    CheckNeededInstructions = models.BooleanField(default=False)
+    OptimizedSolution = models.TextField(blank=True, null=True)
+    CheckOptimizedSolution = models.BooleanField(default=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
 
     def __str__(self):

@@ -90,7 +90,7 @@ def generateBinaryQuestions(request):
                 iscorrect, message = True, "Well done"
             useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
             useranswer.save()
-            return render(request, 'binaryrandexample.html', {'message': message})
+            return render(request, 'binaryrandexample.html', {'message': message, 'correct': iscorrect})
         else: 
             binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
@@ -261,6 +261,7 @@ def generateOpenAssemblerQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
+            answer_text, correct = "Your answer is wrong.", False
             form = OpenAssemblerAnswerForm(request.POST)
             if form.is_valid():
                 usercode = form.cleaned_data['CodeAnswer'].replace("\r", "")
@@ -268,15 +269,25 @@ def generateOpenAssemblerQuestions(request):
                 parsed.eval()
                 AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
                 answerdict = json.loads(AssemblerQuestion.RegisterAnswer)
-                correct = parsed.equalsState(answerdict)
+                if (AssemblerQuestion.CheckNeededInstructions):
+                    n_instructions = list(filter(lambda i: len(i), AssemblerQuestion.NeededInstructions.split(",")))
+                    parsed.checkForStatement(n_instructions)
+                    correct = (parsed.equalsState(answerdict) and parsed.hasMissingInstructions())
+                    if correct:
+                        answer_text = "Your answer is correct and you used all needed instructions."
+                    else:
+                        answer_text = "Your answer might be correct but you missed some needed instructions. Needed Instructions: {}".format(str(AssemblerQuestion.NeededInstructions).rstrip(','))
+                else:
+                    correct = parsed.equalsState(answerdict)
+                    answer_text = "Your answer is correct."
                 useranswer = OpenAssemblerAnswer(
                     Question=AssemblerQuestion.Question,
                     Answer=usercode,
                     Correct=correct
                 )
                 useranswer.save()
-                return render(request, 'openassembler.html', {'message': "Your answer is {}".format(correct)})
-            return render(request, 'openassembler.html', {'message': "Cannot handle your request!"})
+                return render(request, 'openassembler.html', {'message': answer_text, 'correct': correct})
+            return render(request, 'openassembler.html', {'message': "Cannot handle your request!", 'correct': correct})
         else:
             AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
             Target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target

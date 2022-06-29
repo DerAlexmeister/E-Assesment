@@ -118,10 +118,11 @@ def parser(programm):
 
 class MiniAssembler():
 
-    def __init__(self, instructions=[], error=None):
+    def __init__(self, instructions=[], error=None, state={}):
         self.instructions = instructions
         self.error = error
-        self.state = {}
+        self.state = state
+        self.missing_instructions = []
 
     def getCode(self):
         return self.instructions
@@ -166,11 +167,24 @@ class MiniAssembler():
             print(error)
             return False
 
-    def checkForStatement(self):
+    def checkForStatement(self, n_statements):
+        try:
+            instruction_statements = [i[0] for i in self.instructions]
+            for instruction in n_statements:
+                if instruction in instruction_statements:
+                    self.missing_instructions = instruction
+        except Exception as error:
+            print(error)
+        return self.missing_instructions
+
+    def hasMissingInstructions(self):
+        return len(self.missing_instructions) > 0
+
+    def compareSolutions(self):
         try:
             pass
         except Exception as error:
-            pass
+            print(error) 
 
 OPINST = {
     "ADD": addfunc,
