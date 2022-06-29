@@ -12,6 +12,13 @@ from .models import GapSolution
 from .models import OpenAssemblerCodeQuestions
 
 from .models import CalculusSingleUserAnswer
+from .models import SingleChoiceUserAnswer
+from .models import MultipleChoiceUserAnswer
+from .models import SingleMultipleChoiceUserAnswer
+from .models import TruthTableUserAnswer
+from .models import SingleTruthTableUserAnswer
+from .models import ClozeUserAnswer
+from .models import SingleFieldClozeUserAnswer
 from .models import OpenAssemblerAnswer
 
 # Questiontypes
@@ -28,4 +35,11 @@ admin.site.register(OpenAssemblerCodeQuestions)
 
 # Answertypes for Users
 admin.site.register(CalculusSingleUserAnswer)
+admin.site.register(SingleChoiceUserAnswer)
+admin.site.register(MultipleChoiceUserAnswer)
+admin.site.register(SingleMultipleChoiceUserAnswer)
+admin.site.register(TruthTableUserAnswer)
+admin.site.register(SingleTruthTableUserAnswer)
+admin.site.register(ClozeUserAnswer)
+admin.site.register(SingleFieldClozeUserAnswer)
 admin.site.register(OpenAssemblerAnswer)

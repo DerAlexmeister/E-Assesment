@@ -43,7 +43,7 @@ class MCAnswerForm(forms.Form):
         try:
             super(MCAnswerForm, self).__init__(*args, **kwargs)
             if 'initial' in kwargs.keys():
-                self.fields['Options_q'].choices = (kwargs['initial'])['Options']
+                self.fields['Options_q'].choices = (kwargs['initial'])['Options']          
         except Exception as error:
             print(error)
 
