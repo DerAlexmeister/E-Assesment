@@ -156,7 +156,7 @@ class MultipleChoiceUserAnswer(models.Model):
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
-        return "{} - Status: {}".format(self.Solved, self.Correct)
+        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleMultipleChoiceUserAnswer(models.Model):
     Answer = models.CharField(max_length=1024, blank=False, null=False)
@@ -169,7 +169,7 @@ class TruthTableUserAnswer(models.Model):
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
-        return "{} - Status: {}".format(self.Solved, self.Correct)
+        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleTruthTableUserAnswer(models.Model):
     Question = models.CharField(max_length=1024, blank=False, null=False)
@@ -190,6 +190,7 @@ class SingleFieldClozeUserAnswer(models.Model):
     UserAnswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+
 class OpenAssemblerAnswer(models.Model):
 
     Question = models.TextField(blank=False, null=False)

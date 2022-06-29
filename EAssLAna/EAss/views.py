@@ -75,7 +75,7 @@ def generateOctaQuestions(request):
                 iscorrect, message = True, "Well done"
             useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question)
             useranswer.save()
-            return render(request, 'octarandexample.html', {'message': message})
+            return render(request, 'octarandexample.html', {'message': message, 'correct': iscorrect})
         else: 
             octaex = OctaStatement.objects.filter(Set__NameID=(str(cat)))[0]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
