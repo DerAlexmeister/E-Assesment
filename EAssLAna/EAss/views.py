@@ -1,5 +1,3 @@
-from optparse import Option, Values
-from tabnanny import check
 import urllib.parse
 import json
 
@@ -69,11 +67,11 @@ def generateOctaQuestions(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             iscorrect, message = False, "You are wrong"
-            question = int(request.POST['Question'], 8)
+            question = int(request.POST['Question'])
             answer = int(request.POST['Answer'], 10)
             if question == answer:
                 iscorrect, message = True, "Well done"
-            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question)
+            useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Octa")
             useranswer.save()
             return render(request, 'octarandexample.html', {'message': message, 'correct': iscorrect})
         else: 
@@ -90,10 +88,9 @@ def generateOctaQuestions(request):
 def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
-        print("t=", cat)
         if request.method == "POST":
             iscorrect, message = False, "You are wrong"
-            question = int(request.POST['Question'], 2)
+            question = int(request.POST['Question'])
             answer = int(request.POST['Answer'], 10)
             if question == answer:
                 iscorrect, message = True, "Well done"
