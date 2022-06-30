@@ -20,6 +20,7 @@ from .models import SingleTruthTableUserAnswer
 from .models import ClozeUserAnswer
 from .models import SingleFieldClozeUserAnswer
 from .models import OpenAssemblerAnswer
+from .models import GatesAnswer
 
 # Questiontypes
 admin.site.register(QAWSet)
@@ -43,3 +44,4 @@ admin.site.register(SingleTruthTableUserAnswer)
 admin.site.register(ClozeUserAnswer)
 admin.site.register(SingleFieldClozeUserAnswer)
 admin.site.register(OpenAssemblerAnswer)
+admin.site.register(GatesAnswer)

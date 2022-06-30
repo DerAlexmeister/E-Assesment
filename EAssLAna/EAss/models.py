@@ -1,4 +1,3 @@
-from tkinter.tix import Tree
 from django.db import models
 from django.utils import timezone
 
@@ -162,6 +161,10 @@ class SingleMultipleChoiceUserAnswer(models.Model):
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(MultipleChoiceUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Solved = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
 
 class TruthTableUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -176,6 +179,10 @@ class SingleTruthTableUserAnswer(models.Model):
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(TruthTableUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Solved = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
 
 class ClozeUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -183,14 +190,18 @@ class ClozeUserAnswer(models.Model):
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
-        return "{} - Status: {}".format(self.Solved, self.Correct)
+        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleFieldClozeUserAnswer(models.Model):
     ExpectedAnswer = models.CharField(max_length=1024, blank=False, null=False)
     UserAnswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Solved = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
+        
 class OpenAssemblerAnswer(models.Model):
 
     Question = models.TextField(blank=False, null=False)
@@ -198,6 +209,16 @@ class OpenAssemblerAnswer(models.Model):
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
     MissedStatements = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
+
+class GatesAnswer(models.Model):
+
+    Question = models.TextField(blank=False, null=False)
+    Answer = models.TextField(blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    Correct = models.BooleanField(blank=False, null=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
