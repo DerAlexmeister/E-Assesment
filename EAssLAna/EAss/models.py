@@ -124,9 +124,6 @@ class OpenAssemblerCodeQuestions(models.Model):
     def __str__(self):
         return "{}".format(self.Question)
 
-#class AssemblerCloze(models.Model):
-#    pass
-
 class CalculusSingleUserAnswer(models.Model):
 
     Answer = models.IntegerField(blank=False, null=False)
@@ -161,6 +158,7 @@ class SingleMultipleChoiceUserAnswer(models.Model):
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(MultipleChoiceUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
 class TruthTableUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -175,6 +173,7 @@ class SingleTruthTableUserAnswer(models.Model):
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(TruthTableUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
 class ClozeUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -189,6 +188,7 @@ class SingleFieldClozeUserAnswer(models.Model):
     UserAnswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
 class OpenAssemblerAnswer(models.Model):
 
@@ -197,6 +197,7 @@ class OpenAssemblerAnswer(models.Model):
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
     MissedStatements = models.TextField(blank=True, null=True)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='Assembler', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
