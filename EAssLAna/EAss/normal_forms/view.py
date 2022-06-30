@@ -32,14 +32,16 @@ def normal_form(request):
 
         if answer.is_valid():
             guess = answer.cleaned_data['guess']
-            return render_question(
-                request,
-                guess.question,
-                answer,
-                assessment.assess(guess),
-            )
+            correction = assessment.assess(guess)
         else:
-            return HttpResponse(answer.errors.get('guess'))
+            correction = answer.errors.get('guess')
+
+        return render_question(
+            request,
+            question,
+            answer,
+            correction,
+        )
 
     else:
         variables = {"a", "b"}

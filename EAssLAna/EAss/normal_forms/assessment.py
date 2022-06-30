@@ -45,3 +45,15 @@ class BooleanAssessment(Assessment):
             return "You are correct!"
         else:
             return "You are false!"
+
+
+class GradingAssessment(Assessment):
+    def assess(self, guess: Guess) -> str:
+        solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
+            guess.question.function,
+        )
+        counter = 0
+        for g, e in zip(solution.clauses, guess.answer.clauses):
+            if g == e:
+                counter += 1
+        return f"You have {counter} of {len(solution.clauses)} correct!"

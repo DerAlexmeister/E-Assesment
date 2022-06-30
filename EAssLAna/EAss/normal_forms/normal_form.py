@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import pandas as pd
 import numpy as np
 
@@ -55,20 +54,26 @@ class Literal:
     variable: str
     sign: bool
 
+    def __gt__(self, other):
+        return other.variable < self.variable \
+            or other.sign < self.sign
+
 
 def normalise_clause(clause):
-    return list(sorted(clause, key=lambda l: (l.variable, l.sign)))
+    return list(sorted(clause))
 
 
 def normalise_formula(clauses):
-    return list(sorted(clauses, key=lambda c: len(c)))
+    return list(sorted(clauses, key=lambda c: (len(c), c)))
 
 
 class NormalForm:
     def __init__(self, clauses):
+        print(clauses)
         self.clauses = normalise_formula(
             map(normalise_clause, clauses)
         )
+        print(self.clauses)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NormalForm):
@@ -106,7 +111,6 @@ class Question:
             normal_form,
             TruthTable(table, result_name),
         )
-
 
 
 @dataclass
