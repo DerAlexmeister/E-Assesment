@@ -100,18 +100,18 @@
         };
     
         var config2 = {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-            data: {{ dataassembler|safe }},
-            backgroundColor: ['#1ef87a', '#f90000'],
-            label: 'Statistic for users assembler'
-            }],
-            labels: {{ labels|safe }}
-        },
-        options: {
-            responsive: true
-        }
+          type: 'doughnut',
+          data: {
+              datasets: [{
+              data: {{ dataassembler|safe }},
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users assembler'
+              }],
+              labels: {{ labels|safe }}
+          },
+          options: {
+              responsive: true
+          }
         };
 
         window.onload = function() {

@@ -5,9 +5,12 @@ Learning and Assessment Plattform for RA.
 ## Foldersturcture
 
 - EAss: E-Assessment App
-- KAtQu: Categories-and-Questions App
 - LAna: Learning Analytics App
 - EAssLAna: Server config
+
+-> Accessing the E-Assessment-Part: http://127.0.0.1:8000/eassessments
+
+-> Accessing the Learning-Analytics-Part: http://127.0.0.1:8000/learninganalytics
 
 ## Requriements
 

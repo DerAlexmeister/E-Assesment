@@ -4,6 +4,12 @@ from django.shortcuts import redirect
 from EAss.models import CalculusSingleUserAnswer
 from EAss.models import OpenAssemblerAnswer
 
+def assemblerAnalysis(request):
+    try:
+        pass
+    except Exception as error:
+        pass
+
 def calcUserCIR(q_set):
     correct, incorrect = 0, 0
     for i in q_set:
