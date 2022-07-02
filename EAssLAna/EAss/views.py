@@ -335,7 +335,9 @@ def generateOpenAssemblerQuestions(request):
                 useranswer = OpenAssemblerAnswer(
                     Question=AssemblerQuestion.Question,
                     Answer=usercode,
-                    Correct=correct
+                    Correct=correct,
+                    QuestionID=AssemblerQuestion.id,
+                    OptimizedAnswer=AssemblerQuestion.OptimizedSolution
                 )
                 useranswer.save()
                 return render(request, 'openassembler.html', {'message': answer_text, 'correct': correct})

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from datetime import datetime
+
 TOPICS = (
     ('None','None'),
     ('Computer-Models', 'Computer-Models'),
@@ -122,7 +124,7 @@ class OpenAssemblerCodeQuestions(models.Model):
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{}".format(self.Question)
+        return "{}: {}".format(self.id, self.Question)
 
 class CalculusSingleUserAnswer(models.Model):
 
@@ -193,11 +195,16 @@ class SingleFieldClozeUserAnswer(models.Model):
 class OpenAssemblerAnswer(models.Model):
 
     Question = models.TextField(blank=False, null=False)
+    QuestionID = models.IntegerField(blank=True, null=True)
     Answer = models.TextField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
     MissedStatements = models.TextField(blank=True, null=True)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='Assembler', null=False, blank=False)
+    OptimizedAnswer = models.TextField(blank=False, null=True)
 
     def __str__(self):
-        return "{} - Status: {}".format(self.Solved, self.Correct)
+        return "{}: {} - Status: {}".format(self.id, self.Solved, self.Correct)
+
+    def pdate(self):
+        return self.Solved.strftime("%m/%d/%Y, %H:%M:%S")
