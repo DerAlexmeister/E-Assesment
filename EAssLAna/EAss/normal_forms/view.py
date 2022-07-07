@@ -4,11 +4,15 @@ from django.shortcuts import render
 
 from random import choice
 
+from .. import models
+
 from . form import NormalForm
 
-from .normal_form import Guess, TruthTable, Question, DISJUNCTION, CONJUNCTION
-from .assessment import BooleanAssessment
-from ..core import generateNumbers
+from .. import models
+
+from .normal_form import TruthTable, Question, DISJUNCTION, CONJUNCTION
+from .generator import Generator, Difficulty
+from .assessment import ASSESSMENTS
 
 
 QUESTION_KEY = 'question'
@@ -24,8 +28,10 @@ def render_question(request, question, answer, correction = None):
 
 
 def normal_form(request):
+    qaw = models.NormalForm.objects.first()
+
     if request.method == 'POST':
-        assessment = BooleanAssessment()
+        assessment = ASSESSMENTS[qaw.assessment]
 
         question = Question.from_dict(request.session[QUESTION_KEY])
         answer = NormalForm(question, request.POST)
@@ -41,16 +47,12 @@ def normal_form(request):
             question,
             answer,
             correction,
-        )
+            )
 
     else:
-        variables = {"a", "b"}
-        results = generateNumbers(1, 2**len(variables))
-        table = TruthTable.create(variables, "f", results)
-        normal_form = choice([DISJUNCTION, CONJUNCTION])
-
-        question = Question(normal_form, table)
-
+        n = qaw.normal_form
+        difficulty = Difficulty(n.num_variables, n.num_ones, n.normal_form)
+        question = Generator().create(difficulty)
         request.session[QUESTION_KEY] = question.to_dict()
 
         return render_question(

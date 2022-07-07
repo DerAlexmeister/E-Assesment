@@ -101,3 +101,21 @@ class Cloze(models.Model):
 
     def __str__(self):
         return "{} -> (P:{})".format(self.gap, self.position)
+
+
+class NormalFormDifficulty(models.Model):
+    num_variables = models.IntegerField()
+    num_ones = models.IntegerField()
+    normal_form = models.TextField()
+
+    def __str__(self):
+        return f"{self.normal_form}-{self.num_variables}-{self.num_ones}"
+
+
+class NormalForm(models.Model):
+    normal_form = models.ForeignKey(NormalFormDifficulty, on_delete=models.CASCADE)
+    assessment = models.TextField()
+    #Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.normal_form}, {self.assessment}"

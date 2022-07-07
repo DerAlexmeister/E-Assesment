@@ -9,13 +9,6 @@ DISJUNCTION = "disjunctive"
 CONJUNCTION = "conjunctive"
 
 
-@dataclass
-class Difficulty:
-    num_variables: int
-    num_disjunctions: int
-    num_conjunctions: int
-
-
 class TruthTable:
     def __init__(self, table, result_name):
         self.table = table
@@ -69,11 +62,9 @@ def normalise_formula(clauses):
 
 class NormalForm:
     def __init__(self, clauses):
-        print(clauses)
         self.clauses = normalise_formula(
             map(normalise_clause, clauses)
         )
-        print(self.clauses)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NormalForm):

@@ -57,3 +57,9 @@ class GradingAssessment(Assessment):
             if g == e:
                 counter += 1
         return f"You have {counter} of {len(solution.clauses)} correct!"
+
+
+ASSESSMENTS = {
+    'boolean': BooleanAssessment(),
+    'grading': GradingAssessment(),
+}
