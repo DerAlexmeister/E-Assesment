@@ -12,7 +12,7 @@
         </div>
         <div>
             <p>Denote conjunction as *, disjunction as + and negation as -. </p>
-            <form action="/eassessments/normalform/", method="post">
+            <form action="/eassessments/normalform/?t={{category}}", method="post">
                 {% csrf_token %}
                 {{input}}
                 <br>

@@ -25,6 +25,7 @@ ITEMTYPES = (
     ('ClozeText','ClozeText'),
     ('TruthTable','TruthTable'),
     ('Calculus','Calculus'),
+    ('Normal Form', 'Normal Form')
 )
 
 class QAWSet(models.Model):
@@ -115,7 +116,7 @@ class NormalFormDifficulty(models.Model):
 class NormalForm(models.Model):
     normal_form = models.ForeignKey(NormalFormDifficulty, on_delete=models.CASCADE)
     assessment = models.TextField()
-    #Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.normal_form}, {self.assessment}"
