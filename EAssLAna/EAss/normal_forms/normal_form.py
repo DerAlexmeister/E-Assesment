@@ -51,6 +51,12 @@ class Literal:
         return other.variable < self.variable \
             or other.sign < self.sign
 
+    def __str__(self) -> str:
+        if self.sign:
+            return self.variable
+        else:
+            return f"-{self.variable}"
+
 
 def normalise_clause(clause):
     return list(sorted(clause))
