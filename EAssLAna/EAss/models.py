@@ -1,5 +1,8 @@
+from enum import unique
 from django.db import models
+from django.forms import Input
 from django.utils import timezone
+from django.core.validators import int_list_validator
 
 TOPICS = (
     ('None','None'),
@@ -33,6 +36,16 @@ CALCTYPES = (
     ('None','None'),
     ('Bin', 'Bin'),
     ('Octa', 'Octa'),
+)
+
+GATES = (
+    ('NOT','NOT'),
+    ('AND', 'AND'),
+    ('OR', 'OR'),
+    ('NAND', 'NAND'),
+    ('NOR', 'NOR'),
+    ('XOR', 'XOR'),
+    ('XNOR', 'XNOR'),
 )
 
 class QAWSet(models.Model):
@@ -124,8 +137,11 @@ class OpenAssemblerCodeQuestions(models.Model):
     def __str__(self):
         return "{}".format(self.Question)
 
-#class AssemblerCloze(models.Model):
-#    pass
+class Gates(models.Model):
+    Created = models.DateTimeField(default=timezone.now)
+    Gateid = models.IntegerField(blank=False, null=True, unique=True)
+    Parentid = models.CharField(max_length=2048, blank=True, validators=int_list_validator)
+    Childid = models.CharField(max_length=2048, blank=True, validators=int_list_validator)
 
 class CalculusSingleUserAnswer(models.Model):
 
@@ -162,9 +178,11 @@ class SingleMultipleChoiceUserAnswer(models.Model):
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(MultipleChoiceUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
     Solved = models.DateTimeField(default=timezone.now)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
+    
 
 class TruthTableUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -180,9 +198,11 @@ class SingleTruthTableUserAnswer(models.Model):
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(TruthTableUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
     Solved = models.DateTimeField(default=timezone.now)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
+    
 
 class ClozeUserAnswer(models.Model):
     AllCorrect = models.BooleanField(blank=False, null=False)
@@ -198,6 +218,7 @@ class SingleFieldClozeUserAnswer(models.Model):
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
     Solved = models.DateTimeField(default=timezone.now)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
@@ -209,6 +230,7 @@ class OpenAssemblerAnswer(models.Model):
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
     MissedStatements = models.TextField(blank=True, null=True)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='Assembler', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
@@ -219,6 +241,7 @@ class GatesAnswer(models.Model):
     Answer = models.TextField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='Assembler', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
