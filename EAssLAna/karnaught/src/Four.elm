@@ -1,5 +1,8 @@
 module Four exposing (..)
 
+import Json.Decode as D
+import Json.Encode as E
+
 
 type alias Four a =
     { zero : a
@@ -96,3 +99,24 @@ index_map f four =
 toList : Four a -> List a
 toList four =
     [ four.zero, four.one, four.two, four.three ]
+
+
+encode : (a -> E.Value) -> Four a -> E.Value
+encode e four =
+    let
+        keys =
+            [ "0", "1", "2", "3" ]
+    in
+    toList four
+        |> List.map e
+        |> List.map2 Tuple.pair keys
+        |> E.object
+
+
+decoder : D.Decoder a -> D.Decoder (Four a)
+decoder a =
+    D.map4 Four
+        (D.field "0" a)
+        (D.field "1" a)
+        (D.field "2" a)
+        (D.field "3" a)

@@ -5,6 +5,7 @@ import Four exposing (Index, Karnaugh, enumFour, get2d, repeat, set2d)
 import Html exposing (Html, button, div, table, td, text, tr)
 import Html.Events exposing (onClick)
 import List as L
+import MapCreation
 
 
 type alias Model =
@@ -13,12 +14,18 @@ type alias Model =
 
 
 type Message
-    = ClickedMap Index Index
+    = ClickKarnaugh Index Index
 
 
+init : Model
+init =
+    { karnaugh = repeat (repeat False) }
+
+
+main : Program () Model Message
 main =
     Browser.sandbox
-        { init = { karnaugh = repeat (repeat False) }
+        { init = init
         , update = update
         , view = view
         }
@@ -27,7 +34,7 @@ main =
 update : Message -> Model -> Model
 update msg model =
     case msg of
-        ClickedMap x y ->
+        ClickKarnaugh x y ->
             let
                 v =
                     not (get2d x y model.karnaugh)
@@ -48,7 +55,7 @@ viewDatum : Karnaugh -> Index -> Index -> Html Message
 viewDatum karnaugh x y =
     td []
         [ button
-            [ onClick (ClickedMap x y) ]
+            [ onClick (ClickKarnaugh x y) ]
             [ text (fromBool (get2d x y karnaugh)) ]
         ]
 
