@@ -13,6 +13,7 @@ from .views import generateTruthTables
 from .views import returnMasterTemplate
 
 from .normal_forms.view import normal_form
+from .optimization.view import optimization
 
 urlpatterns = [
     ## Production
@@ -23,7 +24,8 @@ urlpatterns = [
     path('clozegenerator/', clozeTextGenerator),
     path('ttgenerator/', generateTruthTables),
     path('normalform/', normal_form),
-    ## Examples 
+    ## Examples
+    path('optimization', optimization),
     path('example/', generateMCExample),
     path('examplebin/', generateBinaryExpression),
     #path('examplecloze/', clozeText),

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% load static %}
+        <script src={% static "template/mapcreation.js" %}></script>
+        {{ problem|json_script:"problem" }}
+    </head>
+    <body>
+        <div><h1>Hello</h1></div>
+        <div id="mapcreation"></div>
+        <script>
+            problem = JSON.parse(document.getElementById('problem').textContent);
+            var app = Elm.Main.init({
+                node: document.getElementById('mapcreation'),
+                flags: {
+                    "problem": problem,
+            }});
+        </script>
+    </body>
+</html>

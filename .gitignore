@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Elm
-elm_stuff/
+elm-stuff/
