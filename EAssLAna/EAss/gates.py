@@ -1,6 +1,7 @@
 import random
 from string import ascii_highercase
-
+import uuid
+  
 def andfunc(a,b):
     if (a == 1) and (b == 1):
         return 1
@@ -66,18 +67,16 @@ def difficulty(dif):
 
 def calcgateforeachdepth(depth, gatecount):
     gateforeachdepth = []
-    remainingdepth = depth - 1
-    count = gatecount
-    restcount = gatecount
+    remaininggates = gatecount
+    remainingdepth = depth
 
     for ind in range(depth):
-        count = count - remainingdepth 
-        if ind < (depth - 1):
-            num = random.choice(range(1, count))
+        if ind is not (depth - 1):
+            num = random.choice(range(1, remaininggates-remainingdepth))
         else:
-            num = restcount
+            num = remaininggates
+        remaininggates -= num
         remainingdepth -= 1
-        restcount = restcount - num
 
         gateforeachdepth.append(num)
 
@@ -88,25 +87,79 @@ def getGates(count):
     chosengates = []
     for _ in range(count):
         chosengates.append(random.choice(gates))
+    
     return chosengates
+
+def gateinputcount(gate):
+    number = 2
+    if gate == "NOT": number = 1
+    return number
+
+def creategatecircuit(input, gates, gateforeachdepth):
+    circuit = []
+    unusedinput = {}
+
+    for x in input:
+        gateid = uuid.uuid1()
+        createdgate = Gate(gateid, x , 0, input[x])
+        circuit.append(createdgate)
+        unusedinput[gateid] = input[x]
+    
+    for ind, x in enumerate (gateforeachdepth):
+        for _ in range(x):
+            
+            inputconnection = {}
+
+            currentgate = random.choice(gates)
+            gateinputcount = gateinputcount(currentgate)
+                
+            for _  in range(gateinputcount):
+                if ind == (len(gateforeachdepth) - 1) and len(unusedinput) is not 0:
+                    inputgateid = random.choice(list(unusedinput))
+                    inputconnection[inputgateid] = unusedinput[inputgateid]
+                    unusedinput.pop(inputgateid)   
+                else:
+                    inputgate = random.choice(circuit)
+                    inputconnection[inputgate.id] = inputgate.output
+                    if inputgate.depth == 0:
+                        unusedinput.pop(inputgate.id)          
+
+            inputvalues = list(inputconnection.values())
+            if gateinputcount == 1:
+                output = GATEINST[currentgate](inputvalues[0])
+            else:
+                output = GATEINST[currentgate](inputvalues[0], inputvalues[1])
+            gate = Gate(uuid.uuid1(), currentgate, ind+1, output, inputconnection)
+            
+            gates.pop(currentgate) 
+            circuit.append(gate)           
+    return circuit
+
+def resultgatecheck(circuit):
+    for ind, x in enumerate (circuit):
+        for y in circuit:
+            if x.id == y.inputconnection[0] or x.id == y.inputconnection[len(y.inputcollection)]:
+                circuit[ind].resultgate = False
+    return circuit
 
 def createcircuit(dif):
     depth, gatecount = difficulty(dif)
     gateforeachdepth = calcgateforeachdepth(depth, gatecount)
-    input = generateinput(random.choice(range(2, gateforeachdepth[0])))
+    input = generateinput(random.choice(range(2, 1+gateforeachdepth[0])))
     gates = getGates(gatecount)
-
-    
-    
-    circuit = {}
-    return circuit
+    gatecircuit = creategatecircuit(input, gates, gateforeachdepth)
+    resultgatecheck(gatecircuit)
+    return gatecircuit
 
 class Gate():
 
-    def __init__(self, id, inputconnection={}, outputconnection={}):
+    def __init__(self, id, gatetype, depth, output, inputconnection={}, resultgate=True):
         self.id = id
-        self.inputconnection = inputconnection
-        self.outputconnection = outputconnection 
+        self.gatetype = gatetype
+        self.depth = depth
+        self.output = output #Output Value
+        self.inputconnection = inputconnection  #Child-Gatter
+        self.resultgate = resultgate
 
 GATEINST = {
     "AND": andfunc,

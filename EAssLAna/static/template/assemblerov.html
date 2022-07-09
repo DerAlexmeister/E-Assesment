@@ -1,0 +1,36 @@
+{% extends "master.html" %}
+
+{% block title %} Index E-Assessments {% endblock %}
+
+{% block content %}
+
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
+
+    {% for answer in AssemblerAnswers %}
+        {% if answer.Correct %}
+            <div class="card text-white bg-success">
+                <div class="card-header">{{ answer.Solved }}</div>
+                <div class="card-body">
+                <h5 class="card-title"><b>Task:</b> {{ answer.Question }}</h5>
+                <hr style="border-color: black;">
+                <a href="/learninganalytics/assembleranalysis?t={{ answer.id }}" class="btn btn-light">View more</a>
+                </div>
+            </div>
+            <br>
+        {% else %}
+            <div class="card text-white bg-danger">
+                <div class="card-header">{{ answer.Solved }}</div>
+                <div class="card-body">
+                <h5 class="card-title"><b>Task:</b> {{ answer.Question }}</h5>
+                <hr style="border-color: black;">
+                <a href="/learninganalytics/assembleranalysis?t={{ answer.id }}" class="btn btn-light">View more</a>
+                </div>
+            </div>
+            <br>
+        {% endif %}
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

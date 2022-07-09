@@ -123,23 +123,32 @@ class MiniAssembler():
         self.error = error
         self.state = state
         self.missing_instructions = []
+        self.states = []
 
     def getCode(self):
         return self.instructions
 
     def eval(self):
         try:
+            l_states = []
             state = {}
             for command in self.instructions:
                 state = OPINST[command[0]](command[1:], state)
                 if state == None and not isinstance(state, dict):
                     self.error = state
                     return self.error
-            self.state = state
+                l_states.append({str(command[0]) + " " + ','.join(command[1:]): dict(state.items())})
+            self.state, self.states = state, l_states 
             return state
         except Exception as error:
             self.error = error
             return self.error
+
+    def getInstructions(self):
+        return self.instructions
+
+    def getStates(self):
+        return self.states
 
     def hasError(self):
         return self.error is not None

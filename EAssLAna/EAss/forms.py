@@ -67,5 +67,7 @@ class OpenAssemblerAnswerForm(forms.Form):
     CodeAnswer = forms.CharField(max_length=16384, label=False, widget=forms.Textarea(attrs={"rows":5, "cols":20}))
 
 class GatesAnswerForm(forms.Form):
+    
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answer = forms.IntegerField()
+    Answer = forms.CharField(max_length=1024, widget=forms.HiddenInput()) #muss in array/choices geändert werden
+    Gatecircuit = forms.CharField(max_length=1024, widget=forms.HiddenInput()) #muss in array/choices geändert werden

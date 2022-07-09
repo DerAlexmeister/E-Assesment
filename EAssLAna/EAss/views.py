@@ -40,6 +40,7 @@ from random import sample
 
 from .core import generateNumbers
 from .assembly import parser
+from .assembly import createcircuit
 
 from . import cloze as c
 
@@ -163,7 +164,7 @@ def generateMCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = True, "Your answer is correct."
+            iscorrect, message = False, "Your answer is wrong."
             question = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
@@ -184,9 +185,8 @@ def generateMCQuestions(request):
                 if element in answerset:
                     answercorrect = True
                     correctcounter += 1
-                else:
-                    iscorrect, message = False, "Your answer is wrong."
-                singleuseranswer = SingleMultipleChoiceUserAnswer(Correct=answercorrect, Answer=element, AllAnswers=useranswer)
+                    iscorrect, message = True, "Your answer is correct."
+                singleuseranswer = SingleMultipleChoiceUserAnswer(Correct=answercorrect, Answer=element, AllAnswers=useranswer, Topic=str(cat))
                 singleuseranswer.save()
 
             useranswer.AllCorrect = iscorrect
@@ -267,7 +267,7 @@ def generateTruthTables(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message, correctcounter = True, "Your answer is correct.", 0
+            iscorrect, message, correctcounter = False, "Your answer is wrong.", 0
             postresult = dict(request.POST)
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
             postresult.pop('csrfmiddlewaretoken')
@@ -275,15 +275,14 @@ def generateTruthTables(request):
             useranswer = TruthTableUserAnswer(Topic=str(cat), AllCorrect=iscorrect)
             useranswer.save()
 
+            answercorrect = False
             for k, v in postresult.items():
                 if k in checklist:
+                    answercorrect = True
                     correctcounter += 1
-                    singleuseranswer = SingleTruthTableUserAnswer(Correct=True, Answer=v[0], Question=k, AllAnswers=useranswer)
-                    singleuseranswer.save()
-                else:
-                    singleuseranswer = SingleTruthTableUserAnswer(Correct=False, Answer=v[0], Question=k, AllAnswers=useranswer)
-                    singleuseranswer.save()
-                    iscorrect, message = False, "Your answer is wrong."
+                    iscorrect, message = True, "Your answer is correct."
+                singleuseranswer = SingleTruthTableUserAnswer(Correct=answercorrect, Answer=v[0], Question=k, AllAnswers=useranswer, Topic=str(cat))
+                singleuseranswer.save()
 
             useranswer.AllCorrect = iscorrect
             useranswer.save()
@@ -317,14 +316,40 @@ def generateGateQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = True, "Your answer is correct."
-            
-           
-            return render(request, 'gates.html', {'message': message})
-        else:
+            iscorrect, message = False, "You answer is wrong"
 
+            #ändern damit mehrere Antworten gecheckt werden
+            postresult = dict(request.POST)
+            expectedanswer = postresult['Answer']
+            useranswer = postresult['Useranswer']
+
+            useranswer = GatesAnswer(Topic=str(cat), AllCorrect=iscorrect)
+            useranswer.save()
+
+            answercorrect = False
+            correctcounter = 0
+            for x, y in expectedanswer, useranswer:
+                if x == y:
+                    iscorrect, message = True, "Your answer is correct."
+                    answercorrect = True
+                    correctcounter += 1 
+                singleuseranswer = GatesAnswer(Correct=answercorrect, Topic=str(cat), )
+                singleuseranswer.save()
+
+
+            useranswer.AllCorrect = iscorrect
+            useranswer.save()
+
+            message += " You answered {}/{} statements correctly.".format(correctcounter, len(expectedanswer))
+            
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect})
+        else:
+            questionsset = (Question.objects.filter(Set__NameID=(str(cat))))[0]
+            difficulty = (Question.objects.filter(Set__NameID=(str(cat))))[0].Difficulty
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            answerform = GatesAnswerForm(initial={'Categorie': (str(cat))})
+            gatecircuit, result = createcircuit(difficulty)
+
+            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'Categorie': (str(cat)), 'Answer': result, 'Gatecircuit': gatecircuit})
             return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
@@ -356,7 +381,9 @@ def generateOpenAssemblerQuestions(request):
                 useranswer = OpenAssemblerAnswer(
                     Question=AssemblerQuestion.Question,
                     Answer=usercode,
-                    Correct=correct
+                    Correct=correct,
+                    QuestionID=AssemblerQuestion.id,
+                    OptimizedAnswer=AssemblerQuestion.OptimizedSolution
                 )
                 useranswer.save()
                 return render(request, 'openassembler.html', {'message': answer_text, 'correct': correct})
