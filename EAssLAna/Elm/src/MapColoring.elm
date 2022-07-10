@@ -3,7 +3,7 @@ module MapColoring exposing (..)
 import Array as A
 import Browser
 import EverySet as S
-import Four exposing (Index(..), Karnaugh, enumFour, get2d, repeat)
+import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat)
 import Html exposing (Html, button, div, p, table, td, text, th, tr)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -24,6 +24,7 @@ type alias Model =
     { karnaugh : Karnaugh
     , coloring : A.Array Selection
     , state : State
+    , variables : Four String
     }
 
 
@@ -53,6 +54,7 @@ init =
     { karnaugh = repeat (repeat False)
     , coloring = A.empty
     , state = Idle Nothing
+    , variables = Four "x1" "x2" "x3" "x4"
     }
 
 
@@ -109,6 +111,50 @@ fromBool b =
         "0"
 
 
+rowValues : Four String
+rowValues =
+    Four "00" "01" "11" "10"
+
+
+columnValues : Four String
+columnValues =
+    Four "10" "11" "01" "00"
+
+
+entryToString : Index -> Index -> String
+entryToString x y =
+    Four.get x rowValues ++ Four.get y columnValues
+
+
+tableCaption : Four String -> Html msg
+tableCaption four =
+    th []
+        [ text <|
+            four.two
+                ++ four.three
+                ++ "\\"
+                ++ four.zero
+                ++ four.one
+        ]
+
+
+rowCaption : Four String -> Html msg
+rowCaption variables =
+    rowValues
+        |> Four.map text
+        |> Four.map (\t -> th [] [ t ])
+        |> Four.toList
+        |> (\l -> tableCaption variables :: l)
+        |> tr []
+
+
+columnCaption : Index -> Html msg
+columnCaption index =
+    columnValues
+        |> Four.get index
+        |> text
+
+
 viewDatum : Karnaugh -> Index -> Index -> Html Message
 viewDatum karnaugh x y =
     td []
@@ -120,33 +166,15 @@ viewDatum karnaugh x y =
 
 viewRow : Karnaugh -> Index -> Html Message
 viewRow karnaugh x =
-    tr [] (L.map (viewDatum karnaugh x) enumFour)
+    tr [] (columnCaption x :: L.map (viewDatum karnaugh x) enumFour)
 
 
-viewKarnaugh : Karnaugh -> Html Message
-viewKarnaugh karnaugh =
-    table [] (L.map (viewRow karnaugh) enumFour)
-
-
-indexToString : Index -> String
-indexToString index =
-    case index of
-        Zero ->
-            "00"
-
-        One ->
-            "01"
-
-        Two ->
-            "11"
-
-        Three ->
-            "10"
-
-
-entryToString : Index -> Index -> String
-entryToString x y =
-    indexToString x ++ indexToString y
+viewKarnaugh : Four String -> Karnaugh -> Html Message
+viewKarnaugh variables karnaugh =
+    enumFour
+        |> L.map (viewRow karnaugh)
+        |> (\l -> rowCaption variables :: l)
+        |> table []
 
 
 viewSelection : Int -> Selection -> Html Message
@@ -190,7 +218,7 @@ view model =
                     i
     in
     div []
-        [ viewKarnaugh model.karnaugh
+        [ viewKarnaugh model.variables model.karnaugh
         , viewColoring index model.coloring
         , button [ onClick AddColor ] [ text "Add Color" ]
         , button [ onClick RemoveColor ] [ text "Remove Color" ]
