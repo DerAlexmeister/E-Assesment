@@ -36,10 +36,6 @@ type Message
     | SelectColor Int
 
 
-
---| ActivateColor
-
-
 main : Program () Model Message
 main =
     Browser.sandbox
@@ -58,27 +54,35 @@ init =
     }
 
 
+removeColoring : Model -> Int -> Model
+removeColoring model index =
+    let
+        new_coloring =
+            model.coloring
+                |> A.indexedMap Tuple.pair
+                |> A.filter (\( i, _ ) -> i /= index)
+                |> A.map Tuple.second
+    in
+    { model | coloring = new_coloring }
+
+
 update : Message -> Model -> Model
 update msg model =
     case ( msg, model.state ) of
-        ( AddColor, Idle _ ) ->
+        ( AddColor, _ ) ->
             { model
                 | state = Marking <| A.length model.coloring
                 , coloring = A.push S.empty model.coloring
             }
 
-        ( RemoveColor, Idle (Just index) ) ->
-            let
-                new_coloring =
-                    model.coloring
-                        |> A.indexedMap Tuple.pair
-                        |> A.filter (\( i, _ ) -> i == index)
-                        |> A.map Tuple.second
-            in
-            { model | coloring = new_coloring }
+        ( RemoveColor, Marking index ) ->
+            removeColoring model index
 
-        ( SelectColor index, Idle _ ) ->
-            { model | state = Idle (Just index) }
+        ( RemoveColor, Idle (Just index) ) ->
+            removeColoring model index
+
+        ( SelectColor index, _ ) ->
+            { model | state = Marking index }
 
         ( ClickKarnaugh x y, Marking index ) ->
             case A.get index model.coloring of
