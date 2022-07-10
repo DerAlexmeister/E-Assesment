@@ -5,7 +5,7 @@ import Browser
 import EverySet as S
 import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat)
 import Html exposing (Html, button, div, p, table, td, text, th, tr)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Json.Decode exposing (index)
 import List as L
@@ -132,7 +132,7 @@ entryToString x y =
 
 tableCaption : Four String -> Html msg
 tableCaption four =
-    th []
+    th [ captionClass ]
         [ text <|
             four.two
                 ++ four.three
@@ -146,7 +146,7 @@ rowCaption : Four String -> Html msg
 rowCaption variables =
     rowValues
         |> Four.map text
-        |> Four.map (\t -> th [] [ t ])
+        |> Four.map (\t -> th [ captionClass ] [ t ])
         |> Four.toList
         |> (\l -> tableCaption variables :: l)
         |> tr []
@@ -159,24 +159,26 @@ columnCaption index =
         |> text
 
 
-viewDatum : Karnaugh -> Index -> Index -> Html Message
-viewDatum karnaugh x y =
+viewDatum : Model -> Index -> Index -> Html Message
+viewDatum model x y =
     td []
         [ button
-            [ onClick (ClickKarnaugh x y) ]
-            [ text (fromBool (get2d x y karnaugh)) ]
+            [ datumClass
+            , onClick (ClickKarnaugh x y)
+            ]
+            [ text (fromBool (get2d x y model.karnaugh)) ]
         ]
 
 
-viewRow : Karnaugh -> Index -> Html Message
-viewRow karnaugh x =
-    tr [] (columnCaption x :: L.map (viewDatum karnaugh x) enumFour)
+viewRow : Model -> Index -> Html Message
+viewRow model x =
+    tr [] (columnCaption x :: L.map (viewDatum model x) enumFour)
 
 
-viewKarnaugh : Four String -> Karnaugh -> Html Message
-viewKarnaugh variables karnaugh =
+viewKarnaugh : Four String -> Model -> Html Message
+viewKarnaugh variables model =
     enumFour
-        |> L.map (viewRow karnaugh)
+        |> L.map (viewRow model)
         |> (\l -> rowCaption variables :: l)
         |> table []
 
@@ -222,9 +224,25 @@ view model =
                     i
     in
     div []
-        [ viewKarnaugh model.variables model.karnaugh
+        [ viewKarnaugh model.variables model
         , viewColoring index model.coloring
         , button [ onClick AddColor ] [ text "Add Color" ]
         , button [ onClick RemoveColor ] [ text "Remove Color" ]
         , button [ onClick FinishColoring ] [ text "Finish Selection" ]
         ]
+
+
+captionClass =
+    class "caption"
+
+
+activeClass =
+    class "active"
+
+
+coloringClass index =
+    class <| "coloring" ++ String.fromInt index
+
+
+datumClass =
+    class "datum"
