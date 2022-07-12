@@ -1,10 +1,10 @@
 module MapColoring exposing (..)
 
-import AllDict as D
 import Array as A
 import Browser
+import Dict.Any as D
 import EverySet as S
-import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat)
+import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat, toInt)
 import Html exposing (Html, button, div, p, table, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -13,8 +13,8 @@ import List as L
 
 
 type State
-    = Marking Int
-    | Idle (Maybe Int)
+    = Marking Color
+    | Idle (Maybe Color)
 
 
 type alias Selection =
@@ -23,8 +23,8 @@ type alias Selection =
 
 type alias Model =
     { karnaugh : Karnaugh
-    , colors : A.Array Selection
-    , colorings : D.Dict ( Index, Index ) (S.EverySet Int)
+    , colors : D.AnyDict String Color Selection
+    , colorings : D.AnyDict ( Int, Int ) ( Index, Index ) (S.EverySet Color)
     , state : State
     , variables : Four String
     }
@@ -35,7 +35,7 @@ type Message
     | AddColor
     | RemoveColor
     | FinishColoring
-    | SelectColor Int
+    | SelectColor Color
 
 
 main : Program () Model Message
@@ -50,56 +50,76 @@ main =
 init : Model
 init =
     { karnaugh = repeat (repeat False)
-    , colors = A.empty
-    , colorings = D.empty
+    , colors = D.empty colorName
+    , colorings = D.empty (\( x, y ) -> ( toInt x, toInt y ))
     , state = Idle Nothing
     , variables = Four "x1" "x2" "x3" "x4"
     }
 
 
-removeColoring : Model -> Int -> Model
-removeColoring model index =
+removeColoring : Model -> Color -> Model
+removeColoring model color =
     let
         new_colors =
             model.colors
-                |> A.indexedMap Tuple.pair
-                |> A.filter (\( i, _ ) -> i /= index)
-                |> A.map Tuple.second
+                |> D.remove color
 
         new_colorings =
             model.colorings
-                |> D.map (S.remove index)
+                |> D.map (\_ -> S.remove color)
     in
-    { model | colors = new_colors, colorings = new_colorings }
+    { model
+        | colors = new_colors
+        , colorings = new_colorings
+        , state = Idle Nothing
+    }
 
 
 update : Message -> Model -> Model
 update msg model =
     case ( msg, model.state ) of
         ( AddColor, _ ) ->
-            { model
-                | state = Marking <| A.length model.colors
-                , colors = A.push S.empty model.colors
-            }
+            let
+                used_colors =
+                    D.keys model.colors
+                        |> S.fromList
 
-        ( RemoveColor, Marking index ) ->
-            removeColoring model index
+                total_colors =
+                    enumColors
+                        |> S.fromList
 
-        ( RemoveColor, Idle (Just index) ) ->
-            removeColoring model index
+                available_colors =
+                    S.diff total_colors used_colors
+                        |> S.toList
+            in
+            case L.head available_colors of
+                Just color ->
+                    { model
+                        | state = Marking color
+                        , colors = D.insert color S.empty model.colors
+                    }
 
-        ( SelectColor index, _ ) ->
-            { model | state = Marking index }
+                Nothing ->
+                    model
 
-        ( ClickKarnaugh x y, Marking index ) ->
-            case A.get index model.colors of
+        ( RemoveColor, Marking color ) ->
+            removeColoring model color
+
+        ( RemoveColor, Idle (Just color) ) ->
+            removeColoring model color
+
+        ( SelectColor color, _ ) ->
+            { model | state = Marking color }
+
+        ( ClickKarnaugh x y, Marking color ) ->
+            case D.get color model.colors of
                 Just working_set ->
                     let
                         new_set =
                             S.insert ( x, y ) working_set
 
                         new_coloring =
-                            S.insert index <|
+                            S.insert color <|
                                 case D.get ( x, y ) model.colorings of
                                     Just colors ->
                                         colors
@@ -108,18 +128,15 @@ update msg model =
                                         S.empty
                     in
                     { model
-                        | colors = A.set index new_set model.colors
+                        | colors = D.insert color new_set model.colors
                         , colorings = D.insert ( x, y ) new_coloring model.colorings
                     }
 
                 Nothing ->
                     model
 
-        ( FinishColoring, Marking index ) ->
-            { model | state = Idle (Just index) }
-
-        ( FinishColoring, Idle index ) ->
-            { model | state = Idle index }
+        ( FinishColoring, _ ) ->
+            { model | state = Idle Nothing }
 
         _ ->
             model
@@ -205,32 +222,38 @@ viewKarnaugh variables model =
         |> table []
 
 
-viewSelection : Int -> Selection -> Html Message
-viewSelection index selection =
+viewSelection : Color -> Selection -> Html Message
+viewSelection color selection =
     S.toList selection
         |> L.map (\( x, y ) -> entryToString x y)
         |> String.join ", "
         |> text
         |> L.singleton
-        |> button [ onClick <| SelectColor index ]
+        |> button
+            [ onClick <| SelectColor color
+            , style "border-color" <| colorName color
+            ]
 
 
-viewColoring : Maybe Int -> A.Array Selection -> Html Message
-viewColoring index coloring =
+viewColoring : Maybe Color -> D.AnyDict String Color Selection -> Html Message
+viewColoring color coloring =
     coloring
-        |> A.indexedMap viewSelection
-        |> A.indexedMap
-            (\i t ->
+        |> D.toList
+        |> L.map
+            (\( c, selection ) ->
+                ( c, viewSelection c selection )
+            )
+        |> L.map
+            (\( c, selection ) ->
                 p
-                    (if Just i == index then
+                    (if Just c == color then
                         [ style "background-color" "red" ]
 
                      else
                         []
                     )
-                    [ t ]
+                    [ selection ]
             )
-        |> A.toList
         |> div []
 
 
@@ -281,10 +304,10 @@ addColorButtonStyle =
 
 addColorButton : Model -> Maybe (Html Message)
 addColorButton model =
-    try (A.length model.colors < L.length colorNames) <|
+    try (D.size model.colors < L.length enumColors) <|
         button
             addColorButtonStyle
-            [ text "Add Color" ]
+            [ text "Add Cover" ]
 
 
 removeColorButtonStyle : List (Html.Attribute Message)
@@ -299,7 +322,7 @@ removeColorButton : Model -> Maybe (Html Message)
 removeColorButton model =
     case model.state of
         Marking _ ->
-            try (A.length model.colors >= 1) <|
+            try (D.size model.colors >= 1) <|
                 button
                     removeColorButtonStyle
                     [ text "Remove Color" ]
@@ -329,29 +352,28 @@ finishColoringButton model =
             Nothing
 
 
-chooseColoring : Model -> Index -> Index -> List (Maybe String)
+chooseColoring : Model -> Index -> Index -> List (Maybe Color)
 chooseColoring model x y =
     let
-        mapping =
-            D.get ( x, y ) model.colorings
-                |> Maybe.map
-                    (\colors ->
-                        \index color ->
-                            if S.member index colors then
-                                Just color
-
-                            else
-                                Nothing
-                    )
-                |> Maybe.withDefault (\_ _ -> Nothing)
+        colors =
+            model.colorings
+                |> D.get ( x, y )
+                |> Maybe.withDefault S.empty
     in
-    colorNames
-        |> L.indexedMap mapping
+    enumColors
+        |> L.map
+            (\color ->
+                if S.member color colors then
+                    Just color
+
+                else
+                    Nothing
+            )
 
 
-applyColoring : List (Maybe String) -> Html msg -> Html msg
+applyColoring : List (Maybe Color) -> Html msg -> Html msg
 applyColoring colors inner =
-    L.foldl coloringStyle inner colors
+    L.foldr coloringStyle inner colors
 
 
 activeColoringFrameStyle : List (Html.Attribute msg)
@@ -374,9 +396,10 @@ coloringFrameStyle =
     ]
 
 
-coloringStyle : Maybe String -> Html msg -> Html msg
+coloringStyle : Maybe Color -> Html msg -> Html msg
 coloringStyle color inner =
     color
+        |> Maybe.map colorName
         |> Maybe.map (style "border-color")
         |> Maybe.map L.singleton
         |> Maybe.map (L.append activeColoringFrameStyle)
@@ -385,6 +408,33 @@ coloringStyle color inner =
         |> (\attr -> div attr [ inner ])
 
 
-colorNames : List String
-colorNames =
-    [ "red", "green", "blue", "purple", "black" ]
+type Color
+    = Red
+    | Green
+    | Blue
+    | Purple
+
+
+colorName : Color -> String
+colorName c =
+    case c of
+        Red ->
+            "red"
+
+        Green ->
+            "Green"
+
+        Blue ->
+            "blue"
+
+        Purple ->
+            "purple"
+
+
+enumColors : List Color
+enumColors =
+    [ Red
+    , Green
+    , Blue
+    , Purple
+    ]

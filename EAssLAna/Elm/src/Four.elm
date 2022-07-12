@@ -101,6 +101,22 @@ toList four =
     [ four.zero, four.one, four.two, four.three ]
 
 
+toInt : Index -> Int
+toInt index =
+    case index of
+        Zero ->
+            0
+
+        One ->
+            1
+
+        Two ->
+            2
+
+        Three ->
+            3
+
+
 encode : (a -> E.Value) -> Four a -> E.Value
 encode e four =
     let
