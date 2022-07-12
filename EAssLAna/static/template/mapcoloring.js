@@ -4370,7 +4370,182 @@ function _Browser_load(url)
 		}
 	}));
 }
-var $elm$core$List$cons = _List_cons;
+
+
+
+// SEND REQUEST
+
+var _Http_toTask = F3(function(router, toTask, request)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		function done(response) {
+			callback(toTask(request.expect.a(response)));
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
+		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.expect.b, xhr)); });
+		$elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
+
+		try {
+			xhr.open(request.method, request.url, true);
+		} catch (e) {
+			return done($elm$http$Http$BadUrl_(request.url));
+		}
+
+		_Http_configureRequest(xhr, request);
+
+		request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
+		xhr.send(request.body.b);
+
+		return function() { xhr.c = true; xhr.abort(); };
+	});
+});
+
+
+// CONFIGURE
+
+function _Http_configureRequest(xhr, request)
+{
+	for (var headers = request.headers; headers.b; headers = headers.b) // WHILE_CONS
+	{
+		xhr.setRequestHeader(headers.a.a, headers.a.b);
+	}
+	xhr.timeout = request.timeout.a || 0;
+	xhr.responseType = request.expect.d;
+	xhr.withCredentials = request.allowCookiesFromOtherDomains;
+}
+
+
+// RESPONSES
+
+function _Http_toResponse(toBody, xhr)
+{
+	return A2(
+		200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_,
+		_Http_toMetadata(xhr),
+		toBody(xhr.response)
+	);
+}
+
+
+// METADATA
+
+function _Http_toMetadata(xhr)
+{
+	return {
+		url: xhr.responseURL,
+		statusCode: xhr.status,
+		statusText: xhr.statusText,
+		headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
+	};
+}
+
+
+// HEADERS
+
+function _Http_parseHeaders(rawHeaders)
+{
+	if (!rawHeaders)
+	{
+		return $elm$core$Dict$empty;
+	}
+
+	var headers = $elm$core$Dict$empty;
+	var headerPairs = rawHeaders.split('\r\n');
+	for (var i = headerPairs.length; i--; )
+	{
+		var headerPair = headerPairs[i];
+		var index = headerPair.indexOf(': ');
+		if (index > 0)
+		{
+			var key = headerPair.substring(0, index);
+			var value = headerPair.substring(index + 2);
+
+			headers = A3($elm$core$Dict$update, key, function(oldValue) {
+				return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue)
+					? value + ', ' + oldValue.a
+					: value
+				);
+			}, headers);
+		}
+	}
+	return headers;
+}
+
+
+// EXPECT
+
+var _Http_expect = F3(function(type, toBody, toValue)
+{
+	return {
+		$: 0,
+		d: type,
+		b: toBody,
+		a: toValue
+	};
+});
+
+var _Http_mapExpect = F2(function(func, expect)
+{
+	return {
+		$: 0,
+		d: expect.d,
+		b: expect.b,
+		a: function(x) { return func(expect.a(x)); }
+	};
+});
+
+function _Http_toDataView(arrayBuffer)
+{
+	return new DataView(arrayBuffer);
+}
+
+
+// BODY and PARTS
+
+var _Http_emptyBody = { $: 0 };
+var _Http_pair = F2(function(a, b) { return { $: 0, a: a, b: b }; });
+
+function _Http_toFormData(parts)
+{
+	for (var formData = new FormData(); parts.b; parts = parts.b) // WHILE_CONS
+	{
+		var part = parts.a;
+		formData.append(part.a, part.b);
+	}
+	return formData;
+}
+
+var _Http_bytesToBlob = F2(function(mime, bytes)
+{
+	return new Blob([bytes], { type: mime });
+});
+
+
+// PROGRESS
+
+function _Http_track(router, xhr, tracker)
+{
+	// TODO check out lengthComputable on loadstart event
+
+	xhr.upload.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
+			sent: event.loaded,
+			size: event.total
+		}))));
+	});
+	xhr.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
+			received: event.loaded,
+			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+		}))));
+	});
+}var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
 	function (func, baseCase, _v0) {
@@ -5251,6 +5426,7 @@ var $author$project$Main$init = function (flag) {
 			colors: $turboMaCk$any_dict$Dict$Any$empty($author$project$Main$colorName),
 			karnaugh: karnaugh,
 			state: $author$project$Main$Idle($elm$core$Maybe$Nothing),
+			token: flag.token,
 			variables: A4($author$project$Four$Four, 'x1', 'x2', 'x3', 'x4')
 		},
 		cmd);
@@ -5264,6 +5440,7 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$Marking = function (a) {
 	return {$: 'Marking', a: a};
 };
+var $author$project$Main$Submitted = {$: 'Submitted'};
 var $Gizra$elm_all_set$EverySet$EverySet = function (a) {
 	return {$: 'EverySet', a: a};
 };
@@ -5336,44 +5513,133 @@ var $Gizra$elm_all_set$EverySet$diff = F2(
 	});
 var $pzp1997$assoc_list$AssocList$empty = $pzp1997$assoc_list$AssocList$D(_List_Nil);
 var $Gizra$elm_all_set$EverySet$empty = $Gizra$elm_all_set$EverySet$EverySet($pzp1997$assoc_list$AssocList$empty);
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Tuple$mapBoth = F3(
+	function (funcA, funcB, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			funcA(x),
+			funcB(y));
+	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $turboMaCk$any_dict$Dict$Any$toList = function (_v0) {
+	var dict = _v0.a.dict;
+	return $elm$core$Dict$values(dict);
+};
+var $turboMaCk$any_dict$Dict$Any$encode = F2(
+	function (keyE, valueE) {
+		return A2(
+			$elm$core$Basics$composeL,
+			A2(
+				$elm$core$Basics$composeL,
+				$elm$json$Json$Encode$object,
+				$elm$core$List$map(
+					A2($elm$core$Tuple$mapBoth, keyE, valueE))),
+			$turboMaCk$any_dict$Dict$Any$toList);
+	});
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$Main$encodeIndexPair = function (_v0) {
+	var x = _v0.a;
+	var y = _v0.b;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'first',
+				$elm$json$Json$Encode$int(
+					$author$project$Four$toInt(x))),
+				_Utils_Tuple2(
+				'second',
+				$elm$json$Json$Encode$int(
+					$author$project$Four$toInt(y)))
+			]));
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $pzp1997$assoc_list$AssocList$keys = function (_v0) {
+	var alist = _v0.a;
+	return A2($elm$core$List$map, $elm$core$Tuple$first, alist);
+};
+var $Gizra$elm_all_set$EverySet$toList = function (_v0) {
+	var d = _v0.a;
+	return $pzp1997$assoc_list$AssocList$keys(d);
+};
+var $author$project$Main$encodeSet = F2(
+	function (a, set) {
+		return A2(
+			$elm$json$Json$Encode$list,
+			a,
+			$Gizra$elm_all_set$EverySet$toList(set));
+	});
+var $author$project$Main$encodeSelection = $author$project$Main$encodeSet($author$project$Main$encodeIndexPair);
+var $author$project$Main$encodeColoring = A2($turboMaCk$any_dict$Dict$Any$encode, $author$project$Main$colorName, $author$project$Main$encodeSelection);
 var $author$project$Main$Blue = {$: 'Blue'};
 var $author$project$Main$Green = {$: 'Green'};
 var $author$project$Main$Purple = {$: 'Purple'};
 var $author$project$Main$Red = {$: 'Red'};
 var $author$project$Main$enumColors = _List_fromArray(
 	[$author$project$Main$Red, $author$project$Main$Green, $author$project$Main$Blue, $author$project$Main$Purple]);
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $pzp1997$assoc_list$AssocList$remove = F2(
-	function (targetKey, _v0) {
-		var alist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$filter,
-				function (_v1) {
-					var key = _v1.a;
-					return !_Utils_eq(key, targetKey);
-				},
-				alist));
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
 	});
-var $pzp1997$assoc_list$AssocList$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
-		var alteredAlist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$cons,
-				_Utils_Tuple2(key, value),
-				alteredAlist));
-	});
-var $Gizra$elm_all_set$EverySet$insert = F2(
-	function (k, _v0) {
-		var d = _v0.a;
-		return $Gizra$elm_all_set$EverySet$EverySet(
-			A3($pzp1997$assoc_list$AssocList$insert, k, _Utils_Tuple0, d));
-	});
-var $Gizra$elm_all_set$EverySet$fromList = function (xs) {
-	return A3($elm$core$List$foldl, $Gizra$elm_all_set$EverySet$insert, $Gizra$elm_all_set$EverySet$empty, xs);
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
 };
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -5406,41 +5672,6 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $turboMaCk$any_dict$Dict$Any$get = F2(
-	function (k, _v0) {
-		var dict = _v0.a.dict;
-		var toKey = _v0.a.toKey;
-		return A2(
-			$elm$core$Maybe$map,
-			$elm$core$Tuple$second,
-			A2(
-				$elm$core$Dict$get,
-				toKey(k),
-				dict));
-	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5548,82 +5779,6 @@ var $elm$core$Dict$insert = F3(
 			var x = _v0;
 			return x;
 		}
-	});
-var $turboMaCk$any_dict$Dict$Any$insert = F3(
-	function (k, v, _v0) {
-		var inner = _v0.a;
-		return $turboMaCk$any_dict$Dict$Any$AnyDict(
-			_Utils_update(
-				inner,
-				{
-					dict: A3(
-						$elm$core$Dict$insert,
-						inner.toKey(k),
-						_Utils_Tuple2(k, v),
-						inner.dict)
-				}));
-	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $turboMaCk$any_dict$Dict$Any$toList = function (_v0) {
-	var dict = _v0.a.dict;
-	return $elm$core$Dict$values(dict);
-};
-var $turboMaCk$any_dict$Dict$Any$keys = A2(
-	$elm$core$Basics$composeL,
-	$elm$core$List$map($elm$core$Tuple$first),
-	$turboMaCk$any_dict$Dict$Any$toList);
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
-	});
-var $turboMaCk$any_dict$Dict$Any$map = F2(
-	function (f, _v0) {
-		var dict = _v0.a.dict;
-		var toKey = _v0.a.toKey;
-		return $turboMaCk$any_dict$Dict$Any$AnyDict(
-			{
-				dict: A2(
-					$elm$core$Dict$map,
-					F2(
-						function (_v1, _v2) {
-							var k = _v2.a;
-							var v = _v2.b;
-							return _Utils_Tuple2(
-								k,
-								A2(f, k, v));
-						}),
-					dict),
-				toKey: toKey
-			});
 	});
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
@@ -5987,6 +6142,219 @@ var $elm$core$Dict$remove = F2(
 			return x;
 		}
 	});
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $elm$http$Http$expectBytesResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'arraybuffer',
+			_Http_toDataView,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectWhatever = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectBytesResponse,
+		toMsg,
+		$elm$http$Http$resolve(
+			function (_v0) {
+				return $elm$core$Result$Ok(_Utils_Tuple0);
+			}));
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $pzp1997$assoc_list$AssocList$remove = F2(
+	function (targetKey, _v0) {
+		var alist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$filter,
+				function (_v1) {
+					var key = _v1.a;
+					return !_Utils_eq(key, targetKey);
+				},
+				alist));
+	});
+var $pzp1997$assoc_list$AssocList$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
+		var alteredAlist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(key, value),
+				alteredAlist));
+	});
+var $Gizra$elm_all_set$EverySet$insert = F2(
+	function (k, _v0) {
+		var d = _v0.a;
+		return $Gizra$elm_all_set$EverySet$EverySet(
+			A3($pzp1997$assoc_list$AssocList$insert, k, _Utils_Tuple0, d));
+	});
+var $Gizra$elm_all_set$EverySet$fromList = function (xs) {
+	return A3($elm$core$List$foldl, $Gizra$elm_all_set$EverySet$insert, $Gizra$elm_all_set$EverySet$empty, xs);
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $turboMaCk$any_dict$Dict$Any$get = F2(
+	function (k, _v0) {
+		var dict = _v0.a.dict;
+		var toKey = _v0.a.toKey;
+		return A2(
+			$elm$core$Maybe$map,
+			$elm$core$Tuple$second,
+			A2(
+				$elm$core$Dict$get,
+				toKey(k),
+				dict));
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $turboMaCk$any_dict$Dict$Any$insert = F3(
+	function (k, v, _v0) {
+		var inner = _v0.a;
+		return $turboMaCk$any_dict$Dict$Any$AnyDict(
+			_Utils_update(
+				inner,
+				{
+					dict: A3(
+						$elm$core$Dict$insert,
+						inner.toKey(k),
+						_Utils_Tuple2(k, v),
+						inner.dict)
+				}));
+	});
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $turboMaCk$any_dict$Dict$Any$keys = A2(
+	$elm$core$Basics$composeL,
+	$elm$core$List$map($elm$core$Tuple$first),
+	$turboMaCk$any_dict$Dict$Any$toList);
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $turboMaCk$any_dict$Dict$Any$map = F2(
+	function (f, _v0) {
+		var dict = _v0.a.dict;
+		var toKey = _v0.a.toKey;
+		return $turboMaCk$any_dict$Dict$Any$AnyDict(
+			{
+				dict: A2(
+					$elm$core$Dict$map,
+					F2(
+						function (_v1, _v2) {
+							var k = _v2.a;
+							var v = _v2.b;
+							return _Utils_Tuple2(
+								k,
+								A2(f, k, v));
+						}),
+					dict),
+				toKey: toKey
+			});
+	});
 var $turboMaCk$any_dict$Dict$Any$remove = F2(
 	function (k, _v0) {
 		var inner = _v0.a;
@@ -6023,18 +6391,178 @@ var $author$project$Main$removeColoring = F2(
 				state: $author$project$Main$Idle($elm$core$Maybe$Nothing)
 			});
 	});
-var $pzp1997$assoc_list$AssocList$keys = function (_v0) {
-	var alist = _v0.a;
-	return A2($elm$core$List$map, $elm$core$Tuple$first, alist);
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
 };
-var $Gizra$elm_all_set$EverySet$toList = function (_v0) {
-	var d = _v0.a;
-	return $pzp1997$assoc_list$AssocList$keys(d);
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$http$Http$updateReqs = F3(
+	function (router, cmds, reqs) {
+		updateReqs:
+		while (true) {
+			if (!cmds.b) {
+				return $elm$core$Task$succeed(reqs);
+			} else {
+				var cmd = cmds.a;
+				var otherCmds = cmds.b;
+				if (cmd.$ === 'Cancel') {
+					var tracker = cmd.a;
+					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+					if (_v2.$ === 'Nothing') {
+						var $temp$router = router,
+							$temp$cmds = otherCmds,
+							$temp$reqs = reqs;
+						router = $temp$router;
+						cmds = $temp$cmds;
+						reqs = $temp$reqs;
+						continue updateReqs;
+					} else {
+						var pid = _v2.a;
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v3) {
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A2($elm$core$Dict$remove, tracker, reqs));
+							},
+							$elm$core$Process$kill(pid));
+					}
+				} else {
+					var req = cmd.a;
+					return A2(
+						$elm$core$Task$andThen,
+						function (pid) {
+							var _v4 = req.tracker;
+							if (_v4.$ === 'Nothing') {
+								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							} else {
+								var tracker = _v4.a;
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A3($elm$core$Dict$insert, tracker, pid, reqs));
+							}
+						},
+						$elm$core$Process$spawn(
+							A3(
+								_Http_toTask,
+								router,
+								$elm$core$Platform$sendToApp(router),
+								req)));
+				}
+			}
+		}
+	});
+var $elm$http$Http$onEffects = F4(
+	function (router, cmds, subs, state) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (reqs) {
+				return $elm$core$Task$succeed(
+					A2($elm$http$Http$State, reqs, subs));
+			},
+			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$http$Http$maybeSend = F4(
+	function (router, desiredTracker, progress, _v0) {
+		var actualTracker = _v0.a;
+		var toMsg = _v0.b;
+		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
+			A2(
+				$elm$core$Platform$sendToApp,
+				router,
+				toMsg(progress))) : $elm$core$Maybe$Nothing;
+	});
+var $elm$http$Http$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var tracker = _v0.a;
+		var progress = _v0.b;
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$filterMap,
+					A3($elm$http$Http$maybeSend, router, tracker, progress),
+					state.subs)));
+	});
+var $elm$http$Http$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $elm$http$Http$cmdMap = F2(
+	function (func, cmd) {
+		if (cmd.$ === 'Cancel') {
+			var tracker = cmd.a;
+			return $elm$http$Http$Cancel(tracker);
+		} else {
+			var r = cmd.a;
+			return $elm$http$Http$Request(
+				{
+					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+					body: r.body,
+					expect: A2(_Http_mapExpect, func, r.expect),
+					headers: r.headers,
+					method: r.method,
+					timeout: r.timeout,
+					tracker: r.tracker,
+					url: r.url
+				});
+		}
+	});
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$subMap = F2(
+	function (func, _v0) {
+		var tracker = _v0.a;
+		var toMsg = _v0.b;
+		return A2(
+			$elm$http$Http$MySub,
+			tracker,
+			A2($elm$core$Basics$composeR, toMsg, func));
+	});
+_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+var $elm$http$Http$command = _Platform_leaf('Http');
+var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$request = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$6:
+		_v0$7:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'AddColor':
@@ -6073,7 +6601,7 @@ var $author$project$Main$update = F2(
 								A2($author$project$Main$removeColoring, model, color),
 								$elm$core$Platform$Cmd$none);
 						} else {
-							break _v0$6;
+							break _v0$7;
 						}
 					}
 				case 'SelectColor':
@@ -6129,9 +6657,9 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$6;
+						break _v0$7;
 					}
-				default:
+				case 'FinishColoring':
 					var _v8 = _v0.a;
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -6140,11 +6668,35 @@ var $author$project$Main$update = F2(
 								state: $author$project$Main$Idle($elm$core$Maybe$Nothing)
 							}),
 						$elm$core$Platform$Cmd$none);
+				case 'Submit':
+					var _v9 = _v0.a;
+					return _Utils_Tuple2(
+						model,
+						$elm$http$Http$request(
+							{
+								body: $elm$http$Http$jsonBody(
+									$author$project$Main$encodeColoring(model.colors)),
+								expect: $elm$http$Http$expectWhatever(
+									function (_v10) {
+										return $author$project$Main$Submitted;
+									}),
+								headers: _List_fromArray(
+									[
+										A2($elm$http$Http$header, 'X-CSRFToken', model.token)
+									]),
+								method: 'POST',
+								timeout: $elm$core$Maybe$Nothing,
+								tracker: $elm$core$Maybe$Nothing,
+								url: 'http://127.0.0.1:8000/eassessments/coloring'
+							}));
+				default:
+					break _v0$7;
 			}
 		}
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	});
 var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Main$Submit = {$: 'Submit'};
 var $author$project$Main$AddColor = {$: 'AddColor'};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -6607,7 +7159,18 @@ var $author$project$Main$view = function (model) {
 					A2($author$project$Main$viewColoring, index, model.colors)),
 					$author$project$Main$addColorButton(model),
 					$author$project$Main$removeColorButton(model),
-					$author$project$Main$finishColoringButton(model)
+					$author$project$Main$finishColoringButton(model),
+					$elm$core$Maybe$Just(
+					A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$Submit)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Submit')
+							])))
 				])));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
@@ -6615,13 +7178,18 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
-		function (karnaugh) {
+		function (token) {
 			return A2(
 				$elm$json$Json$Decode$andThen,
-				function (error_redirect) {
-					return $elm$json$Json$Decode$succeed(
-						{error_redirect: error_redirect, karnaugh: karnaugh});
+				function (karnaugh) {
+					return A2(
+						$elm$json$Json$Decode$andThen,
+						function (error_redirect) {
+							return $elm$json$Json$Decode$succeed(
+								{error_redirect: error_redirect, karnaugh: karnaugh, token: token});
+						},
+						A2($elm$json$Json$Decode$field, 'error_redirect', $elm$json$Json$Decode$string));
 				},
-				A2($elm$json$Json$Decode$field, 'error_redirect', $elm$json$Json$Decode$string));
+				A2($elm$json$Json$Decode$field, 'karnaugh', $elm$json$Json$Decode$value));
 		},
-		A2($elm$json$Json$Decode$field, 'karnaugh', $elm$json$Json$Decode$value)))(0)}});}(this));
+		A2($elm$json$Json$Decode$field, 'token', $elm$json$Json$Decode$string)))(0)}});}(this));

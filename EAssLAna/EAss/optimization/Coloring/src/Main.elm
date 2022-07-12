@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Array as A
 import Browser
 import Browser.Navigation exposing (load)
 import Dict.Any as D
@@ -9,8 +8,9 @@ import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat, toInt)
 import Html exposing (Html, button, div, p, table, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import Json.Decode exposing (index)
-import Json.Encode
+import Http
+import Json.Decode as J exposing (index)
+import Json.Encode as E
 import List as L
 
 
@@ -29,6 +29,7 @@ type alias Model =
     , colorings : D.AnyDict ( Int, Int ) ( Index, Index ) (S.EverySet Color)
     , state : State
     , variables : Four String
+    , token : String
     }
 
 
@@ -38,11 +39,14 @@ type Message
     | RemoveColor
     | FinishColoring
     | SelectColor Color
+    | Submit
+    | Submitted
 
 
 type alias Flag =
-    { karnaugh : Json.Decode.Value
+    { karnaugh : J.Value
     , error_redirect : String
+    , token : String
     }
 
 
@@ -60,7 +64,7 @@ init : Flag -> ( Model, Cmd Message )
 init flag =
     let
         ( karnaugh, cmd ) =
-            case Json.Decode.decodeValue (Four.decoder (Four.decoder Json.Decode.bool)) flag.karnaugh of
+            case J.decodeValue (Four.decoder (Four.decoder J.bool)) flag.karnaugh of
                 Ok k ->
                     ( k, Cmd.none )
 
@@ -72,6 +76,7 @@ init flag =
       , colorings = D.empty (\( x, y ) -> ( toInt x, toInt y ))
       , state = Idle Nothing
       , variables = Four "x1" "x2" "x3" "x4"
+      , token = flag.token
       }
     , cmd
     )
@@ -161,6 +166,19 @@ update msg model =
 
         ( FinishColoring, _ ) ->
             ( { model | state = Idle Nothing }, Cmd.none )
+
+        ( Submit, _ ) ->
+            ( model
+            , Http.request
+                { method = "POST"
+                , headers = [ Http.header "X-CSRFToken" model.token ]
+                , url = "http://127.0.0.1:8000/eassessments/coloring"
+                , body = Http.jsonBody <| encodeColoring model.colors
+                , expect = Http.expectWhatever <| \_ -> Submitted
+                , timeout = Nothing
+                , tracker = Nothing
+                }
+            )
 
         _ ->
             ( model, Cmd.none )
@@ -299,6 +317,7 @@ view model =
             , addColorButton model
             , removeColorButton model
             , finishColoringButton model
+            , Just <| button [ onClick Submit ] [ text "Submit" ]
             ]
 
 
@@ -467,3 +486,28 @@ enumColors =
 subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.none
+
+
+encodeSet : (a -> E.Value) -> S.EverySet a -> E.Value
+encodeSet a set =
+    set
+        |> S.toList
+        |> E.list a
+
+
+encodeIndexPair : ( Index, Index ) -> E.Value
+encodeIndexPair ( x, y ) =
+    E.object
+        [ ( "first", E.int <| toInt x )
+        , ( "second", E.int <| toInt y )
+        ]
+
+
+encodeSelection : Selection -> E.Value
+encodeSelection =
+    encodeSet encodeIndexPair
+
+
+encodeColoring : D.AnyDict String Color Selection -> E.Value
+encodeColoring =
+    D.encode colorName encodeSelection

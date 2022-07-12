@@ -1,43 +1,48 @@
 from django.http.response import HttpResponse
 
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from .. import models
 
 
 def coloring(request):
     cat = request.GET.get('t', '')
+    karnaugh = {
+        "0": {
+            "0": True,
+            "1": False,
+            "2": False,
+            "3": True,
+        },
+        "1": {
+            "0": True,
+            "1": False,
+            "2": False,
+            "3": True,
+        },
+        "2": {
+            "0": True,
+            "1": False,
+            "2": False,
+            "3": True,
+        },
+        "3": {
+            "0": True,
+            "1": False,
+            "2": False,
+            "3": True,
+        },
+    }
 
     if request.method == 'POST':
-        return HttpResponse("Test")
+        print(request.body)
+        return render(request, 'mapcoloring.html', {
+            "karnaugh": karnaugh
+        })
+
     else:
         return render(request, 'mapcoloring.html', {
-            "karnaugh": {
-                "0": {
-                    "0": True,
-                    "1": False,
-                    "2": False,
-                    "3": True,
-                },
-                "1": {
-                    "0": True,
-                    "1": False,
-                    "2": False,
-                    "3": True,
-                },
-                "2": {
-                    "0": True,
-                    "1": False,
-                    "2": False,
-                    "3": True,
-                },
-                "3": {
-                    "0": True,
-                    "1": False,
-                    "2": False,
-                    "3": True,
-                },
-            }
+            "karnaugh": karnaugh
         })
 
 def optimization(request):
