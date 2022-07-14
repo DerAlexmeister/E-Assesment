@@ -1,5 +1,8 @@
+from enum import unique
 from django.db import models
+from django.forms import Input
 from django.utils import timezone
+from django.core.validators import int_list_validator
 
 from datetime import datetime
 
@@ -35,6 +38,16 @@ CALCTYPES = (
     ('None','None'),
     ('Bin', 'Bin'),
     ('Octa', 'Octa'),
+)
+
+GATES = (
+    ('NOT','NOT'),
+    ('AND', 'AND'),
+    ('OR', 'OR'),
+    ('NAND', 'NAND'),
+    ('NOR', 'NOR'),
+    ('XOR', 'XOR'),
+    ('XNOR', 'XNOR'),
 )
 
 class QAWSet(models.Model):
@@ -90,6 +103,7 @@ class OctaStatement(models.Model):
         return "Random expression: {}".format(self.MaxValue)
 
 class Gap(models.Model):
+
     preceeding_text = models.TextField(blank=False)
     succeeding_text = models.TextField(blank=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
@@ -98,6 +112,7 @@ class Gap(models.Model):
         return "{} [...] {}".format(self.preceeding_text, self.succeeding_text)
 
 class GapSolution(models.Model):
+
     solution = models.TextField(blank=False, null=False)
     gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
 
@@ -105,6 +120,7 @@ class GapSolution(models.Model):
         return "{}".format(self.solution)
 
 class Cloze(models.Model):
+
     qaw = models.ForeignKey(QAWSet, on_delete=models.CASCADE)
     gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()
@@ -126,6 +142,12 @@ class OpenAssemblerCodeQuestions(models.Model):
     def __str__(self):
         return "{}: {}".format(self.id, self.Question)
 
+class GatesQuestions(models.Model):
+
+    Created = models.DateTimeField(default=timezone.now)
+    Difficulty = models.TextField(blank=False, null=False)
+    Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
+
 class CalculusSingleUserAnswer(models.Model):
 
     Answer = models.IntegerField(blank=False, null=False)
@@ -138,6 +160,7 @@ class CalculusSingleUserAnswer(models.Model):
         return "{} - Status: {}".format(self.Solved, self.Correct)
 
 class SingleChoiceUserAnswer(models.Model):
+
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Question = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
@@ -148,6 +171,7 @@ class SingleChoiceUserAnswer(models.Model):
         return "{} - Status: {}".format(self.Solved, self.Correct)
 
 class MultipleChoiceUserAnswer(models.Model):
+
     Question = models.CharField(max_length=1024, blank=False, null=False)
     AllCorrect = models.BooleanField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
@@ -157,12 +181,19 @@ class MultipleChoiceUserAnswer(models.Model):
         return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleMultipleChoiceUserAnswer(models.Model):
+
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(MultipleChoiceUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Solved = models.DateTimeField(default=timezone.now)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
+    
+
 class TruthTableUserAnswer(models.Model):
+
     AllCorrect = models.BooleanField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
@@ -171,27 +202,39 @@ class TruthTableUserAnswer(models.Model):
         return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleTruthTableUserAnswer(models.Model):
+
     Question = models.CharField(max_length=1024, blank=False, null=False)
     Answer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(TruthTableUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
-    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
-
-class ClozeUserAnswer(models.Model):
-    AllCorrect = models.BooleanField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
+    
+
+class ClozeUserAnswer(models.Model):
+
+    AllCorrect = models.BooleanField(blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
 
 class SingleFieldClozeUserAnswer(models.Model):
+    
     ExpectedAnswer = models.CharField(max_length=1024, blank=False, null=False)
     UserAnswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllGaps = models.ForeignKey(ClozeUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    Solved = models.DateTimeField(default=timezone.now)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)
+        
 class OpenAssemblerAnswer(models.Model):
 
     Question = models.TextField(blank=False, null=False)
@@ -208,3 +251,23 @@ class OpenAssemblerAnswer(models.Model):
 
     def pdate(self):
         return self.Solved.strftime("%m/%d/%Y, %H:%M:%S")
+
+class GatesAnswer(models.Model):
+
+    Solved = models.DateTimeField(default=timezone.now)
+    AllCorrect = models.BooleanField(blank=False, null=False)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='Gates', null=False, blank=False)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
+
+class SingleGatesAnswer(models.Model):
+
+    Expectedanswer = models.TextField(blank=False, null=False)
+    Useranswer = models.TextField(blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    Correct = models.BooleanField(blank=False, null=False)
+    Topic = models.CharField(max_length=24, choices=TOPICS, default='Gates', null=False, blank=False)
+
+    def __str__(self):
+        return "{} - Status: {}".format(self.Solved, self.Correct)

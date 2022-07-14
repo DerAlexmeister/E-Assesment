@@ -13,6 +13,7 @@ from .views import generateOctaQuestions
 from .views import generateTruthTables
 from .views import returnMasterTemplate
 from .views import generateOpenAssemblerQuestions
+from .views import generateGateQuestions
 
 urlpatterns = [
     ## Production
@@ -24,6 +25,7 @@ urlpatterns = [
     path('clozegenerator/', clozeTextGenerator),
     path('ttgenerator/', generateTruthTables),
     path('oagenerator/', generateOpenAssemblerQuestions),
+    path('gatesgenerator/', generateGateQuestions),
 
     ## Examples 
     path('example/', generateMCExample),

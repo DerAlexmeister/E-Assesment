@@ -6,21 +6,29 @@
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
 
-    <p class="form-group">
-        <h3>{{Question}}</h3>
-
-        <h4>{{message}}</h4>
-       
-        {% if not message %} 
-        
-        <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
-            {% csrf_token %}
-            {{Form.as_p}}
-            
-            <button type="submit">Answer</button>
-        </form>
+    {% if message %}
+        {% if correct %}
+            <div class="alert alert-success" role="alert">
+                {{message}}
+            </div>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                {{message}}
+            </div>
         {% endif %}
-    </p>
+    {% else %}
+        <p class="form-group">
+            <h3>{{Question}}</h3>
+        
+            <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
+                {% csrf_token %}
+                {{Form.as_p}}
+                
+                <button type="submit">Answer</button>
+            </form>
+        </p>
+    {% endif %}
+
 </div>
 
 {% endblock %}

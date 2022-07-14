@@ -23,6 +23,7 @@ from .models import SingleTruthTableUserAnswer
 from .models import ClozeUserAnswer
 from .models import SingleFieldClozeUserAnswer
 from .models import OpenAssemblerAnswer
+from .models import GatesAnswer
 
 from .forms import BinaryAnswerForm
 from .forms import OctaAnswerForm
@@ -31,6 +32,7 @@ from .forms import MCAnswerForm
 from .forms import TtAnswerForm
 from .forms import ClozeForm
 from .forms import OpenAssemblerAnswerForm
+from .forms import GatesAnswerForm
 
 from random import randint
 from random import shuffle
@@ -38,6 +40,7 @@ from random import sample
 
 from .core import generateNumbers
 from .assembly import parser
+from .assembly import createcircuit
 
 from . import cloze as c
 
@@ -66,11 +69,11 @@ def generateOctaQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = False, "You are wrong"
+            iscorrect, message = False, "You answer is wrong"
             question = int(request.POST['Question'])
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                iscorrect, message = True, "Well done"
+                iscorrect, message = True, "Your answer is correct."
             useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Octa")
             useranswer.save()
             return render(request, 'octarandexample.html', {'message': message, 'correct': iscorrect})
@@ -89,11 +92,11 @@ def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = False, "You are wrong"
-            question = int(request.POST['Question'])
+            iscorrect, message = False, "You answer is wrong"
+            question = int(request.POST['Question'], 2)
             answer = int(request.POST['Answer'], 10)
             if question == answer:
-                iscorrect, message = True, "Well done"
+                iscorrect, message = True, "Your answer is correct."
             useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
             useranswer.save()
             return render(request, 'binaryrandexample.html', {'message': message, 'correct': iscorrect})
@@ -127,13 +130,12 @@ def generateSCQuestions(request):
             answerscorrection = [ans in answerset for ans in answers]
 
             if False in answerscorrection or len(answerscorrection) < 1:
-                message = "Your answer is not correct."
-                iscorrect = False
+                iscorrect, message = False, "Your answer is wrong."
     
             useranswer = SingleChoiceUserAnswer(Answer=answers[0], Correct=iscorrect, Question=question, Topic=str(cat))
             useranswer.save()
 
-            return render(request, 'singlechoiceexample.html', {'message': message})
+            return render(request, 'singlechoiceexample.html', {'message': message, 'correct':iscorrect})
         else:
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
             questionsset = Question.objects.filter(Set__NameID=(str(cat)))
@@ -152,8 +154,8 @@ def generateSCQuestions(request):
             statements_f = []
             for i in statements: statements_f.append((i, i))
 
-            mcform = SCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
-            return render(request, 'singlechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
+            answerform = SCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
+            return render(request, 'singlechoiceexample.html', {'Form': answerform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return redirect('homeview')
@@ -162,7 +164,7 @@ def generateMCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = True, "Your answer is correct."
+            iscorrect, message = False, "Your answer is wrong."
             question = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
@@ -173,22 +175,26 @@ def generateMCQuestions(request):
                 if element.startswith("Question="):
                     question += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Question=", "")))
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
-            answerscorrection = [ans in answerset for ans in answers]
-            if False in answerscorrection or len(answerscorrection) < 1:
-                message = "Your answer is not correct."
-                iscorrect = False
-
+            
             useranswer = MultipleChoiceUserAnswer(AllCorrect=iscorrect, Question=question, Topic=str(cat))
             useranswer.save()
 
             answercorrect = False
-            for element in answers:
+            correctcounter = 0
+            for index, element in enumerate(answers):
                 if element in answerset:
                     answercorrect = True
-                singleuseranswer = SingleMultipleChoiceUserAnswer(Correct=answercorrect, Answer=element, AllAnswers=useranswer)
+                    correctcounter += 1
+                    iscorrect, message = True, "Your answer is correct."
+                singleuseranswer = SingleMultipleChoiceUserAnswer(Correct=answercorrect, Answer=element, AllAnswers=useranswer, Topic=str(cat))
                 singleuseranswer.save()
+
+            useranswer.AllCorrect = iscorrect
+            useranswer.save()
+
+            message += " You answered {}/{} statements correctly.".format(correctcounter, index+1)
     
-            return render(request, 'multiplechoiceexample.html', {'message': message})
+            return render(request, 'multiplechoiceexample.html', {'message': message, 'correct':iscorrect})
         else:
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
             questionsset = Question.objects.filter(Set__NameID=(str(cat)))
@@ -207,8 +213,8 @@ def generateMCQuestions(request):
             statements_f = []
             for i in statements: statements_f.append((i, i))
 
-            mcform = MCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
-            return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
+            answerform = MCAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Options': statements_f})
+            return render(request, 'multiplechoiceexample.html', {'Form': answerform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return redirect('homeview')
@@ -216,7 +222,7 @@ def generateMCQuestions(request):
 def clozeTextGenerator(request):
     cat = request.GET.get('t', '')
     if request.method == 'POST':
-        iscorrect = True
+        iscorrect, message = True, "Your answer is correct."
         cloze_id = request.POST['cloze_id']
         qaw = QAWSet.objects.get(id=cloze_id)
         cloze = c.from_model(qaw)
@@ -224,7 +230,7 @@ def clozeTextGenerator(request):
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
 
-        useranswer = ClozeUserAnswer(Topic=str(cat))
+        useranswer = ClozeUserAnswer(Topic=str(cat), AllCorrect=iscorrect)
         useranswer.save()
 
         for guess, solution in zip(gaps, cloze.gaps):
@@ -236,12 +242,14 @@ def clozeTextGenerator(request):
             else:
                 singleuseranswer = SingleFieldClozeUserAnswer(Correct=False, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
                 singleuseranswer.save()
-                iscorrect = False
+                iscorrect, message = False, "Your answer is wrong." 
         
         useranswer.AllCorrect = iscorrect
         useranswer.save()
 
-        return HttpResponse(f"{count} of {maximal} are correct.")
+        message += " You answered {}/{} gaps correctly.".format(count, maximal)
+
+        return HttpResponse(message)
     else:
         qaw = Cloze.objects.first().qaw #TODO fix this
         print(qaw)
@@ -259,34 +267,29 @@ def generateTruthTables(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect = True
+            iscorrect, message, correctcounter = False, "Your answer is wrong.", 0
             postresult = dict(request.POST)
-            result = {}
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
             postresult.pop('csrfmiddlewaretoken')
             postresult.pop('NameID')
-            useranswer = TruthTableUserAnswer(Topic=str(cat))
+            useranswer = TruthTableUserAnswer(Topic=str(cat), AllCorrect=iscorrect)
             useranswer.save()
 
+            answercorrect = False
             for k, v in postresult.items():
                 if k in checklist:
-                    result[k] = (v[0], True)
-                    singleuseranswer = SingleTruthTableUserAnswer(Correct=True, Answer=v[0], Question=k, AllAnswers=useranswer)
-                    singleuseranswer.save()
-                else:
-                    result[k] = (v[0], False)
-                    singleuseranswer = SingleTruthTableUserAnswer(Correct=False, Answer=v[0], Question=k, AllAnswers=useranswer)
-                    singleuseranswer.save()
-                    iscorrect = False
-
-            correctcounter = [True if (bool(i[0]) == i[1]) else False for i in result.values()].count(True)
+                    answercorrect = True
+                    correctcounter += 1
+                    iscorrect, message = True, "Your answer is correct."
+                singleuseranswer = SingleTruthTableUserAnswer(Correct=answercorrect, Answer=v[0], Question=k, AllAnswers=useranswer, Topic=str(cat))
+                singleuseranswer.save()
 
             useranswer.AllCorrect = iscorrect
             useranswer.save()
 
-            message = "You answered {}/6 statements correctly.".format(correctcounter)
+            message += " You answered {}/{} statements correctly.".format(correctcounter, k+1)
            
-            return render(request, 'truthtableexample.html', {'message': message, 'result': result})
+            return render(request, 'truthtableexample.html', {'message': message})
         else:
             answerset = Answer.objects.filter(Set__NameID=(str(cat)))
             wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
@@ -303,8 +306,51 @@ def generateTruthTables(request):
             shuffle(statements)
 
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            mcform = TtAnswerForm(initial={'Categorie': (str(cat)), 'Options': statements})
-            return render(request, 'truthtableexample.html', {'Form': mcform, 'Categorie': (str(cat)), 'Target': target})
+            answerform = TtAnswerForm(initial={'Categorie': (str(cat)), 'Options': statements})
+            return render(request, 'truthtableexample.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target})
+    except Exception as error:
+        print(error)
+    return redirect('homeview')
+
+def generateGateQuestions(request):
+    try:
+        cat = request.GET.get('t', '')
+        if request.method == "POST":
+            iscorrect, message = False, "You answer is wrong"
+
+            #ändern damit mehrere Antworten gecheckt werden
+            postresult = dict(request.POST)
+            expectedanswer = postresult['Answer']
+            useranswer = postresult['Useranswer']
+
+            useranswer = GatesAnswer(Topic=str(cat), AllCorrect=iscorrect)
+            useranswer.save()
+
+            answercorrect = False
+            correctcounter = 0
+            for x, y in expectedanswer, useranswer:
+                if x == y:
+                    iscorrect, message = True, "Your answer is correct."
+                    answercorrect = True
+                    correctcounter += 1 
+                singleuseranswer = GatesAnswer(Correct=answercorrect, Topic=str(cat), )
+                singleuseranswer.save()
+
+
+            useranswer.AllCorrect = iscorrect
+            useranswer.save()
+
+            message += " You answered {}/{} statements correctly.".format(correctcounter, len(expectedanswer))
+            
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect})
+        else:
+            questionsset = (Question.objects.filter(Set__NameID=(str(cat))))[0]
+            difficulty = (Question.objects.filter(Set__NameID=(str(cat))))[0].Difficulty
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            gatecircuit, result = createcircuit(difficulty)
+
+            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'Categorie': (str(cat)), 'Answer': result, 'Gatecircuit': gatecircuit})
+            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return redirect('homeview')
@@ -345,8 +391,8 @@ def generateOpenAssemblerQuestions(request):
         else:
             AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
             Target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            form = OpenAssemblerAnswerForm(initial={'Question': AssemblerQuestion.Question})
-            return render(request, 'openassembler.html', {'Form': form, 'Categorie': (str(cat)), 'Target': Target, 'Question': AssemblerQuestion.Question,})
+            answerform = OpenAssemblerAnswerForm(initial={'Question': AssemblerQuestion.Question})
+            return render(request, 'openassembler.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': Target, 'Question': AssemblerQuestion.Question,})
     except Exception as error:
         print(error)
     return redirect('homeview')
@@ -368,7 +414,7 @@ def generateMCExample(request):
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID='DLX-Pipeline'))]
             answerscorrection = [ans in answerset for ans in answers]
             if False in answerscorrection or len(answerscorrection) < 1:
-                message = "Your answer is not correct."
+                message = "Your answer is wrong."
             else:
                 message = "Your answer is correct."
             return render(request, 'multiplechoiceexample.html', {'message': message})
@@ -390,8 +436,8 @@ def generateMCExample(request):
             for index, i in enumerate(statements):
                 statements_f.append((i, i))
 
-            mcform = MCAnswerForm(initial={'Question': question_f, 'Categorie': 'DLX-Pipeline', 'Options': statements_f})
-            return render(request, 'multiplechoiceexample.html', {'Form': mcform, 'Question': question_f, 'Categorie': 'DLX-Pipeline'})
+            answerform = MCAnswerForm(initial={'Question': question_f, 'Categorie': 'DLX-Pipeline', 'Options': statements_f})
+            return render(request, 'multiplechoiceexample.html', {'Form': answerform, 'Question': question_f, 'Categorie': 'DLX-Pipeline'})
     except Exception as error:
         print(error)
     return render(request, 'multiplechoiceexample.html')
