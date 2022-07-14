@@ -340,7 +340,7 @@ def generateOpenAssemblerQuestions(request):
                     OptimizedAnswer=AssemblerQuestion.OptimizedSolution
                 )
                 useranswer.save()
-                return render(request, 'openassembler.html', {'message': answer_text, 'correct': correct})
+                return redirect("/learninganalytics/assembleranalysis?t={}".format(useranswer.id))
             return render(request, 'openassembler.html', {'message': "Cannot handle your request!", 'correct': correct})
         else:
             AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]

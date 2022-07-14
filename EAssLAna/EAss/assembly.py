@@ -1,4 +1,4 @@
-INST = ['MOV', 'ADD', 'SUB', 'INC', 'DEC'] #'JMP', 'JNZ']
+INST = ['MOV', 'ADD', 'SUB', 'INC', 'DEC']
 
 def isStateValue(state, key):
     try:
@@ -91,6 +91,7 @@ def decfunc(command, state):
 
 def parser(programm):
     try:
+        programm = programm.replace("\r", "")
         instructionssets = []
         programm_split = []
         for statement in [i if i != '' and len(i) > 3 else None for i in str(programm).split('\n')]:
