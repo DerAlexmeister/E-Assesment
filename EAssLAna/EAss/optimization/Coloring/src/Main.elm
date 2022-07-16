@@ -140,30 +140,42 @@ update msg model =
             ( { model | state = Marking color }, Cmd.none )
 
         ( ClickKarnaugh x y, Marking color ) ->
-            case D.get color model.colors of
+            ( case D.get color model.colors of
                 Just working_set ->
-                    let
-                        new_set =
-                            S.insert ( x, y ) working_set
+                    if S.member ( x, y ) working_set then
+                        let
+                            new_set =
+                                S.remove ( x, y ) working_set
 
-                        new_coloring =
-                            S.insert color <|
-                                case D.get ( x, y ) model.colorings of
-                                    Just colors ->
-                                        colors
+                            new_coloring =
+                                D.get ( x, y ) model.colorings
+                                    |> Maybe.withDefault S.empty
+                                    |> S.remove color
+                        in
+                        { model
+                            | colors = D.insert color new_set model.colors
+                            , colorings = D.insert ( x, y ) new_coloring model.colorings
+                        }
 
-                                    Nothing ->
-                                        S.empty
-                    in
-                    ( { model
-                        | colors = D.insert color new_set model.colors
-                        , colorings = D.insert ( x, y ) new_coloring model.colorings
-                      }
-                    , Cmd.none
-                    )
+                    else
+                        let
+                            new_set =
+                                S.insert ( x, y ) working_set
+
+                            new_coloring =
+                                D.get ( x, y ) model.colorings
+                                    |> Maybe.withDefault S.empty
+                                    |> S.insert color
+                        in
+                        { model
+                            | colors = D.insert color new_set model.colors
+                            , colorings = D.insert ( x, y ) new_coloring model.colorings
+                        }
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    model
+            , Cmd.none
+            )
 
         ( FinishColoring, _ ) ->
             ( { model | state = Idle Nothing }, Cmd.none )
