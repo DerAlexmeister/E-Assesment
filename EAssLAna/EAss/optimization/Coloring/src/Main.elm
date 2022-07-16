@@ -64,12 +64,13 @@ init : Flag -> ( Model, Cmd Message )
 init flag =
     let
         ( karnaugh, cmd ) =
-            case J.decodeValue (Four.decoder (Four.decoder J.bool)) flag.karnaugh of
+            case J.decodeValue Four.karnaugh flag.karnaugh of
                 Ok k ->
                     ( k, Cmd.none )
 
-                Err _ ->
-                    ( repeat (repeat False), load flag.error_redirect )
+                Err err ->
+                    Debug.log (J.errorToString err)
+                        ( repeat (repeat False), Cmd.none )
     in
     ( { karnaugh = karnaugh
       , colors = D.empty colorName

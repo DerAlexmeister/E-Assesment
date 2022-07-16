@@ -1,14 +1,15 @@
 import pandas as pd
+from itertools import product
 
 from dataclasses import dataclass
-from typing import Set, Tuple
+from typing import Set, Tuple, List
+
 
 from ..normal_forms.normal_form import TruthTable
 
 
 def to_str(x: bool, y: bool) -> str:
     return f"{int(x)}{int(y)}"
-
 
 @dataclass
 class Karnaugh:
@@ -30,3 +31,23 @@ def fromTruthTable(formula: TruthTable) -> Karnaugh:
     for _, assignment in formula.table[formula.results==1].iterrows():
         ones.add(tuple(bool(b) for b in assignment.iloc[:4]))
     return Karnaugh(ones)
+
+
+def to_json(karnaugh: Karnaugh) -> List[str]:
+    print(karnaugh)
+    return [
+        "".join(
+            str(int(
+                tuple(bool(b) for b in x + y)\
+                in karnaugh.ones
+            ))
+            for x in [(0, 0), (0, 1), (1, 1), (0, 1)]
+        )
+        for y in [(0, 1), (0, 0), (1, 0), (1, 1)]
+    ]
+
+def from_json(json: List[str]) -> Karnaugh:
+    return Karnaugh({
+        tuple(bool(int(s)) for s in string[:4])
+        for string in json
+    })

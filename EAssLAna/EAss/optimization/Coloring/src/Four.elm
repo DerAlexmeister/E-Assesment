@@ -101,6 +101,21 @@ toList four =
     [ four.zero, four.one, four.two, four.three ]
 
 
+fromList : List a -> Maybe (Four a)
+fromList l =
+    case l of
+        [ zero, one, two, three ] ->
+            Just
+                { zero = zero
+                , one = one
+                , two = two
+                , three = three
+                }
+
+        _ ->
+            Nothing
+
+
 toInt : Index -> Int
 toInt index =
     case index of
@@ -119,20 +134,65 @@ toInt index =
 
 encode : (a -> E.Value) -> Four a -> E.Value
 encode e four =
-    let
-        keys =
-            [ "0", "1", "2", "3" ]
-    in
     toList four
-        |> List.map e
-        |> List.map2 Tuple.pair keys
-        |> E.object
+        |> E.list e
 
 
 decoder : D.Decoder a -> D.Decoder (Four a)
 decoder a =
+    D.list a
+        |> D.map fromList
+        |> D.andThen
+            (\parsed ->
+                case parsed of
+                    Just four ->
+                        D.succeed four
+
+                    Nothing ->
+                        D.fail "There must be exactly four elements in this List!"
+            )
+
+
+charToBool : Char -> D.Decoder Bool
+charToBool c =
+    case c of
+        '0' ->
+            D.succeed False
+
+        '1' ->
+            D.succeed True
+
+        _ ->
+            D.fail "Char must be 0 or 1!"
+
+
+stackDecoder : Four Char -> D.Decoder (Four Bool)
+stackDecoder four =
     D.map4 Four
-        (D.field "0" a)
-        (D.field "1" a)
-        (D.field "2" a)
-        (D.field "3" a)
+        (charToBool four.zero)
+        (charToBool four.one)
+        (charToBool four.two)
+        (charToBool four.three)
+
+
+listDecoder : List a -> D.Decoder (Four a)
+listDecoder list =
+    case fromList list of
+        Just four ->
+            D.succeed four
+
+        Nothing ->
+            D.fail "There must be exactly four elements in this List!"
+
+
+karnaughRow : D.Decoder (Four Bool)
+karnaughRow =
+    D.string
+        |> D.map String.toList
+        |> D.andThen listDecoder
+        |> D.andThen stackDecoder
+
+
+karnaugh : D.Decoder Karnaugh
+karnaugh =
+    decoder karnaughRow
