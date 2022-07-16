@@ -3,9 +3,6 @@ import random
 SIGNS = [True, False]
 
 
-def minimalByConstruction(variables, num_gates):
-    pass
-
 def checkResolution(monom, gates):
     for gate in gates:
         diff = monom.symmetric_difference(gate)
@@ -67,3 +64,33 @@ def chooseAnd(monom, literals, gates):
                 continue
 
     return None
+
+
+
+def chooseOr(literals, gates, num_ors: int):
+    if len(gates) >= num_ors:
+        return gates
+
+    tabu = gates.copy()
+    while True:
+        monom = chooseAnd(set(), literals, tabu)
+        if monom is None:
+            return None
+
+        gates.append(monom)
+        result = chooseOr(literals, gates, num_ors)
+        if result:
+            return result
+
+        tabu.append(gates.pop(-1))
+
+
+def  minimalByConstruction(variables, num_ors):
+    literals = {
+        (sign, var)
+        for var in variables
+        for sign in SIGNS
+    }
+
+    gates = []
+    return chooseOr(literals, gates, num_ors)
