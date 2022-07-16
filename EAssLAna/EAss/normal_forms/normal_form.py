@@ -57,6 +57,9 @@ class Literal:
         else:
             return f"-{self.variable}"
 
+    def __hash__(self) -> int:
+        return hash(self.variable) + hash(self.sign)
+
 
 def normalise_clause(clause):
     return list(sorted(clause))

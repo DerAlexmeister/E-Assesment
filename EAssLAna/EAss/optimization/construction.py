@@ -1,6 +1,40 @@
 import random
+import numpy as np
+
+from dataclasses import dataclass
+from typing import Optional, Set, List
+
+from ..normal_forms.normal_form import Literal
 
 SIGNS = [True, False]
+
+
+@dataclass
+class MinimalFunction:
+    variables: List[str]
+    gates: List[Set[Literal]]
+
+    def evaluate(self):
+        num_bits =  len(self.variables)
+        num_input = 2**num_bits
+        numbers = np.arange(num_input, dtype=np.uint8)
+
+        bits = np.unpackbits(numbers[:, np.newaxis], axis=1)[:, -num_bits:]
+        positions = {v: i for i, v in enumerate(self.variables)}
+        results = np.zeros(len(bits), dtype=bits.dtype)
+
+        for gate in self.gates:
+            table = bits.copy()
+            indices = np.zeros(len(gate), dtype=int)
+            for j, lit in enumerate(gate):
+                index = positions[lit.variable]
+                indices[j] = index
+                if not lit.sign:
+                    table[:, index] = np.logical_not(table[:, index])
+            result = np.array(np.all(table[:, indices], axis=1), dtype=bits.dtype)
+            results = np.logical_or(results, result)
+
+        return results
 
 
 def checkResolution(monom, gates):
@@ -13,6 +47,7 @@ def checkResolution(monom, gates):
                 return True
     return False
 
+
 def subsumes(monom, gates):
     differences = set()
     for gate in gates:
@@ -20,11 +55,13 @@ def subsumes(monom, gates):
             differences.update(gate.difference(monom))
     return differences
 
+
 def isSubsumed(monom, gates):
     for gate in gates:
         if monom.issuperset(gate):
             return True
     return False
+
 
 def chooseAnd(monom, literals, gates):
     literals = literals.copy()
@@ -66,7 +103,6 @@ def chooseAnd(monom, literals, gates):
     return None
 
 
-
 def chooseOr(literals, gates, num_ors: int):
     if len(gates) >= num_ors:
         return gates
@@ -85,12 +121,19 @@ def chooseOr(literals, gates, num_ors: int):
         tabu.append(gates.pop(-1))
 
 
-def  minimalByConstruction(variables, num_ors):
+def minimalByConstruction(variables, num_ors) -> Optional[MinimalFunction]:
     literals = {
         (sign, var)
         for var in variables
         for sign in SIGNS
     }
 
-    gates = []
-    return chooseOr(literals, gates, num_ors)
+    gates = chooseOr(literals, [], num_ors)
+    if gates:
+        return MinimalFunction(
+            variables,
+            [
+                {Literal(var, sign) for sign, var in gate}
+                for gate in gates
+            ]
+        )
