@@ -151,6 +151,22 @@ class MiniAssembler():
     def getStates(self):
         return self.states
 
+    def getLastStates(self):
+        try:
+            lastworkingstate = 0
+            for i, e in enumerate(self.states):
+                if None not in e.keys():
+                    lastworkingstate = i
+                else:
+                    break
+            laststate = self.states[lastworkingstate]
+            for _, v in laststate.items(): 
+                if isinstance(v, dict):
+                    return v
+        except Exception as error:
+            print(error)
+        return {}
+
     def hasError(self):
         return self.error is not None
 

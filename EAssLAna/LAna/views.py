@@ -79,16 +79,19 @@ def handleAssemblerAnalytics(request):
                         else:
                             stateequal.append(False)
             for i, v in enumerate(stateequal):
-                u_states[i]['Com'] = v 
+                u_states[i]['Com'] = v
             list_of_user_inst, list_of_opt_inst = len(u_parsed.getCode()), len(o_parsed.getCode())
-            #number_of_used_reg_user, number_of_used_reg_user =
+            number_of_used_reg_user, number_of_used_reg_opt = len(u_parsed.getLastStates()), len(o_parsed.getLastStates())
             data = {
                 "AssemblerAnswer": answer, 
                 "States": zip(o_status, u_states), 
                 "MissingInstructions": u_missing, 
                 "ExecutionTime": (execution_time_user, execute_time_opt),
                 "InstructionCycles": (list_of_user_inst*5, list_of_opt_inst*5),
-                #"NumberOfUsedRegs": (,)
+                "NumberOfUsedRegs": [number_of_used_reg_user, number_of_used_reg_opt],
+                "NumberOfUsedRegsLabels": ["User", "Solution"],
+                "NumberOfUsedInst": [list_of_user_inst, list_of_opt_inst],
+                "NumberOfUsedInstLabel": ["User", "Solution"],
                 }
             return render(request, 'assemblerdetails.html', data)
         else:

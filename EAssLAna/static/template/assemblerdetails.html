@@ -27,17 +27,9 @@
       </p>
       <div class="collapse show" id="general" style="padding-bottom: 10px">
         <div class="card card-body">
-            <h3>Feedback overview</h3>
-            
+            <h3 style="padding-bottom: 10px;">🧭 Feedback overview</h3>
             <hr>
-            <h4>Instruction-usage-feedback</h4>
-            <div class="card">
-                <div class="card-body">
-                  {{ExecutionTime.0}}
-                </div>
-              </div>
-            <hr>
-            <h4>Instruction-usage-feedback</h4>
+            <h4 style="padding-bottom: 20px;">📌 Instruction-usage-feedback</h4>
             {% if MissingInstructions|length > 0 %}
                 <div class="alert alert-dark" role="alert">
                     <i  style="padding-top: 10px;">The following instructions are not part of your answer: </i><br><br>
@@ -53,11 +45,32 @@
                     No instructions are missing!
                 </div>
             {% endif %}
+            <hr>
+            <h4 style="padding-bottom: 20px;">📌 Register-usage-feedback</h4>
+            <div class="alert alert-secondary" role="alert">
+                You can get feedback about the register usage of your programm compared to the offical solution.
+              </div>
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="Register-usage-feedback" width="400px" height="100px"></canvas>
+                </div>
+              </div>
+            <hr>
+            <h4 style="padding-bottom: 20px;">📌 Instruction-usage-feedback</h4>
+            <div class="alert alert-secondary" role="alert">
+                You can get feedback about the register usage of your programm compared to the offical solution.
+              </div>
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="Instruction-usage-feedback" width="400px" height="100px"></canvas>
+                </div>
+              </div>
+            <hr>
         </div>
       </div>
       <div class="collapse" id="debugger" style="padding-bottom: 10px;">
         <div class="card card-body">
-            <h3>Execution-flow-feedback</h3>
+            <h3>🏃‍♂️ Execution-flow-feedback</h3>
             <div class="row" style="padding-top: 10px;">
                 <div class="col-sm-6">
                 <div class="card" style="border-color: #3a3b3b;">
@@ -83,10 +96,13 @@
                         <div class="card" style="border-color: #00d055; border-width: 2.5px;padding: 10px;">
                             {% for k, v in state1.items %}
                                 <div class="card-body">
-                                    <h5 class="card-title">{{k}}</h5>
-                                    {% for register, value in v.items %}
-                                        <span>{{register}}: {{value}}</span><br>
-                                    {% endfor %}
+                                    <h5 class="card-title">👉 {{k|default_if_none:"There is nothing more"}}</h5>
+                                    {% if k != None %}
+                                        <hr>
+                                        {% for register, value in v.items %}
+                                            <span>🗃️ {{register}}: {{value}}</span><br>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -106,12 +122,13 @@
                                 {% endif %}
                                         <div class="card-body">
                                             {% if k != None %}
-                                                <h5 class="card-title">{{k}}</h5>
+                                                <h5 class="card-title">👉 {{k}}</h5>
+                                                <hr>
                                                 {% for register, value in v.items %}
-                                                    <span>{{register}}: {{value}}</span><br>
+                                                    <span>🗃️ {{register}}: {{value}}</span><br>
                                                 {% endfor %}
                                             {% else %}
-                                                <h5 class="card-title">-</h5>
+                                                <h5 class="card-title">⁉️</h5>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -124,4 +141,67 @@
         </div>
       </div>
 </div>
+
+<script>
+
+        window.onload = function() {
+            window.myPie = new Chart(document.getElementById("Register-usage-feedback"), {
+                    type: 'bar',
+                    data: {
+                    labels: {{NumberOfUsedRegsLabels|safe}},
+                    datasets: [
+                        {
+                        label: "Number of used registers compared between the user and the official solution",
+                        backgroundColor: ["#bad000", "#00d06e"],
+                        data: {{NumberOfUsedRegs|safe}}
+                        }
+                    ]
+                    },
+                    options: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Number of used registers compared between the user and the official solution'
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+
+                window.myPie = new Chart(document.getElementById("Instruction-usage-feedback"), {
+                    type: 'bar',
+                    data: {
+                    labels: {{NumberOfUsedInstLabel|safe}},
+                    datasets: [
+                        {
+                        label: "Number of used instructions compared between the user and the official solution",
+                        backgroundColor: ["#bad000", "#00d06e"],
+                        data: {{NumberOfUsedInst|safe}}
+                        }
+                    ]
+                    },
+                    options: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Number of used instructions compared between the user and the official solution'
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+        };
+  </script>
 {% endblock %}
