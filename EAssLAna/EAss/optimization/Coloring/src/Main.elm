@@ -186,7 +186,7 @@ update msg model =
                 { method = "POST"
                 , headers = [ Http.header "X-CSRFToken" model.token ]
                 , url = "http://127.0.0.1:8000/eassessments/coloring"
-                , body = Http.jsonBody <| encodeColoring model.colors
+                , body = Http.jsonBody <| encodeResult <| Result model.karnaugh model.colors
                 , expect = Http.expectWhatever <| \_ -> Submitted
                 , timeout = Nothing
                 , tracker = Nothing
@@ -524,3 +524,17 @@ encodeSelection =
 encodeColoring : D.AnyDict String Color Selection -> E.Value
 encodeColoring =
     D.encode colorName encodeSelection
+
+
+type alias Result =
+    { problem : Karnaugh
+    , coloring : D.AnyDict String Color Selection
+    }
+
+
+encodeResult : Result -> E.Value
+encodeResult result =
+    E.object
+        [ ( "problem", Four.encodeKarnaugh result.problem )
+        , ( "coloring", encodeColoring result.coloring )
+        ]

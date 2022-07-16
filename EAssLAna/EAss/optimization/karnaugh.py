@@ -7,6 +7,8 @@ from typing import Set, Tuple, List
 
 from ..normal_forms.normal_form import TruthTable
 
+X = [(0, 0), (0, 1), (1, 1), (0, 1)]
+Y = [(0, 1), (1, 1), (1, 0), (0, 0)]
 
 def to_str(x: bool, y: bool) -> str:
     return f"{int(x)}{int(y)}"
@@ -17,7 +19,7 @@ class Karnaugh:
 
     def __repr__(self) -> str:
         x = ["00", "01", "11", "10"]
-        y = ["01", "00", "10", "11"]
+        y = ["01", "11", "10", "00"]
 
 
         data = pd.DataFrame(0, index=y, columns=x)
@@ -34,20 +36,21 @@ def fromTruthTable(formula: TruthTable) -> Karnaugh:
 
 
 def to_json(karnaugh: Karnaugh) -> List[str]:
-    print(karnaugh)
     return [
         "".join(
             str(int(
                 tuple(bool(b) for b in x + y)\
                 in karnaugh.ones
             ))
-            for x in [(0, 0), (0, 1), (1, 1), (0, 1)]
+            for x in X
         )
-        for y in [(0, 1), (0, 0), (1, 0), (1, 1)]
+        for y in Y
     ]
 
 def from_json(json: List[str]) -> Karnaugh:
     return Karnaugh({
-        tuple(bool(int(s)) for s in string[:4])
-        for string in json
+        tuple(bool(b) for b in x + y)
+        for string, y in zip(json[:4], Y)
+        for c, x in zip(string[:4], X)
+        if c == '1'
     })

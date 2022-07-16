@@ -196,3 +196,24 @@ karnaughRow =
 karnaugh : D.Decoder Karnaugh
 karnaugh =
     decoder karnaughRow
+
+
+encodeKarnaughRow : Four Bool -> E.Value
+encodeKarnaughRow four =
+    four
+        |> map
+            (\b ->
+                if b then
+                    '1'
+
+                else
+                    '0'
+            )
+        |> toList
+        |> String.fromList
+        |> E.string
+
+
+encodeKarnaugh : Karnaugh -> E.Value
+encodeKarnaugh =
+    encode encodeKarnaughRow
