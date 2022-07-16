@@ -40,7 +40,6 @@ from random import sample
 
 from .core import generateNumbers
 from .assembly import parser
-from .assembly import createcircuit
 
 from . import cloze as c
 
