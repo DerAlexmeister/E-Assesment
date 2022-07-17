@@ -132,6 +132,25 @@ toInt index =
             3
 
 
+fromInt : Int -> Maybe Index
+fromInt index =
+    case index of
+        0 ->
+            Just Zero
+
+        1 ->
+            Just One
+
+        2 ->
+            Just Two
+
+        3 ->
+            Just Three
+
+        _ ->
+            Nothing
+
+
 encode : (a -> E.Value) -> Four a -> E.Value
 encode e four =
     toList four
@@ -217,3 +236,10 @@ encodeKarnaughRow four =
 encodeKarnaugh : Karnaugh -> E.Value
 encodeKarnaugh =
     encode encodeKarnaughRow
+
+
+decodeIndex : Int -> D.Decoder Index
+decodeIndex int =
+    fromInt int
+        |> Maybe.map D.succeed
+        |> Maybe.withDefault (D.fail "Index must be between 0 and 3!")

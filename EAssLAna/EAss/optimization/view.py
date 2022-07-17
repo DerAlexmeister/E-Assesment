@@ -1,6 +1,8 @@
 import json
+from sys import flags
 
 from django.http.response import HttpResponse
+from django.http import JsonResponse
 
 from django.shortcuts import redirect, render
 
@@ -10,11 +12,8 @@ from .construction import minimalByConstruction
 from .karnaugh import fromTruthTable, to_json, from_json
 from ..normal_forms.normal_form import TruthTable
 
+
 COLORS = frozenset({"red", "blue", "green"})
-
-
-class Karnaugh:
-    pass
 
 
 
@@ -25,10 +24,9 @@ def coloring(request):
         data = json.loads(request.body)
 
         karnaugh = from_json(data["problem"])
+        coloring = data["coloring"]
 
-        return render(request, 'mapcoloring.html', {
-            "karnaugh": to_json(karnaugh)
-        })
+        return HttpResponse("Good!")
 
     else:
         variables = ["a", "b", "c", "d"]
@@ -36,8 +34,13 @@ def coloring(request):
         table = TruthTable.create(variables, "f", function)
 
         karnaugh = fromTruthTable(table)
+        flags = {
+            "input" : {
+                "karnaugh": to_json(karnaugh),
+            }
+        }
         return render(request, 'mapcoloring.html', {
-            "karnaugh": to_json(karnaugh)
+            "flags": flags
         })
 
 def optimization(request):

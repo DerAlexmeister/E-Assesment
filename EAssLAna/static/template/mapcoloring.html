@@ -3,20 +3,18 @@
     <head>
         {% load static %}
         <script src={% static "template/mapcoloring.js" %}></script>
-        {{ karnaugh|json_script:"karnaugh" }}
+        {{ flags|json_script:"flags" }}
     </head>
     <body>
-        <div><h1>Hello</h1></div>
+        <div><h1>Optimization</h1></div>
         <div id="coloring"></div>
         <script>
-            karnaugh = JSON.parse(document.getElementById('karnaugh').textContent);
+            flags = JSON.parse(document.getElementById('flags').textContent);
+            flags["token"] = "{{csrf_token}}"
             var app = Elm.Main.init({
                 node: document.getElementById('coloring'),
-                flags: {
-                    "karnaugh": karnaugh,
-                    "error_redirect": "localhost",
-                    "token": "{{csrf_token}}"
-            }});
+                flags: flags
+            });
         </script>
     </body>
 </html>

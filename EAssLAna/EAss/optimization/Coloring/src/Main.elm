@@ -4,7 +4,7 @@ import Browser
 import Browser.Navigation exposing (load)
 import Dict.Any as D
 import EverySet as S
-import Four exposing (Four, Index(..), Karnaugh, enumFour, get2d, repeat, toInt)
+import Four exposing (Four, Index(..), Karnaugh, decodeIndex, enumFour, get2d, repeat, toInt)
 import Html exposing (Html, button, div, p, table, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
@@ -12,6 +12,10 @@ import Http
 import Json.Decode as J exposing (index)
 import Json.Encode as E
 import List as L
+
+
+host =
+    "http://127.0.0.1:8000/eassessments/coloring"
 
 
 type State
@@ -30,6 +34,7 @@ type alias Model =
     , state : State
     , variables : Four String
     , token : String
+    , response : Maybe String
     }
 
 
@@ -40,12 +45,11 @@ type Message
     | FinishColoring
     | SelectColor Color
     | Submit
-    | Submitted
+    | Submitted String
 
 
 type alias Flag =
-    { karnaugh : J.Value
-    , error_redirect : String
+    { input : J.Value
     , token : String
     }
 
@@ -63,23 +67,22 @@ main =
 init : Flag -> ( Model, Cmd Message )
 init flag =
     let
-        ( karnaugh, cmd ) =
-            case J.decodeValue Four.karnaugh flag.karnaugh of
-                Ok k ->
-                    ( k, Cmd.none )
-
-                Err err ->
-                    Debug.log (J.errorToString err)
-                        ( repeat (repeat False), Cmd.none )
+        input =
+            J.decodeValue inputDecoder flag.input
+                |> Result.withDefault
+                    { problem = repeat (repeat False)
+                    , coloring = D.empty colorName
+                    }
     in
-    ( { karnaugh = karnaugh
-      , colors = D.empty colorName
-      , colorings = D.empty (\( x, y ) -> ( toInt x, toInt y ))
+    ( { karnaugh = input.problem
+      , colors = input.coloring
+      , colorings = deriveColoring input.coloring
       , state = Idle Nothing
       , variables = Four "x1" "x2" "x3" "x4"
       , token = flag.token
+      , response = Nothing
       }
-    , cmd
+    , Cmd.none
     )
 
 
@@ -185,13 +188,24 @@ update msg model =
             , Http.request
                 { method = "POST"
                 , headers = [ Http.header "X-CSRFToken" model.token ]
-                , url = "http://127.0.0.1:8000/eassessments/coloring"
-                , body = Http.jsonBody <| encodeResult <| Result model.karnaugh model.colors
-                , expect = Http.expectWhatever <| \_ -> Submitted
+                , url = host
+                , body = Http.jsonBody <| encodeSubmission <| Submission model.karnaugh model.colors
+                , expect =
+                    Http.expectString <|
+                        \response ->
+                            case response of
+                                Ok str ->
+                                    Submitted str
+
+                                Err _ ->
+                                    Submitted "An error occurred!"
                 , timeout = Nothing
                 , tracker = Nothing
                 }
             )
+
+        ( Submitted response, _ ) ->
+            ( { model | response = Just response }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -331,6 +345,7 @@ view model =
             , removeColorButton model
             , finishColoringButton model
             , Just <| button [ onClick Submit ] [ text "Submit" ]
+            , Maybe.map text model.response
             ]
 
 
@@ -497,7 +512,7 @@ enumColors =
 
 
 subscriptions : Model -> Sub Message
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -508,12 +523,29 @@ encodeSet a set =
         |> E.list a
 
 
+decodeSet : J.Decoder a -> J.Decoder (S.EverySet a)
+decodeSet a =
+    J.map S.fromList <|
+        J.list a
+
+
 encodeIndexPair : ( Index, Index ) -> E.Value
 encodeIndexPair ( x, y ) =
-    E.object
-        [ ( "first", E.int <| toInt x )
-        , ( "second", E.int <| toInt y )
-        ]
+    [ x, y ]
+        |> List.map toInt
+        |> E.list E.int
+
+
+decodeIndexPair : List Int -> J.Decoder ( Index, Index )
+decodeIndexPair list =
+    case list of
+        [ i, j ] ->
+            J.map2 Tuple.pair
+                (decodeIndex i)
+                (decodeIndex j)
+
+        _ ->
+            J.fail "Index pair should only have two elements"
 
 
 encodeSelection : Selection -> E.Value
@@ -521,20 +553,80 @@ encodeSelection =
     encodeSet encodeIndexPair
 
 
+decodeSelection : J.Decoder Selection
+decodeSelection =
+    decodeSet <|
+        J.andThen decodeIndexPair <|
+            J.list J.int
+
+
 encodeColoring : D.AnyDict String Color Selection -> E.Value
 encodeColoring =
     D.encode colorName encodeSelection
 
 
-type alias Result =
+nameToColor : String -> Result String Color
+nameToColor color =
+    case color of
+        "red" ->
+            Ok Red
+
+        "Green" ->
+            Ok Green
+
+        "blue" ->
+            Ok Blue
+
+        "purple" ->
+            Ok Purple
+
+        _ ->
+            Err "Unknown color!"
+
+
+coloringDecoder : J.Decoder (D.AnyDict String Color Selection)
+coloringDecoder =
+    D.decode_ (\str _ -> nameToColor str)
+        colorName
+        decodeSelection
+
+
+deriveColoring : D.AnyDict String Color Selection -> D.AnyDict ( Int, Int ) ( Index, Index ) (S.EverySet Color)
+deriveColoring colors =
+    D.foldl
+        (\color indices dict ->
+            S.foldl
+                (\index d ->
+                    D.get index d
+                        |> Maybe.withDefault S.empty
+                        |> S.insert color
+                        |> (\s -> D.insert index s d)
+                )
+                dict
+                indices
+        )
+        (D.empty (\( x, y ) -> ( toInt x, toInt y )))
+        colors
+
+
+type alias Submission =
     { problem : Karnaugh
     , coloring : D.AnyDict String Color Selection
     }
 
 
-encodeResult : Result -> E.Value
-encodeResult result =
+encodeSubmission : Submission -> E.Value
+encodeSubmission result =
     E.object
         [ ( "problem", Four.encodeKarnaugh result.problem )
         , ( "coloring", encodeColoring result.coloring )
         ]
+
+
+inputDecoder : J.Decoder Submission
+inputDecoder =
+    J.map2 Submission
+        (J.field "karnaugh" Four.karnaugh)
+        (J.maybe (J.field "coloring" coloringDecoder)
+            |> J.map (Maybe.withDefault <| D.empty colorName)
+        )

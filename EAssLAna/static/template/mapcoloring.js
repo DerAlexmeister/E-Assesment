@@ -5343,7 +5343,6 @@ var $author$project$Four$Four = F4(
 var $author$project$Main$Idle = function (a) {
 	return {$: 'Idle', a: a};
 };
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Main$colorName = function (c) {
 	switch (c.$) {
 		case 'Red':
@@ -5357,16 +5356,6 @@ var $author$project$Main$colorName = function (c) {
 	}
 };
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Four$decoder = function (a) {
-	return A5(
-		$elm$json$Json$Decode$map4,
-		$author$project$Four$Four,
-		A2($elm$json$Json$Decode$field, '0', a),
-		A2($elm$json$Json$Decode$field, '1', a),
-		A2($elm$json$Json$Decode$field, '2', a),
-		A2($elm$json$Json$Decode$field, '3', a));
-};
 var $turboMaCk$any_dict$Dict$Any$AnyDict = function (a) {
 	return {$: 'AnyDict', a: a};
 };
@@ -5376,270 +5365,79 @@ var $turboMaCk$any_dict$Dict$Any$empty = function (toKey) {
 	return $turboMaCk$any_dict$Dict$Any$AnyDict(
 		{dict: $elm$core$Dict$empty, toKey: toKey});
 };
-var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Four$repeat = function (a) {
-	return A4($author$project$Four$Four, a, a, a, a);
-};
-var $author$project$Four$toInt = function (index) {
-	switch (index.$) {
-		case 'Zero':
-			return 0;
-		case 'One':
-			return 1;
-		case 'Two':
-			return 2;
-		default:
-			return 3;
-	}
-};
-var $author$project$Main$init = function (flag) {
-	var _v0 = function () {
-		var _v1 = A2(
-			$elm$json$Json$Decode$decodeValue,
-			$author$project$Four$decoder(
-				$author$project$Four$decoder($elm$json$Json$Decode$bool)),
-			flag.karnaugh);
-		if (_v1.$ === 'Ok') {
-			var k = _v1.a;
-			return _Utils_Tuple2(k, $elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(
-				$author$project$Four$repeat(
-					$author$project$Four$repeat(false)),
-				$elm$browser$Browser$Navigation$load(flag.error_redirect));
-		}
-	}();
-	var karnaugh = _v0.a;
-	var cmd = _v0.b;
-	return _Utils_Tuple2(
-		{
-			colorings: $turboMaCk$any_dict$Dict$Any$empty(
-				function (_v2) {
-					var x = _v2.a;
-					var y = _v2.b;
-					return _Utils_Tuple2(
-						$author$project$Four$toInt(x),
-						$author$project$Four$toInt(y));
-				}),
-			colors: $turboMaCk$any_dict$Dict$Any$empty($author$project$Main$colorName),
-			karnaugh: karnaugh,
-			state: $author$project$Main$Idle($elm$core$Maybe$Nothing),
-			token: flag.token,
-			variables: A4($author$project$Four$Four, 'x1', 'x2', 'x3', 'x4')
-		},
-		cmd);
-};
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Main$Marking = function (a) {
-	return {$: 'Marking', a: a};
-};
-var $author$project$Main$Submitted = {$: 'Submitted'};
 var $Gizra$elm_all_set$EverySet$EverySet = function (a) {
 	return {$: 'EverySet', a: a};
 };
 var $pzp1997$assoc_list$AssocList$D = function (a) {
 	return {$: 'D', a: a};
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $pzp1997$assoc_list$AssocList$get = F2(
-	function (targetKey, _v0) {
-		get:
+var $pzp1997$assoc_list$AssocList$empty = $pzp1997$assoc_list$AssocList$D(_List_Nil);
+var $Gizra$elm_all_set$EverySet$empty = $Gizra$elm_all_set$EverySet$EverySet($pzp1997$assoc_list$AssocList$empty);
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
 		while (true) {
-			var alist = _v0.a;
-			if (!alist.b) {
-				return $elm$core$Maybe$Nothing;
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
 			} else {
-				var _v2 = alist.a;
-				var key = _v2.a;
-				var value = _v2.b;
-				var rest = alist.b;
-				if (_Utils_eq(key, targetKey)) {
-					return $elm$core$Maybe$Just(value);
-				} else {
-					var $temp$targetKey = targetKey,
-						$temp$_v0 = $pzp1997$assoc_list$AssocList$D(rest);
-					targetKey = $temp$targetKey;
-					_v0 = $temp$_v0;
-					continue get;
-				}
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
 			}
 		}
 	});
-var $pzp1997$assoc_list$AssocList$member = F2(
-	function (targetKey, dict) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$get, targetKey, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
+var $turboMaCk$any_dict$Dict$Any$foldl = F3(
+	function (f, acc, _v0) {
+		var dict = _v0.a.dict;
+		return A3(
+			$elm$core$Dict$foldl,
+			F2(
+				function (_v1, _v2) {
+					var k = _v2.a;
+					var v = _v2.b;
+					return A2(f, k, v);
+				}),
+			acc,
+			dict);
 	});
-var $elm$core$Basics$not = _Basics_not;
-var $pzp1997$assoc_list$AssocList$diff = F2(
-	function (_v0, rightDict) {
-		var leftAlist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$filter,
-				function (_v1) {
-					var key = _v1.a;
-					return !A2($pzp1997$assoc_list$AssocList$member, key, rightDict);
-				},
-				leftAlist));
-	});
-var $Gizra$elm_all_set$EverySet$diff = F2(
-	function (_v0, _v1) {
-		var d1 = _v0.a;
-		var d2 = _v1.a;
-		return $Gizra$elm_all_set$EverySet$EverySet(
-			A2($pzp1997$assoc_list$AssocList$diff, d1, d2));
-	});
-var $pzp1997$assoc_list$AssocList$empty = $pzp1997$assoc_list$AssocList$D(_List_Nil);
-var $Gizra$elm_all_set$EverySet$empty = $Gizra$elm_all_set$EverySet$EverySet($pzp1997$assoc_list$AssocList$empty);
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Tuple$mapBoth = F3(
-	function (funcA, funcB, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			funcA(x),
-			funcB(y));
-	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
+var $pzp1997$assoc_list$AssocList$foldl = F3(
+	function (func, initialResult, _v0) {
+		var alist = _v0.a;
+		return A3(
 			$elm$core$List$foldl,
 			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
+				function (_v1, result) {
+					var key = _v1.a;
+					var value = _v1.b;
+					return A3(func, key, value, result);
 				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $turboMaCk$any_dict$Dict$Any$toList = function (_v0) {
-	var dict = _v0.a.dict;
-	return $elm$core$Dict$values(dict);
-};
-var $turboMaCk$any_dict$Dict$Any$encode = F2(
-	function (keyE, valueE) {
-		return A2(
-			$elm$core$Basics$composeL,
-			A2(
-				$elm$core$Basics$composeL,
-				$elm$json$Json$Encode$object,
-				$elm$core$List$map(
-					A2($elm$core$Tuple$mapBoth, keyE, valueE))),
-			$turboMaCk$any_dict$Dict$Any$toList);
+			initialResult,
+			alist);
 	});
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Main$encodeIndexPair = function (_v0) {
-	var x = _v0.a;
-	var y = _v0.b;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'first',
-				$elm$json$Json$Encode$int(
-					$author$project$Four$toInt(x))),
-				_Utils_Tuple2(
-				'second',
-				$elm$json$Json$Encode$int(
-					$author$project$Four$toInt(y)))
-			]));
-};
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
+var $Gizra$elm_all_set$EverySet$foldl = F3(
+	function (f, b, _v0) {
+		var d = _v0.a;
+		return A3(
+			$pzp1997$assoc_list$AssocList$foldl,
+			F3(
+				function (k, _v1, result) {
+					return A2(f, k, result);
+				}),
+			b,
+			d);
 	});
-var $pzp1997$assoc_list$AssocList$keys = function (_v0) {
-	var alist = _v0.a;
-	return A2($elm$core$List$map, $elm$core$Tuple$first, alist);
-};
-var $Gizra$elm_all_set$EverySet$toList = function (_v0) {
-	var d = _v0.a;
-	return $pzp1997$assoc_list$AssocList$keys(d);
-};
-var $author$project$Main$encodeSet = F2(
-	function (a, set) {
-		return A2(
-			$elm$json$Json$Encode$list,
-			a,
-			$Gizra$elm_all_set$EverySet$toList(set));
-	});
-var $author$project$Main$encodeSelection = $author$project$Main$encodeSet($author$project$Main$encodeIndexPair);
-var $author$project$Main$encodeColoring = A2($turboMaCk$any_dict$Dict$Any$encode, $author$project$Main$colorName, $author$project$Main$encodeSelection);
-var $author$project$Main$Blue = {$: 'Blue'};
-var $author$project$Main$Green = {$: 'Green'};
-var $author$project$Main$Purple = {$: 'Purple'};
-var $author$project$Main$Red = {$: 'Red'};
-var $author$project$Main$enumColors = _List_fromArray(
-	[$author$project$Main$Red, $author$project$Main$Green, $author$project$Main$Blue, $author$project$Main$Purple]);
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
-	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
-	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
-};
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
-};
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -5671,6 +5469,32 @@ var $elm$core$Dict$get = F2(
 				}
 			}
 		}
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $turboMaCk$any_dict$Dict$Any$get = F2(
+	function (k, _v0) {
+		var dict = _v0.a.dict;
+		var toKey = _v0.a.toKey;
+		return A2(
+			$elm$core$Maybe$map,
+			$elm$core$Tuple$second,
+			A2(
+				$elm$core$Dict$get,
+				toKey(k),
+				dict));
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
@@ -5780,6 +5604,636 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
+var $turboMaCk$any_dict$Dict$Any$insert = F3(
+	function (k, v, _v0) {
+		var inner = _v0.a;
+		return $turboMaCk$any_dict$Dict$Any$AnyDict(
+			_Utils_update(
+				inner,
+				{
+					dict: A3(
+						$elm$core$Dict$insert,
+						inner.toKey(k),
+						_Utils_Tuple2(k, v),
+						inner.dict)
+				}));
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $pzp1997$assoc_list$AssocList$remove = F2(
+	function (targetKey, _v0) {
+		var alist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$filter,
+				function (_v1) {
+					var key = _v1.a;
+					return !_Utils_eq(key, targetKey);
+				},
+				alist));
+	});
+var $pzp1997$assoc_list$AssocList$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
+		var alteredAlist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(key, value),
+				alteredAlist));
+	});
+var $Gizra$elm_all_set$EverySet$insert = F2(
+	function (k, _v0) {
+		var d = _v0.a;
+		return $Gizra$elm_all_set$EverySet$EverySet(
+			A3($pzp1997$assoc_list$AssocList$insert, k, _Utils_Tuple0, d));
+	});
+var $author$project$Four$toInt = function (index) {
+	switch (index.$) {
+		case 'Zero':
+			return 0;
+		case 'One':
+			return 1;
+		case 'Two':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$deriveColoring = function (colors) {
+	return A3(
+		$turboMaCk$any_dict$Dict$Any$foldl,
+		F3(
+			function (color, indices, dict) {
+				return A3(
+					$Gizra$elm_all_set$EverySet$foldl,
+					F2(
+						function (index, d) {
+							return function (s) {
+								return A3($turboMaCk$any_dict$Dict$Any$insert, index, s, d);
+							}(
+								A2(
+									$Gizra$elm_all_set$EverySet$insert,
+									color,
+									A2(
+										$elm$core$Maybe$withDefault,
+										$Gizra$elm_all_set$EverySet$empty,
+										A2($turboMaCk$any_dict$Dict$Any$get, index, d))));
+						}),
+					dict,
+					indices);
+			}),
+		$turboMaCk$any_dict$Dict$Any$empty(
+			function (_v0) {
+				var x = _v0.a;
+				var y = _v0.b;
+				return _Utils_Tuple2(
+					$author$project$Four$toInt(x),
+					$author$project$Four$toInt(y));
+			}),
+		colors);
+};
+var $author$project$Main$Submission = F2(
+	function (problem, coloring) {
+		return {coloring: coloring, problem: problem};
+	});
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$Four$One = {$: 'One'};
+var $author$project$Four$Three = {$: 'Three'};
+var $author$project$Four$Two = {$: 'Two'};
+var $author$project$Four$Zero = {$: 'Zero'};
+var $author$project$Four$fromInt = function (index) {
+	switch (index) {
+		case 0:
+			return $elm$core$Maybe$Just($author$project$Four$Zero);
+		case 1:
+			return $elm$core$Maybe$Just($author$project$Four$One);
+		case 2:
+			return $elm$core$Maybe$Just($author$project$Four$Two);
+		case 3:
+			return $elm$core$Maybe$Just($author$project$Four$Three);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Four$decodeIndex = function (_int) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$elm$json$Json$Decode$fail('Index must be between 0 and 3!'),
+		A2(
+			$elm$core$Maybe$map,
+			$elm$json$Json$Decode$succeed,
+			$author$project$Four$fromInt(_int)));
+};
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $author$project$Main$decodeIndexPair = function (list) {
+	if ((list.b && list.b.b) && (!list.b.b.b)) {
+		var i = list.a;
+		var _v1 = list.b;
+		var j = _v1.a;
+		return A3(
+			$elm$json$Json$Decode$map2,
+			$elm$core$Tuple$pair,
+			$author$project$Four$decodeIndex(i),
+			$author$project$Four$decodeIndex(j));
+	} else {
+		return $elm$json$Json$Decode$fail('Index pair should only have two elements');
+	}
+};
+var $Gizra$elm_all_set$EverySet$fromList = function (xs) {
+	return A3($elm$core$List$foldl, $Gizra$elm_all_set$EverySet$insert, $Gizra$elm_all_set$EverySet$empty, xs);
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$decodeSet = function (a) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$Gizra$elm_all_set$EverySet$fromList,
+		$elm$json$Json$Decode$list(a));
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $author$project$Main$decodeSelection = $author$project$Main$decodeSet(
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$author$project$Main$decodeIndexPair,
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$int)));
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $turboMaCk$any_dict$Dict$Any$decode_ = F3(
+	function (fromStr, toComparable, valueD) {
+		var construct = F2(
+			function (strK, v) {
+				return $elm$core$Result$andThen(
+					function (acc) {
+						return A2(
+							$elm$core$Result$map,
+							function (key) {
+								return A3($turboMaCk$any_dict$Dict$Any$insert, key, v, acc);
+							},
+							A2(fromStr, strK, v));
+					});
+			});
+		return A2(
+			$elm$json$Json$Decode$andThen,
+			function (res) {
+				if (res.$ === 'Ok') {
+					var val = res.a;
+					return $elm$json$Json$Decode$succeed(val);
+				} else {
+					var err = res.a;
+					return $elm$json$Json$Decode$fail(err);
+				}
+			},
+			A2(
+				$elm$json$Json$Decode$map,
+				A2(
+					$elm$core$Dict$foldr,
+					construct,
+					$elm$core$Result$Ok(
+						$turboMaCk$any_dict$Dict$Any$empty(toComparable))),
+				$elm$json$Json$Decode$dict(valueD)));
+	});
+var $author$project$Main$Blue = {$: 'Blue'};
+var $author$project$Main$Green = {$: 'Green'};
+var $author$project$Main$Purple = {$: 'Purple'};
+var $author$project$Main$Red = {$: 'Red'};
+var $author$project$Main$nameToColor = function (color) {
+	switch (color) {
+		case 'red':
+			return $elm$core$Result$Ok($author$project$Main$Red);
+		case 'Green':
+			return $elm$core$Result$Ok($author$project$Main$Green);
+		case 'blue':
+			return $elm$core$Result$Ok($author$project$Main$Blue);
+		case 'purple':
+			return $elm$core$Result$Ok($author$project$Main$Purple);
+		default:
+			return $elm$core$Result$Err('Unknown color!');
+	}
+};
+var $author$project$Main$coloringDecoder = A3(
+	$turboMaCk$any_dict$Dict$Any$decode_,
+	F2(
+		function (str, _v0) {
+			return $author$project$Main$nameToColor(str);
+		}),
+	$author$project$Main$colorName,
+	$author$project$Main$decodeSelection);
+var $author$project$Four$fromList = function (l) {
+	if ((((l.b && l.b.b) && l.b.b.b) && l.b.b.b.b) && (!l.b.b.b.b.b)) {
+		var zero = l.a;
+		var _v1 = l.b;
+		var one = _v1.a;
+		var _v2 = _v1.b;
+		var two = _v2.a;
+		var _v3 = _v2.b;
+		var three = _v3.a;
+		return $elm$core$Maybe$Just(
+			{one: one, three: three, two: two, zero: zero});
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Four$decoder = function (a) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (parsed) {
+			if (parsed.$ === 'Just') {
+				var four = parsed.a;
+				return $elm$json$Json$Decode$succeed(four);
+			} else {
+				return $elm$json$Json$Decode$fail('There must be exactly four elements in this List!');
+			}
+		},
+		A2(
+			$elm$json$Json$Decode$map,
+			$author$project$Four$fromList,
+			$elm$json$Json$Decode$list(a)));
+};
+var $author$project$Four$listDecoder = function (list) {
+	var _v0 = $author$project$Four$fromList(list);
+	if (_v0.$ === 'Just') {
+		var four = _v0.a;
+		return $elm$json$Json$Decode$succeed(four);
+	} else {
+		return $elm$json$Json$Decode$fail('There must be exactly four elements in this List!');
+	}
+};
+var $author$project$Four$charToBool = function (c) {
+	switch (c.valueOf()) {
+		case '0':
+			return $elm$json$Json$Decode$succeed(false);
+		case '1':
+			return $elm$json$Json$Decode$succeed(true);
+		default:
+			return $elm$json$Json$Decode$fail('Char must be 0 or 1!');
+	}
+};
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Four$stackDecoder = function (four) {
+	return A5(
+		$elm$json$Json$Decode$map4,
+		$author$project$Four$Four,
+		$author$project$Four$charToBool(four.zero),
+		$author$project$Four$charToBool(four.one),
+		$author$project$Four$charToBool(four.two),
+		$author$project$Four$charToBool(four.three));
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $author$project$Four$karnaughRow = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$Four$stackDecoder,
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$author$project$Four$listDecoder,
+		A2($elm$json$Json$Decode$map, $elm$core$String$toList, $elm$json$Json$Decode$string)));
+var $author$project$Four$karnaugh = $author$project$Four$decoder($author$project$Four$karnaughRow);
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$Main$inputDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Main$Submission,
+	A2($elm$json$Json$Decode$field, 'karnaugh', $author$project$Four$karnaugh),
+	A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Maybe$withDefault(
+			$turboMaCk$any_dict$Dict$Any$empty($author$project$Main$colorName)),
+		$elm$json$Json$Decode$maybe(
+			A2($elm$json$Json$Decode$field, 'coloring', $author$project$Main$coloringDecoder))));
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Four$repeat = function (a) {
+	return A4($author$project$Four$Four, a, a, a, a);
+};
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
+var $author$project$Main$init = function (flag) {
+	var input = A2(
+		$elm$core$Result$withDefault,
+		{
+			coloring: $turboMaCk$any_dict$Dict$Any$empty($author$project$Main$colorName),
+			problem: $author$project$Four$repeat(
+				$author$project$Four$repeat(false))
+		},
+		A2($elm$json$Json$Decode$decodeValue, $author$project$Main$inputDecoder, flag.input));
+	return _Utils_Tuple2(
+		{
+			colorings: $author$project$Main$deriveColoring(input.coloring),
+			colors: input.coloring,
+			karnaugh: input.problem,
+			response: $elm$core$Maybe$Nothing,
+			state: $author$project$Main$Idle($elm$core$Maybe$Nothing),
+			token: flag.token,
+			variables: A4($author$project$Four$Four, 'x1', 'x2', 'x3', 'x4')
+		},
+		$elm$core$Platform$Cmd$none);
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Main$Marking = function (a) {
+	return {$: 'Marking', a: a};
+};
+var $author$project$Main$Submitted = function (a) {
+	return {$: 'Submitted', a: a};
+};
+var $pzp1997$assoc_list$AssocList$get = F2(
+	function (targetKey, _v0) {
+		get:
+		while (true) {
+			var alist = _v0.a;
+			if (!alist.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v2 = alist.a;
+				var key = _v2.a;
+				var value = _v2.b;
+				var rest = alist.b;
+				if (_Utils_eq(key, targetKey)) {
+					return $elm$core$Maybe$Just(value);
+				} else {
+					var $temp$targetKey = targetKey,
+						$temp$_v0 = $pzp1997$assoc_list$AssocList$D(rest);
+					targetKey = $temp$targetKey;
+					_v0 = $temp$_v0;
+					continue get;
+				}
+			}
+		}
+	});
+var $pzp1997$assoc_list$AssocList$member = F2(
+	function (targetKey, dict) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$get, targetKey, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $pzp1997$assoc_list$AssocList$diff = F2(
+	function (_v0, rightDict) {
+		var leftAlist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$filter,
+				function (_v1) {
+					var key = _v1.a;
+					return !A2($pzp1997$assoc_list$AssocList$member, key, rightDict);
+				},
+				leftAlist));
+	});
+var $Gizra$elm_all_set$EverySet$diff = F2(
+	function (_v0, _v1) {
+		var d1 = _v0.a;
+		var d2 = _v1.a;
+		return $Gizra$elm_all_set$EverySet$EverySet(
+			A2($pzp1997$assoc_list$AssocList$diff, d1, d2));
+	});
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Tuple$mapBoth = F3(
+	function (funcA, funcB, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			funcA(x),
+			funcB(y));
+	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $turboMaCk$any_dict$Dict$Any$toList = function (_v0) {
+	var dict = _v0.a.dict;
+	return $elm$core$Dict$values(dict);
+};
+var $turboMaCk$any_dict$Dict$Any$encode = F2(
+	function (keyE, valueE) {
+		return A2(
+			$elm$core$Basics$composeL,
+			A2(
+				$elm$core$Basics$composeL,
+				$elm$json$Json$Encode$object,
+				$elm$core$List$map(
+					A2($elm$core$Tuple$mapBoth, keyE, valueE))),
+			$turboMaCk$any_dict$Dict$Any$toList);
+	});
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$Main$encodeIndexPair = function (_v0) {
+	var x = _v0.a;
+	var y = _v0.b;
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$json$Json$Encode$int,
+		A2(
+			$elm$core$List$map,
+			$author$project$Four$toInt,
+			_List_fromArray(
+				[x, y])));
+};
+var $pzp1997$assoc_list$AssocList$keys = function (_v0) {
+	var alist = _v0.a;
+	return A2($elm$core$List$map, $elm$core$Tuple$first, alist);
+};
+var $Gizra$elm_all_set$EverySet$toList = function (_v0) {
+	var d = _v0.a;
+	return $pzp1997$assoc_list$AssocList$keys(d);
+};
+var $author$project$Main$encodeSet = F2(
+	function (a, set) {
+		return A2(
+			$elm$json$Json$Encode$list,
+			a,
+			$Gizra$elm_all_set$EverySet$toList(set));
+	});
+var $author$project$Main$encodeSelection = $author$project$Main$encodeSet($author$project$Main$encodeIndexPair);
+var $author$project$Main$encodeColoring = A2($turboMaCk$any_dict$Dict$Any$encode, $author$project$Main$colorName, $author$project$Main$encodeSelection);
+var $author$project$Four$toList = function (four) {
+	return _List_fromArray(
+		[four.zero, four.one, four.two, four.three]);
+};
+var $author$project$Four$encode = F2(
+	function (e, four) {
+		return A2(
+			$elm$json$Json$Encode$list,
+			e,
+			$author$project$Four$toList(four));
+	});
+var $elm$core$String$fromList = _String_fromList;
+var $author$project$Four$map = F2(
+	function (f, four) {
+		return {
+			one: f(four.one),
+			three: f(four.three),
+			two: f(four.two),
+			zero: f(four.zero)
+		};
+	});
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Four$encodeKarnaughRow = function (four) {
+	return $elm$json$Json$Encode$string(
+		$elm$core$String$fromList(
+			$author$project$Four$toList(
+				A2(
+					$author$project$Four$map,
+					function (b) {
+						return b ? _Utils_chr('1') : _Utils_chr('0');
+					},
+					four))));
+};
+var $author$project$Four$encodeKarnaugh = $author$project$Four$encode($author$project$Four$encodeKarnaughRow);
+var $author$project$Main$encodeSubmission = function (result) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'problem',
+				$author$project$Four$encodeKarnaugh(result.problem)),
+				_Utils_Tuple2(
+				'coloring',
+				$author$project$Main$encodeColoring(result.coloring))
+			]));
+};
+var $author$project$Main$enumColors = _List_fromArray(
+	[$author$project$Main$Red, $author$project$Main$Green, $author$project$Main$Blue, $author$project$Main$Purple]);
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
+	});
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -6158,12 +6612,12 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $elm$http$Http$expectBytesResponse = F2(
+var $elm$http$Http$expectStringResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
 			_Http_expect,
-			'arraybuffer',
-			_Http_toDataView,
+			'',
+			$elm$core$Basics$identity,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
 	});
 var $elm$http$Http$BadBody = function (a) {
@@ -6211,73 +6665,12 @@ var $elm$http$Http$resolve = F2(
 					toResult(body));
 		}
 	});
-var $elm$http$Http$expectWhatever = function (toMsg) {
+var $elm$http$Http$expectString = function (toMsg) {
 	return A2(
-		$elm$http$Http$expectBytesResponse,
+		$elm$http$Http$expectStringResponse,
 		toMsg,
-		$elm$http$Http$resolve(
-			function (_v0) {
-				return $elm$core$Result$Ok(_Utils_Tuple0);
-			}));
+		$elm$http$Http$resolve($elm$core$Result$Ok));
 };
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $pzp1997$assoc_list$AssocList$remove = F2(
-	function (targetKey, _v0) {
-		var alist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$filter,
-				function (_v1) {
-					var key = _v1.a;
-					return !_Utils_eq(key, targetKey);
-				},
-				alist));
-	});
-var $pzp1997$assoc_list$AssocList$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
-		var alteredAlist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$cons,
-				_Utils_Tuple2(key, value),
-				alteredAlist));
-	});
-var $Gizra$elm_all_set$EverySet$insert = F2(
-	function (k, _v0) {
-		var d = _v0.a;
-		return $Gizra$elm_all_set$EverySet$EverySet(
-			A3($pzp1997$assoc_list$AssocList$insert, k, _Utils_Tuple0, d));
-	});
-var $Gizra$elm_all_set$EverySet$fromList = function (xs) {
-	return A3($elm$core$List$foldl, $Gizra$elm_all_set$EverySet$insert, $Gizra$elm_all_set$EverySet$empty, xs);
-};
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $turboMaCk$any_dict$Dict$Any$get = F2(
-	function (k, _v0) {
-		var dict = _v0.a.dict;
-		var toKey = _v0.a.toKey;
-		return A2(
-			$elm$core$Maybe$map,
-			$elm$core$Tuple$second,
-			A2(
-				$elm$core$Dict$get,
-				toKey(k),
-				dict));
-	});
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -6292,20 +6685,7 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $turboMaCk$any_dict$Dict$Any$insert = F3(
-	function (k, v, _v0) {
-		var inner = _v0.a;
-		return $turboMaCk$any_dict$Dict$Any$AnyDict(
-			_Utils_update(
-				inner,
-				{
-					dict: A3(
-						$elm$core$Dict$insert,
-						inner.toKey(k),
-						_Utils_Tuple2(k, v),
-						inner.dict)
-				}));
-	});
+var $author$project$Main$host = 'http://127.0.0.1:8000/eassessments/coloring';
 var $elm$http$Http$jsonBody = function (value) {
 	return A2(
 		_Http_pair,
@@ -6316,6 +6696,17 @@ var $turboMaCk$any_dict$Dict$Any$keys = A2(
 	$elm$core$Basics$composeL,
 	$elm$core$List$map($elm$core$Tuple$first),
 	$turboMaCk$any_dict$Dict$Any$toList);
+var $Gizra$elm_all_set$EverySet$member = F2(
+	function (k, _v0) {
+		var d = _v0.a;
+		return A2($pzp1997$assoc_list$AssocList$member, k, d);
+	});
+var $Gizra$elm_all_set$EverySet$remove = F2(
+	function (k, _v0) {
+		var d = _v0.a;
+		return $Gizra$elm_all_set$EverySet$EverySet(
+			A2($pzp1997$assoc_list$AssocList$remove, k, d));
+	});
 var $elm$core$Dict$map = F2(
 	function (func, dict) {
 		if (dict.$ === 'RBEmpty_elm_builtin') {
@@ -6367,12 +6758,6 @@ var $turboMaCk$any_dict$Dict$Any$remove = F2(
 						inner.toKey(k),
 						inner.dict)
 				}));
-	});
-var $Gizra$elm_all_set$EverySet$remove = F2(
-	function (k, _v0) {
-		var d = _v0.a;
-		return $Gizra$elm_all_set$EverySet$EverySet(
-			A2($pzp1997$assoc_list$AssocList$remove, k, d));
 	});
 var $author$project$Main$removeColoring = F2(
 	function (model, color) {
@@ -6562,7 +6947,7 @@ var $elm$http$Http$request = function (r) {
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$7:
+		_v0$8:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'AddColor':
@@ -6601,7 +6986,7 @@ var $author$project$Main$update = F2(
 								A2($author$project$Main$removeColoring, model, color),
 								$elm$core$Platform$Cmd$none);
 						} else {
-							break _v0$7;
+							break _v0$8;
 						}
 					}
 				case 'SelectColor':
@@ -6619,48 +7004,75 @@ var $author$project$Main$update = F2(
 						var x = _v5.a;
 						var y = _v5.b;
 						var color = _v0.b.a;
-						var _v6 = A2($turboMaCk$any_dict$Dict$Any$get, color, model.colors);
-						if (_v6.$ === 'Just') {
-							var working_set = _v6.a;
-							var new_set = A2(
-								$Gizra$elm_all_set$EverySet$insert,
-								_Utils_Tuple2(x, y),
-								working_set);
-							var new_coloring = A2(
-								$Gizra$elm_all_set$EverySet$insert,
-								color,
-								function () {
-									var _v7 = A2(
-										$turboMaCk$any_dict$Dict$Any$get,
+						return _Utils_Tuple2(
+							function () {
+								var _v6 = A2($turboMaCk$any_dict$Dict$Any$get, color, model.colors);
+								if (_v6.$ === 'Just') {
+									var working_set = _v6.a;
+									if (A2(
+										$Gizra$elm_all_set$EverySet$member,
 										_Utils_Tuple2(x, y),
-										model.colorings);
-									if (_v7.$ === 'Just') {
-										var colors = _v7.a;
-										return colors;
-									} else {
-										return $Gizra$elm_all_set$EverySet$empty;
-									}
-								}());
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										colorings: A3(
-											$turboMaCk$any_dict$Dict$Any$insert,
+										working_set)) {
+										var new_set = A2(
+											$Gizra$elm_all_set$EverySet$remove,
 											_Utils_Tuple2(x, y),
-											new_coloring,
-											model.colorings),
-										colors: A3($turboMaCk$any_dict$Dict$Any$insert, color, new_set, model.colors)
-									}),
-								$elm$core$Platform$Cmd$none);
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
+											working_set);
+										var new_coloring = A2(
+											$Gizra$elm_all_set$EverySet$remove,
+											color,
+											A2(
+												$elm$core$Maybe$withDefault,
+												$Gizra$elm_all_set$EverySet$empty,
+												A2(
+													$turboMaCk$any_dict$Dict$Any$get,
+													_Utils_Tuple2(x, y),
+													model.colorings)));
+										return _Utils_update(
+											model,
+											{
+												colorings: A3(
+													$turboMaCk$any_dict$Dict$Any$insert,
+													_Utils_Tuple2(x, y),
+													new_coloring,
+													model.colorings),
+												colors: A3($turboMaCk$any_dict$Dict$Any$insert, color, new_set, model.colors)
+											});
+									} else {
+										var new_set = A2(
+											$Gizra$elm_all_set$EverySet$insert,
+											_Utils_Tuple2(x, y),
+											working_set);
+										var new_coloring = A2(
+											$Gizra$elm_all_set$EverySet$insert,
+											color,
+											A2(
+												$elm$core$Maybe$withDefault,
+												$Gizra$elm_all_set$EverySet$empty,
+												A2(
+													$turboMaCk$any_dict$Dict$Any$get,
+													_Utils_Tuple2(x, y),
+													model.colorings)));
+										return _Utils_update(
+											model,
+											{
+												colorings: A3(
+													$turboMaCk$any_dict$Dict$Any$insert,
+													_Utils_Tuple2(x, y),
+													new_coloring,
+													model.colorings),
+												colors: A3($turboMaCk$any_dict$Dict$Any$insert, color, new_set, model.colors)
+											});
+									}
+								} else {
+									return model;
+								}
+							}(),
+							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$7;
+						break _v0$8;
 					}
 				case 'FinishColoring':
-					var _v8 = _v0.a;
+					var _v7 = _v0.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -6669,16 +7081,22 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				case 'Submit':
-					var _v9 = _v0.a;
+					var _v8 = _v0.a;
 					return _Utils_Tuple2(
 						model,
 						$elm$http$Http$request(
 							{
 								body: $elm$http$Http$jsonBody(
-									$author$project$Main$encodeColoring(model.colors)),
-								expect: $elm$http$Http$expectWhatever(
-									function (_v10) {
-										return $author$project$Main$Submitted;
+									$author$project$Main$encodeSubmission(
+										A2($author$project$Main$Submission, model.karnaugh, model.colors))),
+								expect: $elm$http$Http$expectString(
+									function (response) {
+										if (response.$ === 'Ok') {
+											var str = response.a;
+											return $author$project$Main$Submitted(str);
+										} else {
+											return $author$project$Main$Submitted('An error occurred!');
+										}
 									}),
 								headers: _List_fromArray(
 									[
@@ -6687,10 +7105,17 @@ var $author$project$Main$update = F2(
 								method: 'POST',
 								timeout: $elm$core$Maybe$Nothing,
 								tracker: $elm$core$Maybe$Nothing,
-								url: 'http://127.0.0.1:8000/eassessments/coloring'
+								url: $author$project$Main$host
 							}));
 				default:
-					break _v0$7;
+					var response = _v0.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								response: $elm$core$Maybe$Just(response)
+							}),
+						$elm$core$Platform$Cmd$none);
 			}
 		}
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -6698,7 +7123,6 @@ var $author$project$Main$update = F2(
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$Main$Submit = {$: 'Submit'};
 var $author$project$Main$AddColor = {$: 'AddColor'};
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6922,21 +7346,8 @@ var $author$project$Main$viewColoring = F2(
 					},
 					$turboMaCk$any_dict$Dict$Any$toList(coloring))));
 	});
-var $author$project$Four$One = {$: 'One'};
-var $author$project$Four$Three = {$: 'Three'};
-var $author$project$Four$Two = {$: 'Two'};
-var $author$project$Four$Zero = {$: 'Zero'};
 var $author$project$Four$enumFour = _List_fromArray(
 	[$author$project$Four$Zero, $author$project$Four$One, $author$project$Four$Two, $author$project$Four$Three]);
-var $author$project$Four$map = F2(
-	function (f, four) {
-		return {
-			one: f(four.one),
-			three: f(four.three),
-			two: f(four.two),
-			zero: f(four.zero)
-		};
-	});
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $author$project$Main$tableCaption = function (four) {
 	return A2(
@@ -6946,10 +7357,6 @@ var $author$project$Main$tableCaption = function (four) {
 			[
 				$elm$html$Html$text(four.two + (four.three + ('\\' + (four.zero + four.one))))
 			]));
-};
-var $author$project$Four$toList = function (four) {
-	return _List_fromArray(
-		[four.zero, four.one, four.two, four.three]);
 };
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $author$project$Main$rowCaption = function (variables) {
@@ -7005,15 +7412,6 @@ var $author$project$Main$deactiveColoringFrameStyle = _List_fromArray(
 		A2($elm$html$Html$Attributes$style, 'border-color', 'white'),
 		A2($elm$html$Html$Attributes$style, 'border-style', 'solid')
 	]);
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$Main$coloringStyle = F2(
 	function (color, inner) {
 		return function (attr) {
@@ -7043,11 +7441,6 @@ var $author$project$Main$coloringStyle = F2(
 var $author$project$Main$applyColoring = F2(
 	function (colors, inner) {
 		return A3($elm$core$List$foldr, $author$project$Main$coloringStyle, inner, colors);
-	});
-var $Gizra$elm_all_set$EverySet$member = F2(
-	function (k, _v0) {
-		var d = _v0.a;
-		return A2($pzp1997$assoc_list$AssocList$member, k, d);
 	});
 var $author$project$Main$chooseColoring = F3(
 	function (model, x, y) {
@@ -7170,7 +7563,8 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('Submit')
-							])))
+							]))),
+					A2($elm$core$Maybe$map, $elm$html$Html$text, model.response)
 				])));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
@@ -7181,15 +7575,10 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 		function (token) {
 			return A2(
 				$elm$json$Json$Decode$andThen,
-				function (karnaugh) {
-					return A2(
-						$elm$json$Json$Decode$andThen,
-						function (error_redirect) {
-							return $elm$json$Json$Decode$succeed(
-								{error_redirect: error_redirect, karnaugh: karnaugh, token: token});
-						},
-						A2($elm$json$Json$Decode$field, 'error_redirect', $elm$json$Json$Decode$string));
+				function (input) {
+					return $elm$json$Json$Decode$succeed(
+						{input: input, token: token});
 				},
-				A2($elm$json$Json$Decode$field, 'karnaugh', $elm$json$Json$Decode$value));
+				A2($elm$json$Json$Decode$field, 'input', $elm$json$Json$Decode$value));
 		},
 		A2($elm$json$Json$Decode$field, 'token', $elm$json$Json$Decode$string)))(0)}});}(this));
