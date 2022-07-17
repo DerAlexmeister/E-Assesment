@@ -7,8 +7,8 @@ from typing import Set, Tuple, List
 
 from ..normal_forms.normal_form import TruthTable
 
-X = [(0, 0), (0, 1), (1, 1), (0, 1)]
-Y = [(0, 1), (1, 1), (1, 0), (0, 0)]
+X = [(0, 0), (0, 1), (1, 1), (1, 0)]
+Y = [(1, 0), (1, 1), (0, 1), (0, 0)]
 
 def to_str(x: bool, y: bool) -> str:
     return f"{int(x)}{int(y)}"
@@ -19,7 +19,7 @@ class Karnaugh:
 
     def __repr__(self) -> str:
         x = ["00", "01", "11", "10"]
-        y = ["01", "11", "10", "00"]
+        y = ["10", "11", "01", "00"]
 
 
         data = pd.DataFrame(0, index=y, columns=x)
