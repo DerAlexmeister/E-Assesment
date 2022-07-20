@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
+from . import model
 from .normal_form import Guess, TruthTable, Literal, NormalForm, DISJUNCTION, CONJUNCTION
 
 
@@ -121,9 +123,41 @@ class DifferenceAssessment(Assessment):
             return f"<p>Not every thing is correct: {clause}</p>"
 
 
+@dataclass
+class RememberingAssessment(Assessment):
+    assessment: Assessment
+
+    def assess(self, guess: Guess) -> str:
+        question = model.NormalFormQuestion(normal_form=guess.question.normal_form)
+        question.save()
+
+        for col, _ in guess.question.function.table[guess.question.function.results==1].iterrows():
+            function_value = model.FunctionValue(question=question, one=col)
+            function_value.save()
+
+        answer = model.NormalFormAnswer()
+        answer.save()
+
+        for clause in guess.answer.clauses:
+            term = model.NormalFormTerm(answer=answer)
+            term.save()
+
+            for lit in clause:
+                literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
+                literal.save()
+
+        guess_model = model.NormalFormGuess(question=question, answer=answer)
+        guess_model.save()
+
+        return self.assessment.assess(guess)
+
+
 ASSESSMENTS = {
-    'boolean': BooleanAssessment(),
-    'grading': GradingAssessment(),
-    'correcting_boolean': CorrectingBooleanAssessment(),
-    'difference': DifferenceAssessment(),
+    name: RememberingAssessment(assessment)
+    for name, assessment in {
+        'boolean': BooleanAssessment(),
+        'grading': GradingAssessment(),
+        'correcting_boolean': CorrectingBooleanAssessment(),
+        'difference': DifferenceAssessment(),
+    }.items()
 }

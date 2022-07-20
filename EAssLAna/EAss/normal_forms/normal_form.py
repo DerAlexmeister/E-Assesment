@@ -10,6 +10,7 @@ CONJUNCTION = "conjunctive"
 
 NORMAL_FORMS = [DISJUNCTION, CONJUNCTION]
 
+
 class TruthTable:
     def __init__(self, table, result_name):
         self.table = table

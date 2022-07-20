@@ -10,10 +10,20 @@ from .normal_form import TruthTable, Question
 @dataclass
 class Difficulty:
     num_variables: int
-    num_ones: int
+    num_terms: int
     normal_form: str
 
+
+@dataclass
+class Knowledge:
+    num_variables: float
+    num_terms: float
+
 VARIABLES = ["a", "b", "c", "d", "e"]
+
+class AdaptiveGenerator:
+    def create(self, difficulty: Difficulty) -> Question:
+        pass
 
 @dataclass
 class Generator:
@@ -26,7 +36,7 @@ class Generator:
         bits = np.unpackbits(numbers[:, np.newaxis], axis=1)[:, -difficulty.num_variables:]
 
         results = np.zeros(num_input, dtype=np.uint8)
-        ones = sample(range(num_input), difficulty.num_ones)
+        ones = sample(range(num_input), difficulty.num_terms)
         results[ones] = 1
 
         table = np.column_stack((bits, results))
