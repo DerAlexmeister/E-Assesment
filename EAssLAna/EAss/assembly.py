@@ -129,6 +129,9 @@ class MiniAssembler():
     def getCode(self):
         return self.instructions
 
+    def getMissingInstructions(self):
+        return self.missing_instructions
+
     def eval(self):
         try:
             l_states = []
@@ -197,8 +200,8 @@ class MiniAssembler():
         try:
             instruction_statements = [i[0] for i in self.instructions]
             for instruction in n_statements:
-                if instruction in instruction_statements:
-                    self.missing_instructions = instruction
+                if instruction not in instruction_statements:
+                    self.missing_instructions.append(instruction)
         except Exception as error:
             print(error)
         return self.missing_instructions

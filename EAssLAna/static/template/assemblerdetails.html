@@ -31,11 +31,12 @@
             <hr>
             <h4 style="padding-bottom: 20px;">📌 Instruction-usage-feedback</h4>
             {% if MissingInstructions|length > 0 %}
-                <div class="alert alert-dark" role="alert">
-                    <i  style="padding-top: 10px;">The following instructions are not part of your answer: </i><br><br>
+                <div class="alert alert-warning" role="alert">
+                    The following instructions are not part of your answer:
+                    <br><br>
                     <ul class="list-group">
                         {% for instruction in MissingInstructions %}
-                            <li class="list-group-item">{{instruction}}</li>
+                            <li class="list-group-item">➡️ {{instruction}}</li>
                         {% endfor %}
                     </ul>
                 </div>
