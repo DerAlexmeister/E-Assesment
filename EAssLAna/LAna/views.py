@@ -47,25 +47,16 @@ def handleAssemblerAnalytics(request):
     try:
         target = request.GET.get('t', '')
         if request.method == "GET" and target != '':
-            execute_time_opt, execution_time_user = 0, 0 
             answer = OpenAssemblerAnswer.objects.get(id=target)
-            start = datetime.now() 
             u_parsed = parser(answer.Answer)
             u_parsed.eval()
             u_states = u_parsed.getStates()
-            execution_time_user = datetime.now()  - start
             o_parsed, o_status, u_missing, stateequal = None, None, [], []
-            if answer.OptimizedAnswer:
-                start = datetime.now() 
-                print(start)
+            if answer.OptimizedAnswer: 
                 o_parsed = parser(answer.OptimizedAnswer)
                 o_parsed.eval()
                 o_status = o_parsed.getStates()
-                end = datetime.now() 
-                print(end)
-                execute_time_opt = end - start
             o_status, u_states = equalizeLists(o_status, u_states)
-            print(execute_time_opt.total_seconds(), execution_time_user.total_seconds())
             if answer.MissedStatements:
                 for i in str(answer.MissedStatements).split(","):
                     if len(i) > 2: u_missing.append(i)
@@ -86,7 +77,6 @@ def handleAssemblerAnalytics(request):
                 "AssemblerAnswer": answer, 
                 "States": zip(o_status, u_states), 
                 "MissingInstructions": u_missing, 
-                "ExecutionTime": (execution_time_user, execute_time_opt),
                 "InstructionCycles": (list_of_user_inst*5, list_of_opt_inst*5),
                 "NumberOfUsedRegs": [number_of_used_reg_user, number_of_used_reg_opt],
                 "NumberOfUsedRegsLabels": ["User", "Solution"],
