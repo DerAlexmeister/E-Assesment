@@ -70,7 +70,7 @@ def generate_randomly(difficulty: Difficulty):
 
 def generate_adaptively(difficulty: model.NormalFormDifficulty) -> Question:
     variable_progress, term_progress = getProgress(difficulty.normal_form)
-    num_variables = chooseSize(variable_progress, MINIMAL_NUM_TERMS, difficulty.num_variables)
-    maximal_num_terms = min(2**num_variables, difficulty.num_terms)
+    num_variables = chooseSize(variable_progress, MINIMAL_NUM_VARIABLES, difficulty.num_variables)
+    maximal_num_terms = min(2**num_variables-1, difficulty.num_terms)
     num_terms = chooseSize(term_progress, MINIMAL_NUM_TERMS, maximal_num_terms)
     return generate_randomly(Difficulty(num_variables, num_terms, difficulty.normal_form))
