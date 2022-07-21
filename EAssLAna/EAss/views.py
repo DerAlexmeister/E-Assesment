@@ -13,6 +13,7 @@ from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
 from .models import OpenAssemblerCodeQuestions
+from .models import GatesQuestions
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -40,7 +41,7 @@ from random import sample
 
 from .core import generateNumbers
 from .assembly import parser
-from .assembly import createcircuit
+from .gates import createcircuit
 
 from . import cloze as c
 
@@ -316,41 +317,52 @@ def generateGateQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            iscorrect, message = False, "You answer is wrong"
+            iscorrect = False 
 
-            #ändern damit mehrere Antworten gecheckt werden
-            postresult = dict(request.POST)
-            expectedanswer = postresult['Answer']
-            useranswer = postresult['Useranswer']
+            question = ""
+            expectedanswer = ""
+            answer = ""
+            imgpath = ""
+            expectedcircuitfunction = ""
+            answercircuitfunction = ""
+            raw_request = request.body.decode("UTF-8")
+            raw_request_split = raw_request.split("&")          
 
-            useranswer = GatesAnswer(Topic=str(cat), AllCorrect=iscorrect)
+            for element in raw_request_split:
+                if element.startswith("Question="):
+                    question += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Question=", "")))
+                if element.startswith("Imgpath="):
+                    imgpath += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Imgpath=", "")))
+                if element.startswith("Expectedanswer="):
+                    expectedanswer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedanswer=", "")))
+                if element.startswith("Answer="):
+                    answer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answer=", "")))
+                if element.startswith("Expectedcircuitfunction="):
+                    expectedcircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedcircuitfunction=", "")))
+                if element.startswith("Answerircuitfunction="):
+                    answercircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answerircuitfunction=", "")))
+            if expectedanswer == answer and expectedcircuitfunction == answercircuitfunction:
+                iscorrect = True
+                message = "Answer and circuitfunction are both correct"
+            if expectedanswer == answer and expectedcircuitfunction != answercircuitfunction:
+                iscorrect = False
+                message = "Answer is correct but circuitfunction is wrong"
+            elif expectedanswer != answer and expectedcircuitfunction == answercircuitfunction:
+                iscorrect = False
+                message = "Answer is wrong but circuitfunction is correct"
+            elif expectedanswer != answer and expectedcircuitfunction != answercircuitfunction:
+                iscorrect = False
+                message = "Answer and circuitfunction are both wrong"
+            useranswer = GatesAnswer(Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction)
             useranswer.save()
-
-            answercorrect = False
-            correctcounter = 0
-            for x, y in expectedanswer, useranswer:
-                if x == y:
-                    iscorrect, message = True, "Your answer is correct."
-                    answercorrect = True
-                    correctcounter += 1 
-                singleuseranswer = GatesAnswer(Correct=answercorrect, Topic=str(cat), )
-                singleuseranswer.save()
-
-
-            useranswer.AllCorrect = iscorrect
-            useranswer.save()
-
-            message += " You answered {}/{} statements correctly.".format(correctcounter, len(expectedanswer))
-            
-            return render(request, 'gates.html', {'message': message, 'correct': iscorrect})
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction})
         else:
-            questionsset = (Question.objects.filter(Set__NameID=(str(cat))))[0]
-            difficulty = (Question.objects.filter(Set__NameID=(str(cat))))[0].Difficulty
+            questionsset = GatesQuestions.objects.filter(Set__NameID=(str(cat)))[0]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            gatecircuit, result = createcircuit(difficulty)
+            imgpath, result, circuitfunction = createcircuit(questionsset.Gatesnumber)
 
-            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'Categorie': (str(cat)), 'Answer': result, 'Gatecircuit': gatecircuit})
-            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target})
+            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'Categorie': (str(cat)), 'Expectedanswer': result, 'Expectedcircuitfunction': circuitfunction, 'Imgpath': imgpath})
+            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Imgpath': imgpath, 'Question': questionsset.Question})
     except Exception as error:
         print(error)
     return redirect('homeview')

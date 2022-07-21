@@ -1,8 +1,7 @@
 from enum import unique
 from django.db import models
-from django.forms import Input
 from django.utils import timezone
-from django.core.validators import int_list_validator
+
 
 from datetime import datetime
 
@@ -32,6 +31,7 @@ ITEMTYPES = (
     ('TruthTable','TruthTable'),
     ('Calculus','Calculus'),
     ('Assembler','Assembler'),
+    ('Gates','Gates'),
 )
 
 CALCTYPES = (
@@ -144,9 +144,13 @@ class OpenAssemblerCodeQuestions(models.Model):
 
 class GatesQuestions(models.Model):
 
+    Question = models.CharField(max_length=1024, blank=False, null=False)
     Created = models.DateTimeField(default=timezone.now)
-    Difficulty = models.TextField(blank=False, null=False)
+    Gatesnumber = models.IntegerField(blank=False, null=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{}: {}".format(self.id, self.Gatesnumber)
 
 class CalculusSingleUserAnswer(models.Model):
 
@@ -254,20 +258,15 @@ class OpenAssemblerAnswer(models.Model):
 
 class GatesAnswer(models.Model):
 
-    Solved = models.DateTimeField(default=timezone.now)
-    AllCorrect = models.BooleanField(blank=False, null=False)
-    Topic = models.CharField(max_length=24, choices=TOPICS, default='Gates', null=False, blank=False)
-
-    def __str__(self):
-        return "{} - Status: {}".format(self.Solved, self.AllCorrect)
-
-class SingleGatesAnswer(models.Model):
-
+    Question = models.TextField(blank=False, null=False)
     Expectedanswer = models.TextField(blank=False, null=False)
-    Useranswer = models.TextField(blank=False, null=False)
+    Answer = models.PositiveIntegerField(blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Correct = models.BooleanField(blank=False, null=False)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='Gates', null=False, blank=False)
+    Imgpath = models.CharField(max_length=1024, null=False, blank=False)
+    Expectedcircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
+    Answerircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)

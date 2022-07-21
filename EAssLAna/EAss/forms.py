@@ -1,4 +1,6 @@
+from wsgiref.validate import validator
 from django import forms
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class BinaryAnswerForm(forms.Form):
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
@@ -69,5 +71,8 @@ class OpenAssemblerAnswerForm(forms.Form):
 class GatesAnswerForm(forms.Form):
     
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answer = forms.CharField(max_length=1024, widget=forms.HiddenInput()) #muss in array/choices geändert werden
-    Gatecircuit = forms.CharField(max_length=1024, widget=forms.HiddenInput()) #muss in array/choices geändert werden
+    Answer = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)])
+    Expectedcircuitfunction = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Answerircuitfunction = forms.CharField(max_length=1024)
+    Imgpath = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Expectedanswer = forms.IntegerField(widget=forms.HiddenInput())

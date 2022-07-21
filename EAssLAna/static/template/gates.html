@@ -7,6 +7,12 @@
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
 
     {% if message %}
+    <div class="alert alert-secondary" role="alert">
+        {{Question}}
+    </div>
+
+    <br><img src={{Imgpath}} alt="/static/imgs/test.svg" height="200px"><br>
+
         {% if correct %}
             <div class="alert alert-success" role="alert">
                 {{message}}
@@ -16,18 +22,159 @@
                 {{message}}
             </div>
         {% endif %}
+
+            <table class="table table-bordered table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Expectedanswer</th>
+                        <th scope="col">Useranswer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Answer for gate circuit</th>
+                        <td>{{Expectedanswer}}</td>
+                        <td>{{Answer}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Answer for function</th>
+                        <td>{{Expectedcircuitfunction}}</td>
+                        <td>{{Answerircuitfunction}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr>
+            <p>
+                <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#gates" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Explanation for all gate types
+                </a>
+                <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#explanation" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Instructions to solve the question
+                </a>
+            </p>
+                <div class="collapse" id="explanation" style="padding-bottom: 10px">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/function.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">General explanation for gate network functions</h5>
+                                    <p class="card-text">
+                                        <ol>
+                                            <li>Go from left to right. Depth 0 to n.</li>
+                                            <li>Recognise the Gate</li>
+                                            <li>Combine input1 with gate and input2 and put it in brackets. For example (0 or 1).</li>
+                                            <li>Repeat step 2 and 3 for all gates in the current depth</li>
+                                            <li>Repeat step 2-4 for all depths</li>                                     
+                                        </ol>    
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/gateanswer.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">General explanation for gate networks</h5>
+                                    <p class="card-text">
+                                        <ol>
+                                            <li>Go from left to right. Depth 0 to n.</li>
+                                            <li>Recognise the Gate</li>
+                                            <li>Check the input. Determine the output taking into account the inputs and the gate.</li>
+                                            <li>Repeat step 2 and 3 for all gates in the current depth</li>
+                                            <li>Repeat step 2-4 for all depths</li>
+                                        </ol>                                     
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse" id="gates" style="padding-bottom: 10px">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/and.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">And-Gate</h5>
+                                    <p class="card-text">The AND gate is a basic digital logic gate that implements logical conjunction (∧) from mathematical logic – AND gate behaves according to the truth table above. A HIGH output (1) results only if all the inputs to the AND gate are HIGH (1). If not all inputs to the AND gate are HIGH, LOW output results.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/nand.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">Nand-Gate</h5>
+                                    <p class="card-text">The NAND gate (NOT-AND) is a logic gate which produces an output which is false only if all its inputs are true; thus its output is complement to that of an AND gate. A LOW (0) output results only if all the inputs to the gate are HIGH (1); if any input is LOW (0), a HIGH (1) output results.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/or.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">Or-Gate</h5>
+                                    <p class="card-text">The OR gate is a digital logic gate that implements logical disjunction (∨) from mathematical logic – it behaves according to the truth table above. A HIGH output (1) results if one or both the inputs to the gate are HIGH (1). If neither input is high, a LOW output (0) results. In another sense, the function of OR effectively finds the maximum between two binary digits, just as the complementary AND function finds the minimum.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/xor.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">Xor-Gate</h5>
+                                    <p class="card-text">XOR gate (sometimes EOR, or EXOR and pronounced as Exclusive OR) is a digital logic gate that gives a true (1 or HIGH) output when the number of true inputs is odd. An XOR gate implements an exclusive or ( ↮ {\displaystyle \nleftrightarrow } \nleftrightarrow) from mathematical logic; that is, a true output results if one, and only one, of the inputs to the gate is true. If both inputs are false (0/LOW) or both are true, a false output results. XOR represents the inequality function, i.e., the output is true if the inputs are not alike otherwise the output is false. A way to remember XOR is "must have one or the other but not both". </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/nor.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">Nor-Gate</h5>
+                                    <p class="card-text">The NOR gate is a digital logic gate that implements logical NOR - it behaves according to the truth table to the right. A HIGH output (1) results if both the inputs to the gate are LOW (0); if one or both input is HIGH (1), a LOW output (0) results. NOR is the result of the negation of the OR operator. It can also in some senses be seen as the inverse of an AND gate.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" src="/static/imgs/xnor.png">
+                                <div class="card-body">
+                                    <h5 class="card-title">Xnor-Gate</h5>
+                                    <p class="card-text">The XNOR gate (sometimes ENOR, EXNOR or NXOR and pronounced as Exclusive NOR. Alternatively XAND, pronounced Exclusive AND) is a digital logic gate whose function is the logical complement of the Exclusive OR (XOR) gate. It is equivalent to the logical connective ( ↔ {\displaystyle \leftrightarrow } \leftrightarrow ) from mathematical logic, also known as the material biconditional. The two-input version implements logical equality, behaving according to the truth table to the right, and hence the gate is sometimes called an "equivalence gate". A high output (1) results if both of the inputs to the gate are the same. If one but not both inputs are high (1), a low output (0) results.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
     {% else %}
         <p class="form-group">
+            <span class="badge text-bg-success" style="font-size: 18px;">Your task ✏️</span>
+            <div class="alert alert-secondary" role="alert">
+                {{Question}}
+            </div>
+            <hr>
+
+            <br><img src={{Imgpath}} alt="/static/imgs/test.svg" height="200px"><br>
             
-            <form action="/eassessments/{{Target}}/", method="post">
+            <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
                 {{Form}}
                 <button type="submit" class="btn btn-info">Answer</button>
-            </form>  
+            </form>
         </p>
     {% endif %}
-
-    
+  
 </div>
 
 {% endblock %}
