@@ -5,7 +5,8 @@
 {% block content %}
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
-
+    <h1>Binary calculus</h1>
+    <hr>
     {% if message %}
         {% if correct %}
             <div class="alert alert-success" role="alert">
@@ -13,18 +14,126 @@
             </div>
         {% else %}
             <div class="alert alert-danger" role="alert">
-                {{message}}
+                ❌ {{message}}. The solution is <b>{{solution}} not {{NonBinarySolution}}</b>. See how to calculate does translations down below. ⬇️ 
             </div>
         {% endif %}
+            <hr>
+            <h4>💡 Explanation of binary translation</h4>
+            <br>
+            <div class="alert alert-secondary" role="alert">
+                ✍️ Here you can see how to calculate the binary to decimal translation. 
+              </div>
+            <div class="row">
+                <div class="col-sm-6">
+                  <div class="card">
+                    <div class="card-body"  style="text-align: center;">
+                      <h5 class="card-title">Solution ✔️</h5>
+                      <hr>
+                      <p class="card-text">
+                        <b> <span style="color: #9b3fa6"> {{BinarySolution}} </span> = </b>
+                        {% for element in Solution %}
+                            <b>{{element}}</b>
+                        {% endfor %}
+                        <b> = <span style="color: #3fa65e"> {{solution}} </span></b> 
+                        </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="card">
+                    <div class="card-body"  style="text-align: center;">
+                      <h5 class="card-title">User 👨🏼‍💻</h5>
+                      <hr>
+                        {% if correct %}
+                            <p class="card-text">
+                                <b><span style="color: #3fa65e"> {{NonBinarySolution}} </span> = </b> 
+                                {% for element in Usercalc %}
+                                    <b>{{element}}</b>
+                                {% endfor %}
+                                <b> = <span style="color: #3fa65e"> {{BinaryAnswer}} ✔️</span></b> 
+                            </p>
+                        {% else %}
+                            <p class="card-text">
+                                <b><span style="color: #f84a48"> {{NonBinarySolution}} </span> = </b> 
+                                {% for element in Usercalc %}
+                                    <b>{{element}}</b>
+                                {% endfor %}
+                                <b> = <span style="color: #f84a48"> {{BinaryAnswer}} ⚡</span></b> 
+                            </p>
+                        {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p>
+                <hr>
+            <p>
+                <button class="btn btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample">
+                    Need more help 💛
+               </button>
+                </p>
+                <div style="min-height: 120px;">
+                  <div class="collapse" id="collapseWidthExample">
+                    <div class="card card-body" style="width: 100%;">
+                        <h4>👩‍🏫 Example calculation</h4>
+                        <hr>
+                        <div class="alert alert-secondary" role="alert">
+                            Calculate the decimal representation of <b>10010</b>
+                          </div>
+                          
+                        <ol class="list-group list-group-numbered">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                              <div class="ms-2 me-auto">
+                                <div class="fw-bold"><span style="color: #3fa65e;">Split</span> the binary number</div>
+                                👉 1 <span style="color: #3fa65e;">•</span> 0 <span style="color: #3fa65e;">•</span> 0 <span style="color: #3fa65e;">•</span> 1 <span style="color: #3fa65e;">•</span> 0
+                              </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                              <div class="ms-2 me-auto">
+                                <div class="fw-bold">Add 2 to the power of the <span style="color:coral">position</span> to every binary digit</div>
+                                👉 (1 x <span style="color:coral">2⁴</span>) + (0 x <span style="color:coral">2³</span>) + (0 x <span style="color:coral">2²</span>) + (1 x <span style="color:coral">2¹</span>) + (0 x <span style="color:coral">2⁰</span>)
+                              </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                              <div class="ms-2 me-auto">
+                                <div class="fw-bold">Calculate the <span style="color:#077d9f">binary</span> digit with the power of the <span style="color:coral">position</span></div>
+                                👉 (<span style="color:#077d9f">1</span> x <span style="color:coral">16</span>) +  (<span style="color:#077d9f">0</span> x <span style="color:coral">8</span>) + (<span style="color:#077d9f">0</span> x <span style="color:coral">4</span>) + (<span style="color:#077d9f">1</span> x <span style="color:coral">2</span>) + (<span style="color:#077d9f">0</span> x <span style="color:coral">1</span>) <br>
+                                👉 16 + 0 + 0 + 2 + 0
+                              </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                  <div class="fw-bold"><span style="color: #3fa65e">Sum</span> all values up</div>
+                                  👉 <span style="color: #3fa65e">10010</span> = <span style="color: #3fa65e">18</span> ✔️
+                                </div>
+                              </li>
+                          </ol>
+
+                      </p>
+                      <hr>
+                      <h4>🔥 Use YouTube as addition source!</h4>
+                      <iframe width="100%" height="315" src="https://www.youtube.com/embed/a2FpnU9Mm3E?controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                  </div>
+                </div> 
+            </p>
     {% else %}
         <p class="form-group">
-            Please translate the following binarynumber into decimal: <b class="badge badge-pill badge-primary" style="background-color: #bba457; color: #424242">{{binarycode}}</b> <br>
+            <span class="badge text-bg-success" style="font-size: 18px;">Your task ✏️</span>
+            <div class="alert alert-secondary" role="alert">
+                Please translate the following binarynumber into decimal: <b>{{binarycode}}</b> <br>
+            </div>
             
-            <form action="/eassessments/{{Target}}/", method="post">
-                {% csrf_token %}
-                {{Form}}
-                <button type="submit" class="btn btn-info">Answer</button>
-            </form>
+            <div class="card">
+                <div class="card-body">
+                    <form action="/eassessments/{{Target}}/" method="post">
+                        {% csrf_token %}
+                        {{Form.Answer}}
+                        {{Form.Question}}<br><br>
+                        <button type="submit" class="btn btn-success">Submit your answer</button>
+                    </form>
+                </div>
+            </div>
         </p>
     {% endif %}
 

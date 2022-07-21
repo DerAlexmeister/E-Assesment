@@ -1,4 +1,4 @@
-INST = ['MOV', 'ADD', 'SUB', 'INC', 'DEC'] #'JMP', 'JNZ']
+INST = ['MOV', 'ADD', 'SUB', 'INC', 'DEC']
 
 def isStateValue(state, key):
     try:
@@ -91,6 +91,7 @@ def decfunc(command, state):
 
 def parser(programm):
     try:
+        programm = programm.replace("\r", "")
         instructionssets = []
         programm_split = []
         for statement in [i if i != '' and len(i) > 3 else None for i in str(programm).split('\n')]:
@@ -128,6 +129,9 @@ class MiniAssembler():
     def getCode(self):
         return self.instructions
 
+    def getMissingInstructions(self):
+        return self.missing_instructions
+
     def eval(self):
         try:
             l_states = []
@@ -149,6 +153,22 @@ class MiniAssembler():
 
     def getStates(self):
         return self.states
+
+    def getLastStates(self):
+        try:
+            lastworkingstate = 0
+            for i, e in enumerate(self.states):
+                if None not in e.keys():
+                    lastworkingstate = i
+                else:
+                    break
+            laststate = self.states[lastworkingstate]
+            for _, v in laststate.items(): 
+                if isinstance(v, dict):
+                    return v
+        except Exception as error:
+            print(error)
+        return {}
 
     def hasError(self):
         return self.error is not None
@@ -180,8 +200,8 @@ class MiniAssembler():
         try:
             instruction_statements = [i[0] for i in self.instructions]
             for instruction in n_statements:
-                if instruction in instruction_statements:
-                    self.missing_instructions = instruction
+                if instruction not in instruction_statements:
+                    self.missing_instructions.append(instruction)
         except Exception as error:
             print(error)
         return self.missing_instructions

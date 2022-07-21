@@ -5,79 +5,204 @@
 {% block content %}
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
-    <h3 style="color:#00d055; text-decoration: underline;">1. Missing Instructions</h3>
+    <h1>Assembler feedback</h1>
     <br>
-    {% if MissingInstructions|length > 0 %}
-        <i>The following instructions are not part of your answer: </i><br><br>
-        <ul class="list-group">
-            {% for instruction in MissingInstructions %}
-                <li class="list-group-item">{{instruction}}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
+    {% if AssemblerAnswer.Correct %}
         <div class="alert alert-success" role="alert">
-            No instructions are missing!
+            ✔️ The solution you provided is correct.
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            ❌ The solution you provided is <b>not</b> correct. Have a look at the details feedback down below. ⬇️
         </div>
     {% endif %}
-    <br><br>
-    <h3 style="color:#00d055;text-decoration: underline;">2. Compare the states of your program</h3>
-    <br>
-    <div class="row">
-        <div class="col-sm-6">
-        <div class="card" style="border-color: #3a3b3b;">
-            <div class="card-body" style="text-align: center;">
-            <h5 class="card-title">Solution ✔️</h5>
-            </div>
-        </div>
-        </div>
-        <div class="col-sm-6">
-        <div class="card" style="border-color: #3a3b3b;">
-            <div class="card-body" style="text-align: center;">
-            <h5 class="card-title">User 👨🏼‍💻</h5>
-            </div>
-        </div>
-        </div>
-    </div>
-    <br>
     <hr>
-    <br>
-    {% for state1, state2 in States %}
-        <div class="row">
-            <div class="col-sm-6">
-            <div class="card" style="border-color: #00d055; border-width: 2.5px;">
-                {% for k, v in state1.items %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{k}}</h5>
-                        {% for register, value in v.items %}
-                            <span>{{register}}: {{value}}</span><br>
+    <p>
+        <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#general" role="button" aria-expanded="true" aria-controls="collapseExample">
+            General feedback
+        </a>
+        <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#debugger" role="button" aria-expanded="false" aria-controls="collapseExample">
+            Execution-flow-feedback
+        </a>
+      </p>
+      <div class="collapse show" id="general" style="padding-bottom: 10px">
+        <div class="card card-body">
+            <h3 style="padding-bottom: 10px;">🧭 Feedback overview</h3>
+            <hr>
+            <h4 style="padding-bottom: 20px;">📌 Instruction-usage-feedback</h4>
+            {% if MissingInstructions|length > 0 %}
+                <div class="alert alert-warning" role="alert">
+                    The following instructions are not part of your answer:
+                    <br><br>
+                    <ul class="list-group">
+                        {% for instruction in MissingInstructions %}
+                            <li class="list-group-item">➡️ {{instruction}}</li>
                         {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <br>
+                <div class="alert alert-success" role="alert"  style="padding-top: 10px !important;">
+                    No instructions are missing!
+                </div>
+            {% endif %}
+            <hr>
+            <h4 style="padding-bottom: 20px;">📌 Register-usage-feedback</h4>
+            <div class="alert alert-secondary" role="alert">
+                You can get feedback about the register usage of your programm compared to the offical solution.
+              </div>
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="Register-usage-feedback" width="400px" height="100px"></canvas>
+                </div>
+              </div>
+            <hr>
+            <h4 style="padding-bottom: 20px;">📌 Instruction-usage-feedback</h4>
+            <div class="alert alert-secondary" role="alert">
+                You can get feedback about the register usage of your programm compared to the offical solution.
+              </div>
+            <div class="card">
+                <div class="card-body">
+                    <canvas id="Instruction-usage-feedback" width="400px" height="100px"></canvas>
+                </div>
+              </div>
+            <hr>
+        </div>
+      </div>
+      <div class="collapse" id="debugger" style="padding-bottom: 10px;">
+        <div class="card card-body">
+            <h3>🏃‍♂️ Execution-flow-feedback</h3>
+            <div class="row" style="padding-top: 10px;">
+                <div class="col-sm-6">
+                <div class="card" style="border-color: #3a3b3b;">
+                    <div class="card-body" style="text-align: center;">
+                    <h5 class="card-title">Solution ✔️</h5>
                     </div>
-                {% endfor %}
+                </div>
+                </div>
+                <div class="col-sm-6">
+                <div class="card" style="border-color: #3a3b3b;">
+                    <div class="card-body" style="text-align: center;">
+                    <h5 class="card-title">User 👨🏼‍💻</h5>
+                    </div>
+                </div>
+                </div>
             </div>
-            </div>
-            <div class="col-sm-6">
-                {% for k, v in state2.items %}
-                    {% if k != "Com" %}
-                        {% if state2.Com == True %}
-                            <div class="card"  style="border-color:#00d055;border-width:2.5px;">
-                        {% elif state2.Com == False %}  
-                            <div class="card" style="border-color:#d00000;border-width:2.5px;">
-                        {% else %}
-                            <div class="card" style="border-color:#c0d000;border-width:2.5px;">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{k}}</h5>
-                            {% for register, value in v.items %}
-                                <span>{{register}}: {{value}}</span><br>
+            <br>
+            <hr>
+            <br>
+            {% for state1, state2 in States %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card" style="border-color: #00d055; border-width: 2.5px;padding: 10px;">
+                            {% for k, v in state1.items %}
+                                <div class="card-body">
+                                    <h5 class="card-title">👉 {{k|default_if_none:"There is nothing more"}}</h5>
+                                    {% if k != None %}
+                                        <hr>
+                                        {% for register, value in v.items %}
+                                            <span>🗃️ {{register}}: {{value}}</span><br>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             {% endfor %}
                         </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            </div>
+                        <hr style="border-color:#fff">
+                    </div>
+                    <div class="col-sm-6">
+                        {% for k, v in state2.items %}
+                            {% if k != "Com" %}
+                                {% if k == None %}
+                                    <div class="card"  style="border-color:#b80e91;border-style: dashed;border-width:2.5px; padding: 10px;">
+                                {% elif state2.Com == True %}
+                                    <div class="card" style="border-color:#00d055;border-width:2.5px;  padding: 10px;">
+                                {% elif state2.Com == False %}  
+                                    <div class="card" style="border-color:#d00000;border-width:2.5px;  padding: 10px;">
+                                {% else %}
+                                    <div class="card" style="border-color:#c0d000;border-width:2.5px;  padding: 10px;">
+                                {% endif %}
+                                        <div class="card-body">
+                                            {% if k != None %}
+                                                <h5 class="card-title">👉 {{k}}</h5>
+                                                <hr>
+                                                {% for register, value in v.items %}
+                                                    <span>🗃️ {{register}}: {{value}}</span><br>
+                                                {% endfor %}
+                                            {% else %}
+                                                <h5 class="card-title">⁉️</h5>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                            {% endif %}
+                            <hr style="border-color:#fff">
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}        
         </div>
-        <br>
-    {% endfor %}
+      </div>
 </div>
 
+<script>
+
+        window.onload = function() {
+            window.myPie = new Chart(document.getElementById("Register-usage-feedback"), {
+                    type: 'bar',
+                    data: {
+                    labels: {{NumberOfUsedRegsLabels|safe}},
+                    datasets: [
+                        {
+                        label: "Number of used registers compared between the user and the official solution",
+                        backgroundColor: ["#bad000", "#00d06e"],
+                        data: {{NumberOfUsedRegs|safe}}
+                        }
+                    ]
+                    },
+                    options: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Number of used registers compared between the user and the official solution'
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+
+                window.myPie = new Chart(document.getElementById("Instruction-usage-feedback"), {
+                    type: 'bar',
+                    data: {
+                    labels: {{NumberOfUsedInstLabel|safe}},
+                    datasets: [
+                        {
+                        label: "Number of used instructions compared between the user and the official solution",
+                        backgroundColor: ["#bad000", "#00d06e"],
+                        data: {{NumberOfUsedInst|safe}}
+                        }
+                    ]
+                    },
+                    options: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Number of used instructions compared between the user and the official solution'
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+        };
+  </script>
 {% endblock %}

@@ -18,13 +18,16 @@
         {% endif %}
     {% else %}
         <p class="form-group">
-            Code the following: <b>{{Question}}</b> <br>
+            <span class="badge text-bg-success" style="font-size: 18px;">Your task ✏️</span>
+            <div class="alert alert-secondary" role="alert">
+                {{Question}}
+              </div>
             <hr>
             
-            <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
+            <form action="/eassessments/{{Target}}/?t={{Categorie}}" method="post">
                 {% csrf_token %}
                 {{Form.as_p}}
-                <button type="submit" class="btn btn-info">Answer</button>
+                <button type="submit" class="btn btn-success">Submit your Code ✉️</button>
             </form>
         </p>
     {% endif %}

@@ -42,6 +42,8 @@ from random import sample
 from .core import generateNumbers
 from .assembly import parser
 from .gates import createcircuit
+from .binarys import getBinaryCalcList
+
 
 from . import cloze as c
 
@@ -89,6 +91,7 @@ def generateOctaQuestions(request):
         print(error)
     return redirect('homeview')
 
+## Link: https://stackoverflow.com/questions/5920643/add-an-item-between-each-item-already-in-the-list
 def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
@@ -96,11 +99,24 @@ def generateBinaryQuestions(request):
             iscorrect, message = False, "You answer is wrong"
             question = int(request.POST['Question'], 2)
             answer = int(request.POST['Answer'], 10)
+            useranswerlist, questionslist = getBinaryCalcList(format(answer, "b")), getBinaryCalcList(format(question, "b"))
+            useranswerlist = sum([[i, '+'] for i in useranswerlist], [])[:-1]
+            questionslist = sum([[i, '+'] for i in questionslist], [])[:-1]
             if question == answer:
                 iscorrect, message = True, "Your answer is correct."
             useranswer = CalculusSingleUserAnswer(Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
             useranswer.save()
-            return render(request, 'binaryrandexample.html', {'message': message, 'correct': iscorrect})
+            data = {
+                'message': message, 
+                'correct': iscorrect, 
+                "solution": int(request.POST['Question'], 2),
+                "Usercalc": useranswerlist,
+                "Solution": questionslist,
+                "BinarySolution": format(question, "b"),
+                "BinaryAnswer": format(answer, "b"),
+                "NonBinarySolution": answer
+                }
+            return render(request, 'binaryrandexample.html', data)
         else: 
             binex = BinaryStatement.objects.filter(Set__NameID=(str(cat)))[0]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
@@ -371,7 +387,7 @@ def generateOpenAssemblerQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            answer_text, correct = "Your answer is wrong.", False
+            correct, n_instructions = False, ""
             form = OpenAssemblerAnswerForm(request.POST)
             if form.is_valid():
                 usercode = form.cleaned_data['CodeAnswer'].replace("\r", "")
@@ -382,14 +398,10 @@ def generateOpenAssemblerQuestions(request):
                 if (AssemblerQuestion.CheckNeededInstructions):
                     n_instructions = list(filter(lambda i: len(i), AssemblerQuestion.NeededInstructions.split(",")))
                     parsed.checkForStatement(n_instructions)
+                    n_instructions = ','.join(parsed.getMissingInstructions())
                     correct = (parsed.equalsState(answerdict) and parsed.hasMissingInstructions())
-                    if correct:
-                        answer_text = "Your answer is correct and you used all needed instructions."
-                    else:
-                        answer_text = "Your answer might be correct but you missed some needed instructions. Needed Instructions: {}".format(str(AssemblerQuestion.NeededInstructions).rstrip(','))
                 else:
                     correct = parsed.equalsState(answerdict)
-                    answer_text = "Your answer is correct."
                 useranswer = OpenAssemblerAnswer(
                     Question=AssemblerQuestion.Question,
                     Answer=usercode,
@@ -397,8 +409,9 @@ def generateOpenAssemblerQuestions(request):
                     QuestionID=AssemblerQuestion.id,
                     OptimizedAnswer=AssemblerQuestion.OptimizedSolution
                 )
+                if len(n_instructions) > 2: useranswer.MissedStatements = n_instructions
                 useranswer.save()
-                return render(request, 'openassembler.html', {'message': answer_text, 'correct': correct})
+                return redirect("/learninganalytics/assembleranalysis?t={}".format(useranswer.id))
             return render(request, 'openassembler.html', {'message': "Cannot handle your request!", 'correct': correct})
         else:
             AssemblerQuestion = OpenAssemblerCodeQuestions.objects.filter(Set__NameID=(str(cat)))[0]
