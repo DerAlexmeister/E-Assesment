@@ -18,8 +18,8 @@ VARIABLES = ["a", "b", "c", "d", "e"]
 
 MINIMAL_NUM_VARIABLES = 1
 MINIMAL_NUM_TERMS = 1
-VARIABLE_RATE = 0.1
-TERM_RATE = 0.2
+VARIABLE_RATE = 0.15
+TERM_RATE = 0.05
 
 def updateProgress(rate, points, total_points):
     half = total_points/2
