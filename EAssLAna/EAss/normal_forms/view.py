@@ -2,14 +2,11 @@ from django.http.response import HttpResponse
 
 from django.shortcuts import render
 
-from .. import models
-
 from . form import NormalForm
-
-from .. import models
+from . import model
 
 from .normal_form import Question
-from .generator import Generator, Difficulty
+from .generator import generate_randomly, generate_adaptively, Difficulty
 from .assessment import ASSESSMENTS
 
 
@@ -28,10 +25,11 @@ def render_question(request, question, answer, category, correction = None):
 
 def normal_form(request):
     cat = request.GET.get('t', '')
-    task = models.NormalForm\
+    task = model.NormalForm\
               .objects\
               .filter(Set__NameID=(str(cat)))\
               .first()
+              #.get(str(cat))
 
     if request.method == 'POST':
         assessment = ASSESSMENTS[task.assessment]
@@ -40,7 +38,7 @@ def normal_form(request):
 
         if answer.is_valid():
             guess = answer.cleaned_data['guess']
-            correction = assessment.assess(guess)
+            correction = assessment.assess(guess, qaw=task.Set)
         else:
             correction = answer.errors.get('guess')
 
@@ -54,8 +52,7 @@ def normal_form(request):
 
     else:
         n = task.normal_form
-        difficulty = Difficulty(n.num_variables, n.num_ones, n.normal_form)
-        question = Generator().create(difficulty)
+        question = generate_adaptively(n)
         request.session[QUESTION_KEY] = question.to_dict()
 
         return render_question(

@@ -34,12 +34,12 @@ SOLUTIONS_CALCULATORS = {
 
 class Assessment(ABC):
     @abstractmethod
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, **kwargs) -> str:
         pass
 
 
 class BooleanAssessment(Assessment):
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -50,7 +50,7 @@ class BooleanAssessment(Assessment):
 
 
 class GradingAssessment(Assessment):
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, guess_model, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -58,12 +58,17 @@ class GradingAssessment(Assessment):
         for g, e in zip(solution.clauses, guess.answer.clauses):
             if g == e:
                 counter += 1
+
+        if guess_model:
+            correction = model.NormalFormCorrection(guess=guess_model, points=counter, total_points=len(solution.clauses))
+            correction.save()
+
         return f"You have {counter} of {len(solution.clauses)} correct!"
 
 
 
 class CorrectingBooleanAssessment(Assessment):
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -88,7 +93,7 @@ class CorrectingBooleanAssessment(Assessment):
 
 
 class DifferenceAssessment(Assessment):
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -127,7 +132,7 @@ class DifferenceAssessment(Assessment):
 class RememberingAssessment(Assessment):
     assessment: Assessment
 
-    def assess(self, guess: Guess) -> str:
+    def assess(self, guess: Guess, qaw, **kwargs) -> str:
         question = model.NormalFormQuestion(normal_form=guess.question.normal_form)
         question.save()
 
@@ -146,10 +151,10 @@ class RememberingAssessment(Assessment):
                 literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
                 literal.save()
 
-        guess_model = model.NormalFormGuess(question=question, answer=answer)
+        guess_model = model.NormalFormGuess(qaw=qaw, question=question, answer=answer)
         guess_model.save()
 
-        return self.assessment.assess(guess)
+        return self.assessment.assess(guess, **{'guess_model': guess_model, **kwargs})
 
 
 ASSESSMENTS = {
