@@ -1,130 +1,22 @@
 {% extends "master.html" %}
 
+{% load template_tags %}
+
 {% block title %} Index E-Assessments {% endblock %}
 
 {% block content %}
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
-
-    <h1>Your learning analytics 🧑‍🎓</h1>
-    <hr>
+  {% if user == "Teacher" %}
+    <h1>Learning analytics 👨‍🏫</h1>
     <br><br>
-    <div id="container" style="width: 400px; height: 200px;">
-        <canvas id="chart-line-time"></canvas>
-    </div>
-    <br><br>
-    <hr>
-    <div class="card-group">
-        <div class="card">
-            <div id="container" style="width: 400px; height: 200px;">
-                <canvas id="pie-chart-bin"></canvas>
-              </div>
-          <div class="card-body">
-            <br>
-            <h5 class="card-title">Your calculus overview</h5>
-            <p class="card-text">Here you can see your learning progress in connection with arithmetic tasks like binary conversion.</p>
-            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
-          </div>
-        </div>
-        <div class="card">
-            <div id="container" style="width: 400px; height: 200px;">
-                <canvas id="pie-chart-assembler"></canvas>
-            </div>
-          <div class="card-body">
-            <br>
-            <h5 class="card-title">Your assembler overview</h5>
-            <p class="card-text">Here you can see your learning progress in connection with assembler.</p>
-            <p class="card-text"><a href="/learninganalytics/assembleranalysis" class="btn btn-info">View more</a></p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-img-top" src="..." alt="Card image cap">
-          <div class="card-body">
-            <h5 class="card-title">Your gates overview</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
-      <br>
-      <div class="card-group">
-        <div class="card">
-            <div id="container" style="width: 400px; height: 200px;">
-                <canvas id="pie-chart-bin"></canvas>
-              </div>
-          <div class="card-body">
-            <br>
-            <h5 class="card-title">Your calculus overview</h5>
-            <p class="card-text">Here you can see your learning progress in connection with arithmetic tasks like binary conversion.</p>
-            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
-          </div>
-        </div>
-        <div class="card">
-            <div id="container" style="width: 400px; height: 200px;">
-                <canvas id="pie-chart-assembler"></canvas>
-            </div>
-          <div class="card-body">
-            <br>
-            <h5 class="card-title">Your assembler overview</h5>
-            <p class="card-text">Here you can see your learning progress in connection with assembler.</p>
-            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
-          </div>
-        </div>
-        <div class="card">
-          <img class="card-img-top" src="..." alt="Card image cap">
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
-      <hr>
-      <br><br>
-        
-      <script>
-        
-        var config = {
-          type: 'doughnut',
-          data: {
-            datasets: [{
-              data: {{ datacalc|safe }},
-              backgroundColor: ['#1ef87a', '#f90000'],
-              label: 'Statistic for users calculus'
-            }],
-            labels: {{ labels|safe }}
-          },
-          options: {
-            responsive: true
-          }
-        };
-    
-        var config2 = {
-          type: 'doughnut',
-          data: {
-              datasets: [{
-              data: {{ dataassembler|safe }},
-              backgroundColor: ['#1ef87a', '#f90000'],
-              label: 'Statistic for users assembler'
-              }],
-              labels: {{ labels|safe }}
-          },
-          options: {
-              responsive: true
-          }
-        };
-
-        window.onload = function() {
-
-            // Correct incorrect views
-            var ctx = document.getElementById('pie-chart-bin').getContext('2d');
-            window.myPie = new Chart(ctx, config);
-            var ctx2 = document.getElementById('pie-chart-assembler').getContext('2d');
-            window.myPie = new Chart(ctx2, config2);
-
-        };
-      </script>
-    
+    {% include "laindex_teacher.html" %}
+  {% else %}
+     <h1>Learning analytics 👨‍🎓</h1>
+     <br><br>
+     {% include "laindex_student.html" %}
+  {% endif %}
+  
 </div>
 
 {% endblock %}

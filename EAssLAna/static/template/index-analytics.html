@@ -1,0 +1,72 @@
+
+{% block title %} Index E-Assessments {% endblock %}
+
+{% block content %}
+
+    <div  style="width:100%; background-color: white; padding-left: 40px; padding-top: 40px; z-index: 100;">
+        {% if ComputerModels|length > 0 %}
+            <h2>Assembler</h2>
+            {% block assmbler_qawsets %}
+            {% for qwaset in Assembler %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+               
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+
+        <br>
+
+        {% if ComputerModels|length > 0 %}
+            <h2>Computer Models</h2>
+            {% block computer_models_qawsets %}
+            {% for qwaset in ComputerModels %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+
+        <br>
+
+        {% if Gates|length > 0 %}
+            <h2>Gates</h2>
+            {% block gates_qawsets %}
+            {% for qwaset in Gates %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+
+        <br>
+
+        {% if Calculus|length > 0 %}
+            <h2>Calculus</h2>
+            {% block calculus_qawsets %}
+            {% for qwaset in Calculus %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+
+        <br>
+
+        {% if Optimization|length > 0 %}
+            <h2>Optimization</h2>
+            {% block optimization_qawsets %}
+            {% for qwaset in Optimization %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+
+        <br>
+
+        {% if Quantencomputing|length > 0 %}
+            <h2>Quantencomputing</h2>
+            {% block quantencomputing_qawsets %}
+            {% for qwaset in Quantencomputing %}
+                {% include "qawset_item_statistics.html" with qawset=qwaset %}
+            {% endfor %}
+            {% endblock %}
+        {% endif %}
+    </div>
+{% endblock %}

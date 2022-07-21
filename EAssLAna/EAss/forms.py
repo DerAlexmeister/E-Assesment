@@ -1,17 +1,26 @@
 from wsgiref.validate import validator
 from django import forms
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
+
+from EAss.models import QAWSet
 
 class BinaryAnswerForm(forms.Form):
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Answer = forms.IntegerField()
 
 class OctaAnswerForm(forms.Form):
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Answer = forms.IntegerField()
 
 class ClozeForm(forms.Form):
     cloze_id = forms.IntegerField(widget=forms.HiddenInput())
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
 
     def __init__(self, num_gaps: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,8 +34,10 @@ class ClozeForm(forms.Form):
 
 class SCAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Options_q = forms.ChoiceField(choices=[], label="Statements")
+    
 
     def __init__(self, *args, **kwargs):
         try:
@@ -38,8 +49,10 @@ class SCAnswerForm(forms.Form):
 
 class MCAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Options_q = forms.MultipleChoiceField(choices=[], label="Statements")
+    
 
     def __init__(self, *args, **kwargs):
         try:
@@ -51,6 +64,8 @@ class MCAnswerForm(forms.Form):
 
 class TtAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
+   
 
     def __init__(self, *args, **kwargs):
         try:
@@ -64,14 +79,18 @@ class TtAnswerForm(forms.Form):
             print(error)
 
 class OpenAssemblerAnswerForm(forms.Form):
-
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=16384, widget=forms.HiddenInput())
     CodeAnswer = forms.CharField(max_length=16384, label=False, widget=forms.Textarea(attrs={"rows":5, "cols":20}))
+   
 
 class GatesAnswerForm(forms.Form):
-    
+    NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Answer = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)])
+   
     Expectedcircuitfunction = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Answerircuitfunction = forms.CharField(max_length=1024)
     Imgpath = forms.CharField(max_length=1024, widget=forms.HiddenInput())

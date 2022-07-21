@@ -1,0 +1,428 @@
+{% load template_tags %}
+
+<!-- Load Variables via template tags -->
+{% get_SuccessRate_Week user as successRate_Week %}
+
+<h2>Your Progress</h2>
+<div class="card-group">
+
+  <div class="card">
+    <div id="container" style="width: 300px; height: 150px;">
+          {% if true %}
+          <h2 class="text-warning">{% get_SuccessRate_All_Today_CorrectOnly user %}</h2>
+          {% else %} 
+                {% if true %}
+                <p class="text-warning">50%</p>
+                {% else %} 
+                <p class="text-warning">{% get_SuccessRate_All_Today_CorrectOnly user %}<</p>
+                {% endif %}
+          {% endif %}
+        
+        <!-- <h4>Corectly Answered</h4> -->
+      </div>
+  <div class="card-body">
+    <br>
+    <h5 class="card-title">single choice overview</h5>
+    <p class="card-text">Here you can see how much Single Choice Questions you have answered right or wrong.</p>
+    <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+  </div>
+  </div>
+
+  <div class="card">
+    <div id="container" style="width: 300px; height: 150px;">
+      <canvas id="pie-linechart-week" width="300" height="200"></canvas>
+    </div>
+  <div class="card-body">
+    <br>
+    <h5 class="card-title">Weekly Progress</h5>
+    <p class="card-text">Here you can see how much Questions you have answered right or wrong.</p>
+  </div>
+  </div>
+
+</div>
+<br>
+
+<h2>Task Types Overview</h2>
+      <div class="card-group">
+        
+        <div class="card">
+          <div id="container" style="width: 300px; height: 150px;">
+              <canvas id="pie-chart-sc"></canvas>
+            </div>
+        <div class="card-body">
+          <br>
+          <h5 class="card-title">single choice overview</h5>
+          <p class="card-text">Here you can see how much Single Choice Questions you have answered right or wrong.</p>
+          <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        </div>
+        </div>
+
+        <div class="card">
+          <div id="container" style="width: 300px; height: 150px;">
+              <canvas id="pie-chart-mc"></canvas>
+            </div>
+        <div class="card-body">
+          <br>
+          <h5 class="card-title">multiple choice overview</h5>
+          <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
+          <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        </div>
+      </div>
+
+
+    <div class="card">
+      <div id="container" style="width: 300px; height: 150px;">
+          <canvas id="pie-chart-cloze"></canvas>
+        </div>
+    <div class="card-body">
+      <br>
+      <h5 class="card-title">cloze overview</h5>
+      <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
+      <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+    </div>
+  </div>
+
+
+  <div class="card">
+      <div id="container" style="width: 300px; height: 150px;">
+          <canvas id="pie-chart-truthtable"></canvas>
+        </div>
+    <div class="card-body">
+      <br>
+      <h5 class="card-title">truth table overview</h5>
+      <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
+      <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="container" style="width: 300px; height: 150px;">
+        <canvas id="pie-chart-oassembler"></canvas>
+      </div>
+  <div class="card-body">
+    <br>
+    <h5 class="card-title">open assembler table overview</h5>
+    <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
+    <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+  </div>
+</div>
+
+<div class="card">
+  <div id="container" style="width: 300px; height: 150px;">
+      <canvas id="pie-chart-gates"></canvas>
+    </div>
+<div class="card-body">
+  <br>
+  <h5 class="card-title">gates overview</h5>
+  <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
+  <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+</div>
+</div>
+    </div>
+
+    <br><br>
+
+      <div class="card-group-two">
+      <h2>Broader Overview</h2>
+      <div class="card">
+        <div id="container" style="width: 300px; height: 150px;">
+            <canvas id="topics-radar-bin"></canvas>
+          </div>
+      <div class="card-body">
+        <br>
+        <h5 class="card-title">topics overview</h5>
+        <p class="card-text">Here you can see your learning percentage concering the different available topics to learn from and practice.</p>
+        <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+      </div>
+    </div>
+  </div>
+
+      <br>
+      
+      <hr>
+      <br><br>
+      {% include "index-analytics.html" %}
+      
+      <script>
+        
+
+            
+        var config_SingleChoice = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        var config_MultipleChoice = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        var config_Cloze = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+
+        var config_TruthTable = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        var config_OpenAssembler = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        
+        var config_Gates = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        // // const days_labels = Utils.days({count: 7});
+        // const DATA_COUNT = 7;
+        // const NUMBER_CFG = {count: DATA_COUNT, min: -100, max: 100};
+
+        // const labels = Utils.months({count: 7});
+        // const data_testline = {
+        //   labels: labels,
+        //   datasets: [
+        //     {
+        //       label: 'Dataset 1',
+        //       data: Utils.numbers(NUMBER_CFG),
+        //       borderColor: Utils.CHART_COLORS.red,
+        //       backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
+        //     },
+        //     {
+        //       label: 'Dataset 2',
+        //       data: Utils.numbers(NUMBER_CFG),
+        //       borderColor: Utils.CHART_COLORS.blue,
+        //       backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
+        //     }
+        //   ]
+        // };
+
+       
+
+        
+        const data_AnsweredQuestions_Week = {
+          labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday','Saturday','Sunday'],
+          datasets: [
+            {
+            label: 'Overall',
+            data: {{successRate_Week|get__array_valueByIndex:0}},
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          },
+          {
+            label: 'Correct',
+            data: {{successRate_Week|get__array_valueByIndex:1}},
+            fill: false,
+            borderColor: 'rgb(90, 12, 192)',
+            tension: 0.1
+          }
+            ]
+        };
+
+        const config_AnsweredQuestions_Week = {
+          type: 'line',
+          data: data_AnsweredQuestions_Week,
+          options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Chart.js Line Chart'
+            }
+          }
+        },
+      };
+
+        const data_mockup_RadarChartTopics = {
+          labels: [
+            'Assembler',
+            'Architecture',
+            'Binary',
+            'Gater',
+          ],
+          datasets: [{
+            label: 'Summary',
+            data: [65, 59, 90, 81, 56, 55, 40],
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            pointBackgroundColor: 'rgb(255, 99, 132)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(255, 99, 132)'
+          }, {
+            label: 'Today',
+            data: [28, 48, 40, 19, 96, 27, 100],
+            fill: true,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgb(54, 162, 235)',
+            pointBackgroundColor: 'rgb(54, 162, 235)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(54, 162, 235)'
+          }]
+        };
+
+        const config_mockup_RadarChartTopics = {
+          type: 'radar',
+          data: data_mockup_RadarChartTopics,
+          options: {
+            elements: {
+              line: {
+                borderWidth: 3
+              }
+            }
+          },
+        };
+
+        const data_RadarChartTopics = {
+          labels: [
+    'Eating',
+    'Drinking',
+    'Sleeping',
+    'Designing',
+    'Coding',
+    'Cycling',
+    'Running'
+  ],
+          datasets: [{
+            label: 'Everyone',
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            pointBackgroundColor: 'rgb(255, 99, 132)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(255, 99, 132)'
+          }, {
+            label: 'You',
+            fill: true,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgb(54, 162, 235)',
+            pointBackgroundColor: 'rgb(54, 162, 235)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(54, 162, 235)'
+          }]
+        };
+
+        const config_RadarChartTopics = {
+          type: 'radar',
+          data: data_RadarChartTopics,
+          options: {
+            elements: {
+              line: {
+                borderWidth: 3
+              }
+            }
+          },
+        };
+
+        window.onload = function() {
+            // CalculusSingleUserAnswer
+            // SingleChoiceUserAnswer
+            // MultipleChoiceUserAnswer
+            // SingleMultipleChoiceUserAnswer ??
+            // TruthTableUserAnswer
+            //    SingleTruthTableUserAnswer - single answer of all
+            // ClozeUserAnswer
+            //    SingleFieldClozeUserAnswer - single answer of all
+            // OpenAssemblerAnswer
+            // GatesAnswer 
+
+            var ctx_WeeklyProgress = document.getElementById('pie-linechart-week');
+            window.myPie = new Chart(ctx_WeeklyProgress, config_AnsweredQuestions_Week);
+
+
+            // var ctx_Topics = document.getElementById('topics-radar-bin').getContext('2d');
+            // window.myPie = new Chart(ctx_Topics, config_RadarChartTopics);
+
+           
+            // var ctx_Calculus= document.getElementById('pie-chart-sc').getContext('2d');
+            // window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
+
+            // var ctx_SingleChoice = document.getElementById('pie-chart-sc').getContext('2d');
+            // window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
+
+            // var ctx_MultipleChoice = document.getElementById('pie-chart-mc').getContext('2d');
+            // window.myPie = new Chart(ctx_MultipleChoice, config_MultipleChoice);
+
+            // var ctx_Cloze = document.getElementById('pie-chart-cloze').getContext('2d');
+            // window.myPie = new Chart(ctx_Cloze, config_Cloze);
+
+            // var ctx_TruthTable = document.getElementById('pie-chart-truthtable').getContext('2d');
+            // window.myPie = new Chart(ctx_TruthTable, config_TruthTable);
+
+            // var ctx_OpenAssembler = document.getElementById('pie-chart-oassembler').getContext('2d');
+            // window.myPie = new Chart(ctx_OpenAssembler, config_OpenAssembler);
+
+            
+        
+
+        };
+      </script>
+  
+</div>

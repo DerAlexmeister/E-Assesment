@@ -1,0 +1,129 @@
+{% load template_tags %}
+
+      <div class="card-group">
+          <div class="card">
+            <div id="container" style="width: 400px; height: 200px;">
+                <canvas id="topics-radar-bin"></canvas>
+              </div>
+          <div class="card-body">
+            <br>
+            <h5 class="card-title">Students' topics overview</h5>
+            <p class="card-text">Here you can see students' learning percentage concering the different available topics to learn from and practice.</p>
+            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+          </div>
+        </div>
+        <div class="card">
+          <div id="container" style="width: 400px; height: 200px;">
+              <canvas id="pie-chart-sc"></canvas>
+            </div>
+        <div class="card-body">
+          <br>
+          <h5 class="card-title">Students' single choice overview</h5>
+          <p class="card-text">Here you can see how much Single Choice Questions the students have answered right or wrong.</p>
+          <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        </div>
+        <div class="card">
+          <div id="container" style="width: 400px; height: 200px;">
+              <canvas id="pie-chart-mc"></canvas>
+            </div>
+        <div class="card-body">
+          <br>
+          <h5 class="card-title">Students' multiple choice overview</h5>
+          <p class="card-text">Here you can see how much Multiple Choice Questions the students have answered right or wrong.</p>
+          <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        </div>
+
+      <br>
+      
+      <hr>
+      <br><br>
+        
+      <script>
+        
+
+            
+        var config_SingleChoice = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        var config_MultipleChoice = {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              backgroundColor: ['#1ef87a', '#f90000'],
+              label: 'Statistic for users calculus'
+            }],
+            labels: {{ labels|safe }}
+          },
+          options: {
+            responsive: true
+          }
+        };
+
+        const data_mockup_RadarChartTopics = {
+          labels: [
+            'Assembler',
+            'Architecture',
+            'Binary',
+            'Gater',
+          ],
+          datasets: [{
+            label: 'Summary',
+            data: [65, 59, 90, 81, 56, 55, 40],
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            pointBackgroundColor: 'rgb(255, 99, 132)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(255, 99, 132)'
+          }, {
+            label: 'Today',
+            data: [28, 48, 40, 19, 96, 27, 100],
+            fill: true,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgb(54, 162, 235)',
+            pointBackgroundColor: 'rgb(54, 162, 235)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(54, 162, 235)'
+          }]
+        };
+        const config_RadarChartTopics = {
+          type: 'radar',
+          data: data_mockup_RadarChartTopics,
+          options: {
+            elements: {
+              line: {
+                borderWidth: 3
+              }
+            }
+          },
+        };
+
+        window.onload = function() {
+            var ctx_Topics = document.getElementById('topics-radar-bin').getContext('2d');
+            window.myPie = new Chart(ctx_Topics, config_RadarChartTopics);
+
+
+            var ctx_SingleChoice = document.getElementById('pie-chart-sc').getContext('2d');
+            window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
+
+            var ctx_MultipleChoice = document.getElementById('pie-chart-mc').getContext('2d');
+            window.myPie = new Chart(ctx_MultipleChoice, config_MultipleChoice);
+        
+
+        };
+      </script>
+    
+</div>
