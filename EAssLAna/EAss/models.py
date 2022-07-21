@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+
 TOPICS = (
     ('None','None'),
     ('Computer-Models', 'Computer-Models'),
@@ -44,6 +45,7 @@ GATES = (
     ('NOR', 'NOR'),
     ('XOR', 'XOR'),
     ('XNOR', 'XNOR'),
+    ('Normal Form', 'Normal Form')
 )
 
 class QAWSet(models.Model):

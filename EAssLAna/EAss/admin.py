@@ -11,6 +11,7 @@ from .models import Gap
 from .models import GapSolution
 from .models import OpenAssemblerCodeQuestions
 from .models import GatesQuestions
+from .normal_forms.model import *
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -47,3 +48,12 @@ admin.site.register(ClozeUserAnswer)
 admin.site.register(SingleFieldClozeUserAnswer)
 admin.site.register(OpenAssemblerAnswer)
 admin.site.register(GatesAnswer)
+
+admin.site.register(NormalForm)
+admin.site.register(NormalFormDifficulty)
+admin.site.register(NormalFormGuess)
+admin.site.register(NormalFormLiteral)
+admin.site.register(NormalFormAnswer)
+admin.site.register(NormalFormCorrection)
+admin.site.register(NormalFormTerm)
+admin.site.register(NormalFormQuestion)
