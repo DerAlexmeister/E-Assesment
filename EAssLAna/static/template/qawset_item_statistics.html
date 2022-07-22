@@ -1,6 +1,9 @@
 {% extends "qawset_item.html" %}
+{% load template_tags %}
+
 
 {% block question_content %}
+{% get_Topic_SpecificQuestion_UserData qawset user as SpecificQuestion_Score %}
 <p>
     {% if qwaset.Difficulty == "Easy" %}
         <a style="color: #424242; text-decoration:none"><span class="badge badge-pill" style="background-color: #292828; font-weight: lighter;">{{qwaset.ItemType}}</span> <span class="badge badge-pill" style="background-color: #15da0b; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
@@ -11,7 +14,9 @@
     {% elif qwaset.Difficulty == "Insane" %}
         <a style="color: #424242; text-decoration:none"><span class="badge badge-pill" style="background-color: #292828; font-weight: lighter;">{{qwaset.ItemType}}</span> <span class="badge badge-pill" style="background-color: #452cfc; font-weight: lighter;">{{qwaset.Difficulty}}</span> {{qwaset.title}}</a>
     {% endif %}
-    {% qawset_correctRatio_User qawset user}
+    <span class="badge badge-pill" style="background-color: #daca0b; font-weight: lighter;">{{SpecificQuestion_Score|get__array_valueByIndex:0|safe}}% Correct</span>
+
+    
 </p>
 {% endblock %}
 

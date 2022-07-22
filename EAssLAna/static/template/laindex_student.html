@@ -2,23 +2,28 @@
 
 <!-- Load Variables via template tags -->
 {% get_SuccessRate_Week user as successRate_Week %}
+{% get_SuccessRate_Today user as successRate_Today %}
+{% get_SuccessRate_All user as successRate_All %}
+{% get_UserAnsweredTopics_Count user as Topics_Counts %}
+{% get_UserAnsweredTopics_Count user as AnsweredTopics %}
 
 <h2>Your Progress</h2>
 <div class="card-group">
 
   <div class="card">
     <div id="container" style="width: 300px; height: 150px;">
-          {% if true %}
-          <h2 class="text-warning">{% get_SuccessRate_All_Today_CorrectOnly user %}</h2>
+          {% if successRate_Today|get__array_valueByIndex:0 > 60 %}
+          <h2 class="text-success">{{successRate_Today|get__array_valueByIndex:0}}%</h2>
           {% else %} 
-                {% if true %}
-                <p class="text-warning">50%</p>
+                {% if successRate_Today|get__array_valueByIndex:0 %}
+                <p class="text-warning">{{successRate_Today|get__array_valueByIndex:0}}%</p>
                 {% else %} 
-                <p class="text-warning">{% get_SuccessRate_All_Today_CorrectOnly user %}<</p>
+                <p class="text-danger">{{successRate_Today|get__array_valueByIndex:0}}%</p>
                 {% endif %}
           {% endif %}
         
-        <!-- <h4>Corectly Answered</h4> -->
+        <h3>Correctly Answered: {{successRate_Today|get__array_valueByIndex:2}}</h3>
+        <h3>Incorrectly Answered: {{successRate_Today|get__array_valueByIndex:3}}</h3>
       </div>
   <div class="card-body">
     <br>
@@ -151,6 +156,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:3}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -165,6 +171,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:4}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -179,6 +186,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:5}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -194,6 +202,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:6}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -208,6 +217,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:7}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -223,6 +233,7 @@
           type: 'doughnut',
           data: {
             datasets: [{
+              data: {{successRate_All|get__array_valueByIndex:8}},
               backgroundColor: ['#1ef87a', '#f90000'],
               label: 'Statistic for users calculus'
             }],
@@ -233,32 +244,6 @@
           }
         };
 
-        // // const days_labels = Utils.days({count: 7});
-        // const DATA_COUNT = 7;
-        // const NUMBER_CFG = {count: DATA_COUNT, min: -100, max: 100};
-
-        // const labels = Utils.months({count: 7});
-        // const data_testline = {
-        //   labels: labels,
-        //   datasets: [
-        //     {
-        //       label: 'Dataset 1',
-        //       data: Utils.numbers(NUMBER_CFG),
-        //       borderColor: Utils.CHART_COLORS.red,
-        //       backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
-        //     },
-        //     {
-        //       label: 'Dataset 2',
-        //       data: Utils.numbers(NUMBER_CFG),
-        //       borderColor: Utils.CHART_COLORS.blue,
-        //       backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
-        //     }
-        //   ]
-        // };
-
-       
-
-        
         const data_AnsweredQuestions_Week = {
           labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday','Saturday','Sunday'],
           datasets: [
@@ -295,70 +280,11 @@
           }
         },
       };
-
-        const data_mockup_RadarChartTopics = {
-          labels: [
-            'Assembler',
-            'Architecture',
-            'Binary',
-            'Gater',
-          ],
-          datasets: [{
-            label: 'Summary',
-            data: [65, 59, 90, 81, 56, 55, 40],
-            fill: true,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgb(255, 99, 132)',
-            pointBackgroundColor: 'rgb(255, 99, 132)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(255, 99, 132)'
-          }, {
-            label: 'Today',
-            data: [28, 48, 40, 19, 96, 27, 100],
-            fill: true,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgb(54, 162, 235)',
-            pointBackgroundColor: 'rgb(54, 162, 235)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(54, 162, 235)'
-          }]
-        };
-
-        const config_mockup_RadarChartTopics = {
-          type: 'radar',
-          data: data_mockup_RadarChartTopics,
-          options: {
-            elements: {
-              line: {
-                borderWidth: 3
-              }
-            }
-          },
-        };
-
+      
         const data_RadarChartTopics = {
-          labels: [
-    'Eating',
-    'Drinking',
-    'Sleeping',
-    'Designing',
-    'Coding',
-    'Cycling',
-    'Running'
-  ],
-          datasets: [{
-            label: 'Everyone',
-            fill: true,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgb(255, 99, 132)',
-            pointBackgroundColor: 'rgb(255, 99, 132)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(255, 99, 132)'
-          }, {
-            label: 'You',
+          labels: {{AnsweredTopics|get__array_valueByIndex:0|safe}},
+          datasets: [{  label: 'Correct',
+            data: {{AnsweredTopics|get__array_valueByIndex:2|safe}},
             fill: true,
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             borderColor: 'rgb(54, 162, 235)',
@@ -366,7 +292,18 @@
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: 'rgb(54, 162, 235)'
-          }]
+          },{
+            label: 'All',
+            data: {{AnsweredTopics|get__array_valueByIndex:1|safe}},
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            pointBackgroundColor: 'rgb(255, 99, 132)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgb(255, 99, 132)'
+          }
+          ]
         };
 
         const config_RadarChartTopics = {
@@ -382,44 +319,33 @@
         };
 
         window.onload = function() {
-            // CalculusSingleUserAnswer
-            // SingleChoiceUserAnswer
-            // MultipleChoiceUserAnswer
-            // SingleMultipleChoiceUserAnswer ??
-            // TruthTableUserAnswer
-            //    SingleTruthTableUserAnswer - single answer of all
-            // ClozeUserAnswer
-            //    SingleFieldClozeUserAnswer - single answer of all
-            // OpenAssemblerAnswer
-            // GatesAnswer 
 
             var ctx_WeeklyProgress = document.getElementById('pie-linechart-week');
             window.myPie = new Chart(ctx_WeeklyProgress, config_AnsweredQuestions_Week);
 
+            var ctx_Topics = document.getElementById('topics-radar-bin').getContext('2d');
+            window.myPie = new Chart(ctx_Topics, config_RadarChartTopics);
 
-            // var ctx_Topics = document.getElementById('topics-radar-bin').getContext('2d');
-            // window.myPie = new Chart(ctx_Topics, config_RadarChartTopics);
 
-           
-            // var ctx_Calculus= document.getElementById('pie-chart-sc').getContext('2d');
-            // window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
 
-            // var ctx_SingleChoice = document.getElementById('pie-chart-sc').getContext('2d');
-            // window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
 
-            // var ctx_MultipleChoice = document.getElementById('pie-chart-mc').getContext('2d');
-            // window.myPie = new Chart(ctx_MultipleChoice, config_MultipleChoice);
+            var ctx_SingleChoice = document.getElementById('pie-chart-sc').getContext('2d');
+            window.myPie = new Chart(ctx_SingleChoice, config_SingleChoice);
 
-            // var ctx_Cloze = document.getElementById('pie-chart-cloze').getContext('2d');
-            // window.myPie = new Chart(ctx_Cloze, config_Cloze);
+            var ctx_MultipleChoice = document.getElementById('pie-chart-mc').getContext('2d');
+            window.myPie = new Chart(ctx_MultipleChoice, config_MultipleChoice);
 
-            // var ctx_TruthTable = document.getElementById('pie-chart-truthtable').getContext('2d');
-            // window.myPie = new Chart(ctx_TruthTable, config_TruthTable);
+            var ctx_Cloze = document.getElementById('pie-chart-cloze').getContext('2d');
+            window.myPie = new Chart(ctx_Cloze, config_Cloze);
 
-            // var ctx_OpenAssembler = document.getElementById('pie-chart-oassembler').getContext('2d');
-            // window.myPie = new Chart(ctx_OpenAssembler, config_OpenAssembler);
+            var ctx_TruthTable = document.getElementById('pie-chart-truthtable').getContext('2d');
+            window.myPie = new Chart(ctx_TruthTable, config_TruthTable);
 
-            
+            var ctx_OpenAssembler = document.getElementById('pie-chart-oassembler').getContext('2d');
+            window.myPie = new Chart(ctx_OpenAssembler, config_OpenAssembler);
+
+            var ctx_Gates = document.getElementById('pie-chart-gates').getContext('2d');
+            window.myPie = new Chart(ctx_Gates, config_Gates);     
         
 
         };
