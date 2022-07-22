@@ -121,22 +121,44 @@ def get_Topics():
 
 @register.simple_tag
 def get_Topic_SpecificQuestion_UserData(qawset,user_id):
-    print("BRU")
     correct = 0
     incorrect = 0
-   
-    answers = get_Topic_SpecificQuestion_Answers(qawset.ItemType,user_id)
-    correct, incorrect = get_SuccessRate_Specific(answers)
 
-    print(get_Percentage(correct,correct+incorrect),correct,incorrect)
+    if user_id == "Teacher":
+        answers = get_Topic_SpecificQuestion_Answers_Admin(qawset.ItemType)
+    else:
+        answers = get_Topic_SpecificQuestion_Answers(qawset.ItemType,user_id)
+
+    correct, incorrect = get_SuccessRate_Specific(answers)
     return [get_Percentage(correct,correct+incorrect),correct,incorrect]
 
 
 @register.simple_tag
+def get_Topic_SpecificQuestion_Answers_Admin(answerType):
+    answers = None
+    
+    if(answerType == "SingleChoice"):
+        answers = SingleChoiceUserAnswer.objects.all()
+
+    if(answerType == "MultipleChoice"):
+        answers = MultipleChoiceUserAnswer.objects.all()
+
+    if(answerType == "ClozeText"):
+        answers = ClozeUserAnswer.objects.all()
+
+    if(answerType == "TruthTable"):
+        answers = TruthTableUserAnswer.objects.all()
+
+    if(answerType == "Assembler"):
+        answers = OpenAssemblerAnswer.objects.all()
+
+    if(answerType == "Gates"):
+        answers = GatesAnswer.objects.all()
+
+    return answers
+
+@register.simple_tag
 def get_Topic_SpecificQuestion_Answers(answerType,user_id):
-    print("!!!!!")
-    print(answerType)
-    print("!!!")
     answers = None
     
     if(answerType == "SingleChoice"):
@@ -180,17 +202,58 @@ def get_TimeRange(one_day):
     date_max = datetime.combine(one_day.date(), one_day.time().max,tz)
     return date_min, date_max
 
+@register.simple_tag
+def get_SuccessRate_Today_Admin():
+    date_min, date_max = get_TimeRange_Today()
+    User = get_user_model()
+    users = User.objects.all()
+    valuesToday = [0,0,0,0]
+    for user in users:
+        
+        if not user.is_superuser:
+
+            try:
+                user_valuesToday = get_SuccessRate_All_DateRange(user.id, date_min, date_max)
+           
+
+                valuesToday[0] += user_valuesToday[0]
+                valuesToday[1] += user_valuesToday[1]
+                valuesToday[2] += user_valuesToday[2]
+            except:
+                pass
+
+    return [get_Percentage(valuesToday[1],valuesToday[0]),valuesToday[0],valuesToday[1],valuesToday[2]]
+
+
+
 
 @register.simple_tag
 def get_SuccessRate_Today(user_id):
     date_min, date_max = get_TimeRange_Today()
     valuesToday = get_SuccessRate_All_DateRange(user_id, date_min, date_max)
-    print(valuesToday)
     if valuesToday[0] == 0:
         return [0,0,0,0]
     else:
         return [get_Percentage(valuesToday[1],valuesToday[0]),valuesToday[0],valuesToday[1],valuesToday[2]]
 
+
+@register.simple_tag
+def get_SuccessRate_Week_Admin():
+    User = get_user_model()
+    users = User.objects.all()
+
+    week_dates_All = [0,0,0,0,0,0,0]
+    week_dates_Correct = [0,0,0,0,0,0,0]
+    week_dates_Incorrect = [0,0,0,0,0,0,0]
+
+    for user in users:
+        if not user.is_superuser:
+            user_valuesToday = get_SuccessRate_Week(user.id)
+            for i in range(7):
+                week_dates_All[i] += user_valuesToday[0][i]
+                week_dates_Correct[i] += user_valuesToday[1][i]
+                week_dates_Incorrect[i] += user_valuesToday[2][i]
+    return [week_dates_All, week_dates_Correct, week_dates_Incorrect]
 
 
 @register.simple_tag
@@ -209,24 +272,9 @@ def get_SuccessRate_Week(user_id):
     return [week_dates_All, week_dates_Correct, week_dates_Incorrect]
 
 @register.simple_tag
-def get_Answers_ByTimeRange(answers_set,date_min,date_max): 
-    if(isinstance(answers_set, SingleChoiceUserAnswer)):
-        answers_today = SingleChoiceUserAnswer.objects.filter(Solved__range=(date_min, date_max))
+def get_Answers_ByTimeRange(answers_set,date_min,date_max):
+    answers_today = answers_set.filter(Solved__range=(date_min, date_max))
 
-    if(isinstance(answers_set, MultipleChoiceUserAnswer)):
-        answers_today = MultipleChoiceUserAnswer.objects.filter(Solved__range=(date_min, date_max))
-
-    if(isinstance(answers_set, ClozeUserAnswer)):
-        answers_today = ClozeUserAnswer.objects.filter(Solved__range=(date_min, date_max))
-
-    if(isinstance(answers_set, TruthTableUserAnswer)):
-        answers_today = TruthTableUserAnswer.objects.filter(Solved__range=(date_min, date_max))
-
-    if(isinstance(answers_set, OpenAssemblerAnswer)):
-        answers_today = OpenAssemblerAnswer.objects.filter(Solved__range=(date_min, date_max))
-
-    if(isinstance(answers_set, GatesAnswer)):
-        answers_today = GatesAnswer.objects.filter(Solved__range=(date_min, date_max))
 
     return answers_today
 
@@ -234,7 +282,7 @@ def get_Answers_ByTimeRange(answers_set,date_min,date_max):
 def get_SuccessRate_Specific_DateRange(answers_set,date_min,date_max):
     #print(date_min.strftime('%Y-%m-%d')) 
     #print(date_max.strftime('%Y-%m-%d'))
-    answers_daterange = get_Answers_ByTimeRange(answers_set[0],date_min,date_max)
+    answers_daterange = get_Answers_ByTimeRange(answers_set,date_min,date_max)
     return get_SuccessRate_Specific(answers_daterange)
 
 def get_SuccessRate_Specific(answers_set):    
@@ -325,7 +373,65 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
     return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect]]
 
 
+@register.simple_tag
+def get_SuccessRate_All_Admin():
+    User = get_user_model()
+    users = User.objects.all()
 
+    correct = 0
+    incorrect = 0
+    scCorrect = 0
+    scIncorrect = 0
+    mcCorrect = 0
+    mcIncorrect = 0
+    clozeCorrect = 0
+    clozeIncorrect = 0
+    truthTableCorrect = 0
+    truthTableIncorrect = 0
+    openAssemblerCorrect = 0
+    openAssemblerIncorrect = 0
+    gatesCorrect = 0
+    gatesIncorrect = 0
+
+
+    for user in users:
+        if not user.is_superuser:
+            val = get_SuccessRate_All(user.id)
+
+            correct += val[1]
+            incorrect += val[2]
+
+            scCorrect += val[3][0]
+            scIncorrect += val[3][1]
+
+            mcCorrect += val[4][0]
+            mcIncorrect += val[4][1]
+
+            clozeCorrect += val[5][0]
+            clozeIncorrect += val[5][1]
+
+            truthTableCorrect += val[6][0]
+            truthTableIncorrect += val[6][1]
+
+            openAssemblerCorrect += val[7][0]
+            openAssemblerIncorrect += val[7][1]
+
+            gatesCorrect += val[8][0]
+            gatesIncorrect += val[8][1]
+    
+
+
+    output = [correct+incorrect, correct, incorrect,
+    [get_Percentage(scCorrect,(scCorrect+scIncorrect)),get_Percentage(scIncorrect,(scCorrect+scIncorrect))],
+    [get_Percentage(mcCorrect,(mcCorrect+mcIncorrect)),get_Percentage(scIncorrect,(mcCorrect+mcIncorrect))],
+    [get_Percentage(clozeCorrect,(mcCorrect+clozeIncorrect)),get_Percentage(clozeIncorrect,(clozeCorrect+clozeIncorrect))],
+    [get_Percentage(truthTableCorrect,(truthTableCorrect+truthTableIncorrect)),get_Percentage(truthTableIncorrect,(truthTableCorrect+truthTableIncorrect))],
+    [get_Percentage(openAssemblerCorrect,(openAssemblerCorrect+truthTableIncorrect)),get_Percentage(truthTableIncorrect,(openAssemblerCorrect+truthTableIncorrect))],
+    [get_Percentage(gatesCorrect,(gatesCorrect+gatesIncorrect)),get_Percentage(scIncorrect,(gatesCorrect+gatesIncorrect))]
+    ]
+
+    #print(output)
+    return output
 
 
 @register.simple_tag
@@ -399,7 +505,7 @@ def get_SuccessRate_All(user_id):
     return output
 
 @register.simple_tag
-def get_UserAnsweredTopics_Count():
+def get_UserAnsweredTopics_Count_Admin():
     User = get_user_model()
     users = User.objects.all()
     topics = get_Topics()
@@ -414,13 +520,13 @@ def get_UserAnsweredTopics_Count():
 
     for user in users:
         if not user.is_superuser:
-            val = get_UserAnsweredTopics_Count()
+            val = get_UserAnsweredTopics_Count(user.id)
             z = 0
             for i in topics:
                 topics_count_dict[z] += val[1][z]
                 topics_count_dict_correct[z] += val[2][z]
                 z += 1
-                
+
     return [topics, topics_count_dict,topics_count_dict_correct]
 
 

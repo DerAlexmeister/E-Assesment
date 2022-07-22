@@ -114,32 +114,13 @@ def index(request):
         for topic in topics:
             data[topic.replace("-", "")] = assets if (assets := QAWSet.objects.filter(Topic=topic)) is not None and len(assets) else []
 
-       #prior check if logged in/redirect
-        # SingleChoiceData, MultipleChoiceData, SingleFieldClozeData, ClozeData, SingleTruthTableData, TruthTableData, OpenAssemblerData = getAllUserAnsweredStatistics()
 
-        # topicsPerUserCountDict, topicsEveryoneCountDict = getAllUserAnsweredTopicsCount()
-
-        # topics = topicsEveryoneCountDict.keys()
-        # print(topicsPerUserCountDict)
-        # print(topicsEveryoneCountDict)
-        # print(topics)
-     
-
-        # print(SingleChoiceData)
-        # print(MultipleChoiceData)
-        # print(SingleFieldClozeData)
 
         if request.user.is_superuser:
             user = "Teacher"
-            # calc_c, calc_ic = calcAllUserCIR(SingleChoiceUserAnswer.objects.all().order_by('-Solved'))
-            # #calc_c, calc_ic = calcAllUserCIR(CalculusSingleUserAnswer.objects.all().order_by('-Solved'))
-            # ass_c, ass_ic = calcAllUserCIR(OpenAssemblerAnswer.objects.all().order_by('-Solved'))
         else:
             user = request.user.id
-            #correct,incorrect ratio
-            # #calc_c, calc_ic = calcUserCIR(CalculusSingleUserAnswer.objects.all().order_by('-Solved'))
-            # calc_c, calc_ic = calcUserCIR(SingleChoiceUserAnswer.objects.filter(UserID=request.user.id).order_by('-Solved'))
-            # ass_c, ass_ic = calcUserCIR(OpenAssemblerAnswer.objects.filter(UserID=request.user.id).order_by('-Solved'))
+
         data["labels"] = ['Correct', 'Incorrect']
         data["user"] = user
         return render(request, 'laindex.html', data)
