@@ -1,10 +1,12 @@
 import urllib.parse
 import json
+import pytz
 
 from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.utils import timezone
+from datetime import datetime, timedelta
 
 from .models import Answer
 from .models import OctaStatement
@@ -66,9 +68,17 @@ def index(request):
         print(error)
     return redirect('homeview')
 
+
 def calculateTimeDuration(start_time,end_time):
-    #TODO: calculation!
-    return 10
+    tz = pytz.timezone('Europe/Berlin')
+    start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f')
+
+    start_time = start_time.replace(tzinfo=None)
+    end_time = end_time.replace(tzinfo=None)
+
+    seconds = int((end_time-start_time).total_seconds())
+
+    return (end_time-start_time).total_seconds()
 
 
 ################################################
@@ -82,7 +92,7 @@ def generateOctaQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            endtime = timezone.now()
+            endtime = datetime.now()
             NameID = ""
             duration = ""
             raw_request = request.body.decode("UTF-8")
@@ -101,7 +111,7 @@ def generateOctaQuestions(request):
             if question == answer:
                 iscorrect, message = True, "Your answer is correct."
             qaw_set = QAWSet.objects.get(NameID=NameID)
-            useranswer = CalculusSingleUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set,Answer=answer, Correct=iscorrect, Question=question, CalcType="Octa")
+            useranswer = CalculusSingleUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set,Answer=answer, UserID=request.user.id, Correct=iscorrect, Question=question, CalcType="Octa")
             useranswer.save()
             return render(request, 'octarandexample.html', {'message': message, 'correct': iscorrect})
         else: 
@@ -125,10 +135,10 @@ def generateBinaryQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            endtime = timezone.now()
+            endtime = datetime.now()
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
-
+            NameID = ""
             for element in raw_request_split:
                 if element.startswith("NameID="):
                     NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
@@ -145,7 +155,7 @@ def generateBinaryQuestions(request):
                 iscorrect, message = True, "Your answer is correct."
             
             qaw_set = QAWSet.objects.get(NameID=NameID)
-            useranswer = CalculusSingleUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
+            useranswer = CalculusSingleUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Answer=answer, Correct=iscorrect, Question=question, CalcType="Bin")
             useranswer.save()
             data = {
                 'message': message, 
@@ -178,7 +188,7 @@ def generateSCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            endtime = timezone.now()
+            endtime = datetime.now()
             iscorrect, message = True, "Your answer is correct."
             question = ""
             NameID = ""
@@ -242,7 +252,7 @@ def generateMCQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
-            endtime = timezone.now()
+            endtime = datetime.now()
             iscorrect, message = False, "Your answer is wrong."
             question = ""
             NameID = ""
@@ -262,7 +272,8 @@ def generateMCQuestions(request):
 
             answerset = [str(answer) for answer in list(Answer.objects.filter(Set__NameID=(str(cat))))]
             qaw_set = QAWSet.objects.get(NameID=NameID)
-            useranswer = MultipleChoiceUserAnswer(AllCorrect=iscorrect, Question=question, Topic=str(cat))
+            
+            useranswer = MultipleChoiceUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, AllCorrect=iscorrect, Question=question, Topic=str(cat))
             useranswer.save()
 
             answercorrect = False
@@ -299,44 +310,43 @@ def generateMCQuestions(request):
 
             statements_f = []
             for i in statements: statements_f.append((i, i))
-
+        
             answerform = MCAnswerForm(initial={'Question': question_f, 'BeginTime': beginTime, 'NameID': (str(cat)), 'Options': statements_f})
             return render(request, 'multiplechoiceexample.html', {'Form': answerform, 'Question': question_f, 'Categorie': (str(cat)), 'Target': target})
     except Exception as error:
         print(error)
     return redirect('homeview')
 
-
+######
 def clozeTextGenerator(request):
     if not request.user.is_authenticated:
         return redirect("/")
+
     cat = request.GET.get('t', '')
     if request.method == 'POST':
-        endtime = timezone.now()
+        endtime = datetime.now()
         iscorrect, message = True, "Your answer is correct."
-        cloze_id = request.POST['cloze_id']
-        qaw = QAWSet.objects.get(id=cloze_id)
-        cloze = c.from_model(qaw)
-
         NameID = ""
+
         raw_request = request.body.decode("UTF-8")
         raw_request_split = raw_request.split("&")
-        answers = []
+
 
         for element in raw_request_split:
 
             if element.startswith("NameID="):
-                NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
+                NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
             if element.startswith("BeginTime="):
                 beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
 
         qaw_set = QAWSet.objects.get(NameID=NameID)
+        cloze = c.from_model(qaw_set)
 
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
 
-        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set,Topic=str(cat), AllCorrect=iscorrect)
+        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Topic=str(cat), AllCorrect=iscorrect)
         useranswer.save()
 
         for guess, solution in zip(gaps, cloze.gaps):
@@ -358,17 +368,17 @@ def clozeTextGenerator(request):
         return HttpResponse(message)
     else:
         qaw = Cloze.objects.first().qaw #TODO fix this
-        print(qaw)
+
         cloze = c.from_model(qaw)
         beginTime = timezone.now()
 
-        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': qaw.id,'BeginTime': beginTime, 'NameID': (str(cat))}, )
+        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': (str(cat))}, )
         cloze_items = []
 
         for i, gap in enumerate(cloze.gaps):
             cloze_items.extend([gap.preceeding_text, cloze_form[ClozeForm.get_gap_key(i)], gap.succeeding_text, ])
 
-        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": str(cat), "Target": qaw.Target})
+        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": (str(cat)), "Target": qaw.Target})
 
 def generateTruthTables(request):
     if not request.user.is_authenticated:
@@ -376,6 +386,7 @@ def generateTruthTables(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
+            endtime = datetime.now()
             iscorrect, message, correctcounter = False, "Your answer is wrong.", 0
             postresult = dict(request.POST)
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
@@ -385,12 +396,11 @@ def generateTruthTables(request):
             NameID = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
-            answers = []
 
             for element in raw_request_split:
 
                 if element.startswith("NameID="):
-                    NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
+                    NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
                 if element.startswith("BeginTime="):
                     beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
@@ -412,7 +422,7 @@ def generateTruthTables(request):
             useranswer.AllCorrect = iscorrect
             useranswer.save()
 
-            message += " You answered {}/{} statements correctly.".format(correctcounter, k+1)
+            message += " You answered {}/{} statements correctly.".format(correctcounter, len(postresult.items()))
            
             return render(request, 'truthtableexample.html', {'message': message})
         else:
@@ -514,6 +524,7 @@ def generateOpenAssemblerQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
+            endtime = datetime.now()
             correct, n_instructions = False, ""
             form = OpenAssemblerAnswerForm(request.POST)
             if form.is_valid():
@@ -527,30 +538,28 @@ def generateOpenAssemblerQuestions(request):
                     parsed.checkForStatement(n_instructions)
                     n_instructions = ','.join(parsed.getMissingInstructions())
                     correct = (parsed.equalsState(answerdict) and parsed.hasMissingInstructions())
-                else:
-                    
-                    NameID = ""
-                    raw_request = request.body.decode("UTF-8")
-                    raw_request_split = raw_request.split("&")
-                    answers = []
 
-                    for element in raw_request_split:
+                NameID = ""
+                raw_request = request.body.decode("UTF-8")
+                raw_request_split = raw_request.split("&")
 
-                        if element.startswith("NameID="):
-                            NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
-                        if element.startswith("BeginTime="):
-                            beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
+                for element in raw_request_split:
 
-                    qaw_set = QAWSet.objects.get(NameID=NameID)
+                    if element.startswith("NameID="):
+                        NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
+                    if element.startswith("BeginTime="):
+                        beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
-                    correct = parsed.equalsState(answerdict)
-                    useranswer = OpenAssemblerAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set,
-                    Question=AssemblerQuestion.Question,
-                    Answer=usercode,
-                    Correct=correct,
-                    QuestionID=AssemblerQuestion.id,
-                    OptimizedAnswer=AssemblerQuestion.OptimizedSolution
-                )
+                qaw_set = QAWSet.objects.get(NameID=NameID)
+
+                correct = parsed.equalsState(answerdict)
+                useranswer = OpenAssemblerAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set,
+                UserID=request.user.id,
+                Question=AssemblerQuestion.Question,
+                Answer=usercode,
+                Correct=correct,
+                QuestionID=AssemblerQuestion.id,
+                OptimizedAnswer=AssemblerQuestion.OptimizedSolution)
                 if len(n_instructions) > 2: useranswer.MissedStatements = n_instructions
                 useranswer.save()
                 

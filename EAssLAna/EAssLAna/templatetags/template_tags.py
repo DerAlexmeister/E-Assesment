@@ -305,6 +305,26 @@ def get_SuccessRate_Specific(answers_set):
 
     return correct, incorrect
 
+def get_Duration_Specific(answers_set):
+    if answers_set is None:
+        return 0
+    Duration = 0
+    count = 0
+
+
+    for singleAnswer in answers_set:
+        try:
+            Duration += singleAnswer.Duration
+            count += 1
+        except:
+            pass
+
+    if count == 0:
+        return 0
+    else:
+
+        return int(Duration/count)
+
 @register.simple_tag
 def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
     correct = 0
