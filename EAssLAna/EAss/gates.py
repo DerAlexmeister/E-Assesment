@@ -1,5 +1,4 @@
 import random
-from random import choice
 from schemdraw.parsing import logicparse
 import uuid
 
@@ -43,11 +42,6 @@ def xnorfunc(a, b):
     else:
         return 0
 
-def getinput():
-    inputlist = [("l", 0), ("h", 1)]
-    result = random.choice(inputlist)
-    return result
-
 def getgate():
     gates = [" and ", " nand ", " or ", " xor ", " nor ", " xnor "]    
     return random.choice(gates)
@@ -62,8 +56,26 @@ def gateforeachdepth(pdepth):
             result.insert(0, random.randint(val, (val * 2)))
     return result
 
+def difficultytodepth(diff):
+    depth = 1
+    if diff == "Easy":
+        depth = 1
+    if diff == "Medium":
+        depth = 2
+    if diff == "Hard":
+        depth = 3
+    if diff == "Insane":
+        depth = 4
+    return depth    
+
+def nextchar(currentchar, firsttime):
+    if currentchar == "a" and firsttime:
+        return currentchar, False
+    return chr(ord(currentchar) + 1), False
+
 def creategatecircuit(depth, gatecount):
 
+    currentchar = "a" 
     circuitfunction = ""
     imgpath = ""
     result = 0
@@ -71,19 +83,27 @@ def creategatecircuit(depth, gatecount):
     avcopy = []
     avresult = []
     avresultcopy = []
+    input = ""
+    firsttime = True
 
     for x in range(depth):   
         if x == 0:
             for _ in range(gatecount[x]):
                 gate = getgate()
-                input1 = getinput()
-                input2 = getinput()
+                currentchar, firsttime = nextchar(currentchar, firsttime)
+                input1 = (currentchar, random.randint(0, 1))
+                currentchar, _ = nextchar(currentchar, firsttime)
+                input2 = (currentchar, random.randint(0, 1))
+                input += input1[0] + "=" + str(input1[1]) + ";"
+                input += input2[0] + "=" + str(input2[1]) + ";"
                 av.append('(' + str(input1[0]) + gate + str(input2[0]) + ')')
                 avresult.append(GATEINST[gate](input1[1], input2[1]))
         else: 
             for _ in range(gatecount[x]): 
                 if len(av) == 1:
-                    input1 = getinput()
+                    currentchar, _ = nextchar(currentchar, firsttime)
+                    input1 = (currentchar, random.randint(0, 1))
+                    input += input1[0] + "=" + str(input1[1]) + ";"
                     gate = getgate()
                     avcopy.append('(' + av[0] + gate + str(input1[0]) + ')')
                     av.pop(0)
@@ -92,7 +112,7 @@ def creategatecircuit(depth, gatecount):
                 else:
                     ind1 = random.randint(0, len(av)-1)
                     term1 = av[ind1]
-                    result1 =avresult[ind1]
+                    result1 = avresult[ind1]
                     av.pop(ind1)
                     avresult.pop(ind1)
                     ind2 = random.randint(0, len(av)-1)
@@ -109,17 +129,19 @@ def creategatecircuit(depth, gatecount):
                     avresult = avresultcopy.copy()
                     avresultcopy.clear()  
     d = logicparse(av[0], outlabel='$result$')
+    input = input[:-1]
     circuitfunction = av[0]
     result = avresult[0]
     imgpath = "/static/imgs/" + "image-" + str(uuid.uuid4()) + ".svg"
     simgpath = "EAssLAna" + imgpath
     d.save(simgpath)            
-    return imgpath, result, circuitfunction
+    return imgpath, result, circuitfunction, input
 
-def createcircuit(pdepth):
+def createcircuit(diff):
+    pdepth = difficultytodepth(diff)
     gatecount = gateforeachdepth(pdepth)
-    imgpath, result, circuitfunction = creategatecircuit(pdepth, gatecount)
-    return imgpath, result, circuitfunction
+    imgpath, result, circuitfunction, input = creategatecircuit(pdepth, gatecount)
+    return imgpath, result, circuitfunction, input
 
 GATEINST = {
     " and ": andfunc,

@@ -13,7 +13,6 @@ from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
 from .models import OpenAssemblerCodeQuestions
-from .models import GatesQuestions
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -304,7 +303,7 @@ def generateTruthTables(request):
             useranswer.AllCorrect = iscorrect
             useranswer.save()
 
-            message += " You answered {}/{} statements correctly.".format(correctcounter, k+1)
+            message += " You answered {}/{} statements correctly.".format(correctcounter, len(postresult.items()))
            
             return render(request, 'truthtableexample.html', {'message': message})
         else:
@@ -335,6 +334,7 @@ def generateGateQuestions(request):
         if request.method == "POST":
             iscorrect = False 
 
+            inputq = ""
             question = ""
             expectedanswer = ""
             answer = ""
@@ -357,28 +357,33 @@ def generateGateQuestions(request):
                     expectedcircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedcircuitfunction=", "")))
                 if element.startswith("Answerircuitfunction="):
                     answercircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answerircuitfunction=", "")))
+                if element.startswith("Input="):
+                    inputq += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Input=", "")))
             if expectedanswer == answer and expectedcircuitfunction == answercircuitfunction:
                 iscorrect = True
-                message = "Answer and circuitfunction are both correct"
+                message = "Answer for result and circuitfunction are both correct"
             if expectedanswer == answer and expectedcircuitfunction != answercircuitfunction:
                 iscorrect = False
-                message = "Answer is correct but circuitfunction is wrong"
+                message = "Answer for result is correct but circuitfunction is wrong"
             elif expectedanswer != answer and expectedcircuitfunction == answercircuitfunction:
                 iscorrect = False
-                message = "Answer is wrong but circuitfunction is correct"
+                message = "Answer for result is wrong but circuitfunction is correct"
             elif expectedanswer != answer and expectedcircuitfunction != answercircuitfunction:
                 iscorrect = False
-                message = "Answer and circuitfunction are both wrong"
-            useranswer = GatesAnswer(Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction)
+                message = "Answer for result and circuitfunction are both wrong"
+            useranswer = GatesAnswer(Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction, Input=inputq)
             useranswer.save()
-            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction})
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
         else:
-            questionsset = GatesQuestions.objects.filter(Set__NameID=(str(cat)))[0]
+            questionsset = Question.objects.filter(Set__NameID=(str(cat)))
+            question = randint(0, questionsset.count() - 1)
+            question_f = questionsset[question]
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            imgpath, result, circuitfunction = createcircuit(questionsset.Gatesnumber)
+            difficulty = (QAWSet.objects.filter(NameID=(str(cat))))[0].Difficulty
+            imgpath, result, circuitfunction, input = createcircuit(difficulty)
 
-            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'Categorie': (str(cat)), 'Expectedanswer': result, 'Expectedcircuitfunction': circuitfunction, 'Imgpath': imgpath})
-            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Imgpath': imgpath, 'Question': questionsset.Question})
+            answerform = GatesAnswerForm(initial={'Question': question_f, 'Categorie': (str(cat)), 'Expectedanswer': result, 'Expectedcircuitfunction': circuitfunction, 'Imgpath': imgpath, "Input": input})
+            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Imgpath': imgpath, 'Question': question_f, "Input": input})
     except Exception as error:
         print(error)
     return redirect('homeview')

@@ -10,7 +10,6 @@ from .models import Cloze
 from .models import Gap
 from .models import GapSolution
 from .models import OpenAssemblerCodeQuestions
-from .models import GatesQuestions
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -34,7 +33,6 @@ admin.site.register(Cloze)
 admin.site.register(Gap)
 admin.site.register(GapSolution)
 admin.site.register(OpenAssemblerCodeQuestions)
-admin.site.register(GatesQuestions)
 
 # Answertypes for Users
 admin.site.register(CalculusSingleUserAnswer)

@@ -138,16 +138,6 @@ class OpenAssemblerCodeQuestions(models.Model):
     def __str__(self):
         return "{}: {}".format(self.id, self.Question)
 
-class GatesQuestions(models.Model):
-
-    Question = models.CharField(max_length=1024, blank=False, null=False)
-    Created = models.DateTimeField(default=timezone.now)
-    Gatesnumber = models.IntegerField(blank=False, null=False)
-    Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return "{}: {}".format(self.id, self.Gatesnumber)
-
 class CalculusSingleUserAnswer(models.Model):
 
     Answer = models.IntegerField(blank=False, null=False)
@@ -263,6 +253,7 @@ class GatesAnswer(models.Model):
     Imgpath = models.CharField(max_length=1024, null=False, blank=False)
     Expectedcircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
     Answerircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
+    Input = models.CharField(max_length=1024, null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)

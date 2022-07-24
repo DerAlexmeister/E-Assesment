@@ -76,3 +76,4 @@ class GatesAnswerForm(forms.Form):
     Answerircuitfunction = forms.CharField(max_length=1024)
     Imgpath = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Expectedanswer = forms.IntegerField(widget=forms.HiddenInput())
+    Input = forms.CharField(max_length=1024, widget=forms.HiddenInput())
