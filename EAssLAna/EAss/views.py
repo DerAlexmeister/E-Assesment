@@ -390,7 +390,6 @@ def clozeTextGenerator(request):
                     <span style=\"color:red;text-decoration:line-through\">{answer}</span>
                     <span style=\"color:green">{solution_text}</span>
                 """
-            print(correction)
 
             cloze_items.extend([text_style(gap.preceeding_text), correction, text_style(gap.succeeding_text) ])
 
