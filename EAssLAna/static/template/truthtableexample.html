@@ -5,45 +5,321 @@
 {% block content %}
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
-
     {% if message %}
+        <div class="alert alert-secondary" role="alert">
+            {{Question}}
+        </div>
+
         {% if correct %}
             <div class="alert alert-success" role="alert">
-                {{message}}
+                ✔️ {{message}}
             </div>
         {% else %}
             <div class="alert alert-danger" role="alert">
-                {{message}}
+                ❌ {{message}}
             </div>
         {% endif %}
+
+        <table id="myTable" class="table table-bordered table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Statement</th>
+                    <th scope="col">Useranswer</th>
+                    <th scope="col">Expectedanswer</th>
+                </tr>
+            </thead>
+            <tbody id="testBody"></tbody>
+        </table>
+        <script>
+            var inputstring = "{{Qanswer}}"
+            var inputasArray = inputstring.split(";")
+    
+            function loadTableData(items) {
+                const table = document.getElementById("testBody");
+                inputasArray.forEach( item => {
+                    var splitKeyValueInputArray = item.split("=")
+                    let row = table.insertRow();
+                    let input = row.insertCell(0);
+                    input.innerHTML = splitKeyValueInputArray[0];
+                    let uservalue = row.insertCell(1);
+                    uservalue.innerHTML = splitKeyValueInputArray[1];
+                    let expectedvalue = row.insertCell(2);
+                    expectedvalue.innerHTML = splitKeyValueInputArray[2];
+                });
+            }
+    
+            loadTableData(inputasArray);
+        </script>
+            
+        <p>
+            <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#st1" role="button" aria-expanded="false" aria-controls="collapseExample">
+                Feedback
+            </a>
+        </p>
+
+        <div class="collapse" id="st1" style="padding-bottom: 10px">
+            <h4 style="padding-bottom: 20px;">Feedback</h4>
+            <div class="row">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statement 1</h5>
+                        <canvas id="feedback0" width="400px" height="100px"></canvas>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" id="date0">
+                            You answered this statement the last time on: 0/0/0
+                        </li>
+                        <li class="list-group-item" id="res0">
+                            Your last answer for this statement: TF
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statement 2</h5>
+                        <canvas id="feedback1" width="400px" height="100px"></canvas>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" id="date1">
+                            You answered this statement the last time on: 0/0/0
+                        </li>
+                        <li class="list-group-item" id="res1">
+                            Your last answer for this statement: TF
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statement 3</h5>
+                        <canvas id="feedback2" width="400px" height="100px"></canvas>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" id="date2">
+                            You answered this statement the last time on: 0/0/0
+                        </li>
+                        <li class="list-group-item" id="res2">
+                            Your last answer for this statement: TF
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            var datestring = "{{Lastanswerdate}}"
+            var resstring = "{{Lastanswer}}" 
+            var ind2 = 0
+            var ind3 = 0
+            var t_string = "date"
+            var y_string = "res"
+            var dateasArray = datestring.split(";")
+            var resasArray = resstring.split(";")
+        
+            function loadCard1Data(items) {
+                items.forEach( item => {
+                    abc = "You answered this statement the last time on: "
+                    document.getElementById(t_string.concat(String(ind2))).innerHTML = abc.concat(String(item));
+                    ind2 += 1
+                });
+            }
+            function loadCard2Data(items) {
+                items.forEach( item => {
+                    abc = "Your last answer for this statement: "
+                    document.getElementById(y_string.concat(String(ind3))).innerHTML = abc.concat(String(item));
+                    ind3 += 1
+                });
+            }
+            loadCard1Data(dateasArray);
+            loadCard2Data(resasArray);
+        </script>
+       
     {% else %}
         <p class="form-group">
-
-            <h4>{{Question}}</h4>
+            <span class="badge text-bg-success" style="font-size: 18px;">Your task ✏️</span>
+            <div class="alert alert-secondary" role="alert">
+                {{Question}}
+            </div>
             
             <form action="/eassessments/{{Target}}/?t={{Categorie}}", method="post">
                 {% csrf_token %}
                 {{form.NameID}}
                 {{form.BeginTime}}
-                <table id="table1">
-                {{ Form.as_table }}
+                <table id="table1" class="table table-bordered table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">Statement</th>
+                            <th scope="col">True/False</th>
+                        </tr>
+                    </thead>
+                    {{ Form.as_table }}
                 </table>
                 <br>
-                <br>
                 <button type="submit" class="btn btn-info">Answer</button>
-                
-                <script>
-                    document.getElementById("table1").style.fontSize = "20px";
-                    document.getElementById("table1").style.border = "1px solid #000";
-                    document.getElementById("table1").style.width = "25%";
-                    document.getElementById("table1").style.borderRadius = "25px";
-                    document.getElementById("table1").getElementsByTagName('tbody').style.padding = "25px";
-                </script>
-            </form>       
+            </form>   
+            
+            <hr>
+            <p>
+                <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#st1" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Help for Statement 1
+                </a>
+                <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#st2" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Help for Statement 2
+                </a>
+                <a class="btn btn-info" style="color: white; background-color: #2d2d2d; border-color:#2d2d2d;" data-bs-toggle="collapse" href="#st3" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Help for Statement 3
+                </a>
+            </p>
+    
+            <div class="collapse" id="st1" style="padding-bottom: 10px">
+                <div class="card" style="width: 30rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Explanation for statement 1</h5>
+                        <p class="card-text" id="test0">
+                            Test
+                        </p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="collapse" id="st2" style="padding-bottom: 10px">
+                <div class="card" style="width: 80rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Explanation for statement 2</h5>
+                        <p class="card-text" id="test1">
+                            Test 
+                        </p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="collapse" id="st3" style="padding-bottom: 10px">
+                <div class="card" style="width: 80rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Explanation for statement 3</h5>
+                        <p class="card-text" id="test2">
+                            Test
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <script>
+                var inputstring = "{{Hint}}"
+                var ind = 0
+                var splitKeyValueInputArray = inputstring.split(";")
+        
+                function loadCardData() {
+                    splitKeyValueInputArray.forEach( item => {       
+                        var totn_string = 'test';
+                        document.getElementById(totn_string.concat(String(ind))).innerHTML = String(item);
+                        ind += 1
+                    });
+                }
+                loadCardData();
+            </script>
+        
         </p>
     {% endif %}
 
     
 </div>
+
+<script>
+var inputstring = "{{Statistic}}"
+console.log(inputstring)
+var inputasArray = inputstring.split(";")
+var arr1 = inputasArray[0].split("=")
+var arr2 = inputasArray[1].split("=")
+var arr3 = inputasArray[2].split("=")
+console.log(arr1)
+    window.onload = function() {
+        window.myPie = new Chart(document.getElementById("feedback0"), {
+                type: 'bar',
+                data: {
+                labels: ["True", "False"],
+                datasets: [
+                    {
+                    label: "Statistics on the results of statement 1 so far",
+                    backgroundColor: ["#00ff00", "#ff0000"],
+                    data: arr1,
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Statistics on the results of statement 1 so far'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+        });
+        window.myPie = new Chart(document.getElementById("feedback1"), {
+                type: 'bar',
+                data: {
+                labels: ["True", "False"],
+                datasets: [
+                    {
+                    label: "Statistics on the results of statement 2 so far",
+                    backgroundColor: ["#00ff00", "#ff0000"],
+                    data: arr2,
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Statistics on the results of statement 2 so far'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+        });
+        window.myPie = new Chart(document.getElementById("feedback2"), {
+                type: 'bar',
+                data: {
+                labels: ["True", "False"],
+                datasets: [
+                    {
+                    label: "Statistics on the results of statement 3 so far",
+                    backgroundColor: ["#00ff00", "#ff0000"],
+                    data: arr3,
+                    }
+                ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Statistics on the results of statement 3 so far'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
+                }
+        });
+    };
+</script>
 
 {% endblock %}

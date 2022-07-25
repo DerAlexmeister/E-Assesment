@@ -16,7 +16,6 @@ from .models import WrongStatements
 from .models import Cloze
 from .models import QAWSet
 from .models import OpenAssemblerCodeQuestions
-from .models import GatesQuestions
 
 from .models import CalculusSingleUserAnswer
 from .models import SingleChoiceUserAnswer
@@ -253,7 +252,7 @@ def generateMCQuestions(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect, message = False, "Your answer is wrong."
+            iscorrect, message = True, "Your answer is correct."
             question = ""
             NameID = ""
             raw_request = request.body.decode("UTF-8")
@@ -282,7 +281,8 @@ def generateMCQuestions(request):
                 if element in answerset:
                     answercorrect = True
                     correctcounter += 1
-                    iscorrect, message = True, "Your answer is correct."
+                else:
+                    iscorrect, message = False, "Your answer is wrong."
                 singleuseranswer = SingleMultipleChoiceUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer=element, AllAnswers=useranswer, Topic=str(cat))
                 singleuseranswer.save()
 
@@ -387,45 +387,71 @@ def generateTruthTables(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect, message, correctcounter = False, "Your answer is wrong.", 0
-            postresult = dict(request.POST)
+            iscorrect, message, correctcounter = True, "Your answer is correct.", 0
+            
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
-            postresult.pop('csrfmiddlewaretoken')
-            postresult.pop('NameID')
 
             NameID = ""
+            question_f = ""
+            qanswer = ""
+            statistic = ""
+            lastanswer = ""
+            lastanswerdate = ""
             raw_request = request.body.decode("UTF-8")
             raw_request_split = raw_request.split("&")
 
             for element in raw_request_split:
-
                 if element.startswith("NameID="):
                     NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
                 if element.startswith("BeginTime="):
                     beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
-
+                if element.startswith("Question="):
+                    question_f = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Question=", "")))
 
             qaw_set = QAWSet.objects.get(NameID=NameID)
 
-            useranswer = TruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Topic=str(cat), AllCorrect=iscorrect)
+            useranswer = TruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Topic=str(cat), AllCorrect=iscorrect, Question=question_f)
             useranswer.save()
 
-            answercorrect = False
-            for k, v in postresult.items():
-                if k in checklist:
+            for i in range(1, 4):
+                answercorrect = False
+                x = raw_request_split[i].split("=")
+                if SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).exists():
+                    lastanswer += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Answer) + ";"
+                    lastanswerdate += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Solved) + ";"
+                else:
+                    lastanswer += "not answered yet;"
+                    lastanswerdate += "not answered yet;"
+                if x[0] in checklist:
                     answercorrect = True
                     correctcounter += 1
-                    iscorrect, message = True, "Your answer is correct."
-                singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Correct=answercorrect, Answer=v[0], Question=k, AllAnswers=useranswer, Topic=str(cat))
-                singleuseranswer.save()
+                    qanswer += x[0] + "=" + x[1] + "=" "True" + ";"
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="True", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer.save()
+                else:
+                    iscorrect, message = False, "Your answer is wrong."
+                    qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="False", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer.save()
+                statistic += str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="True").count()) + "=" + str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="False").count()) + ";"
 
+            qanswer = qanswer[:-1]
+            statistic = statistic[:-1]
+            lastanswer = lastanswer[:-1]
+            lastanswerdate = lastanswerdate[:-1]
+            
             useranswer.AllCorrect = iscorrect
             useranswer.save()
 
-            message += " You answered {}/{} statements correctly.".format(correctcounter, len(postresult.items()))
+            message += " You answered {}/{} statements correctly.".format(correctcounter, "3")
            
-            return render(request, 'truthtableexample.html', {'message': message})
+            return render(request, 'truthtableexample.html', {'message': message, 'Question': question_f, 'Qanswer': qanswer, 'Statistic': statistic, 'Lastanswer': lastanswer, 'Lastanswerdate': lastanswerdate})
         else:
+            hint = ""
+            qanswer = ""
+            questionsset = Question.objects.filter(Set__NameID=(str(cat)))
+            question = randint(0, questionsset.count() - 1)
+            question_f = questionsset[question]
             beginTime = timezone.now()
             answerset = Answer.objects.filter(Set__NameID=(str(cat)))
             wrongstatementsset = WrongStatements.objects.filter(Set__NameID=(str(cat)))
@@ -441,9 +467,16 @@ def generateTruthTables(request):
 
             shuffle(statements)
 
+            for x in statements:
+                if Answer.objects.filter(Answer=(str(x))).exists():
+                    hint += str(Answer.objects.get(Answer=(str(x))).Hint) + ";"
+                else:
+                    hint += str(WrongStatements.objects.get(Statement=(str(x))).Hint) + ";"
+            hint = hint[:-1]
+
             target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            answerform = TtAnswerForm(initial={'NameID': (str(cat)), 'BeginTime': beginTime,  'Options': statements})
-            return render(request, 'truthtableexample.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target})
+            answerform = TtAnswerForm(initial={'NameID': (str(cat)), 'BeginTime': beginTime,  'Options': statements, 'Question': question_f, 'Hint': hint, 'Qanswer': qanswer})
+            return render(request, 'truthtableexample.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Question': question_f, 'Hint': hint, 'Qanswer': qanswer})
     except Exception as error:
         print(error)
     return redirect('homeview')
@@ -454,19 +487,19 @@ def generateGateQuestions(request):
     try:
         cat = request.GET.get('t', '')
         if request.method == "POST":
+            endtime = datetime.now()
             iscorrect = False 
-
+            inputq = ""
             question = ""
             expectedanswer = ""
             answer = ""
             imgpath = ""
             expectedcircuitfunction = ""
             answercircuitfunction = ""
-            raw_request = request.body.decode("UTF-8")
-            raw_request_split = raw_request.split("&")          
-            
             NameID = ""
 
+            raw_request = request.body.decode("UTF-8")
+            raw_request_split = raw_request.split("&")          
 
             for element in raw_request_split:
                 if element.startswith("Question="):
@@ -481,39 +514,41 @@ def generateGateQuestions(request):
                     expectedcircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedcircuitfunction=", "")))
                 if element.startswith("Answerircuitfunction="):
                     answercircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answerircuitfunction=", "")))
+                if element.startswith("Input="):
+                    inputq += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Input=", "")))
                 if element.startswith("NameID="):
                     NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
                 if element.startswith("BeginTime="):
                     beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
-
-            qaw_set = QAWSet.objects.get(NameID=NameID)
-
-
-
             if expectedanswer == answer and expectedcircuitfunction == answercircuitfunction:
                 iscorrect = True
-                message = "Answer and circuitfunction are both correct"
+                message = "Answer for result and circuitfunction are both correct"
             if expectedanswer == answer and expectedcircuitfunction != answercircuitfunction:
                 iscorrect = False
-                message = "Answer is correct but circuitfunction is wrong"
+                message = "Answer for result is correct but circuitfunction is wrong"
             elif expectedanswer != answer and expectedcircuitfunction == answercircuitfunction:
                 iscorrect = False
-                message = "Answer is wrong but circuitfunction is correct"
+                message = "Answer for result is wrong but circuitfunction is correct"
             elif expectedanswer != answer and expectedcircuitfunction != answercircuitfunction:
                 iscorrect = False
-                message = "Answer and circuitfunction are both wrong"
-            useranswer = GatesAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction)
-            useranswer.save()
-            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction})
-        else:
-            beginTime = timezone.now()
-            questionsset = GatesQuestions.objects.filter(Set__NameID=(str(cat)))[0]
-            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
-            imgpath, result, circuitfunction = createcircuit(questionsset.Gatesnumber)
 
-            answerform = GatesAnswerForm(initial={'Question': questionsset.Question, 'NameID': (str(cat)), 'BeginTime': beginTime, 'Expectedanswer': result, 'Expectedcircuitfunction': circuitfunction, 'Imgpath': imgpath})
-            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Imgpath': imgpath, 'Question': questionsset.Question})
+            qaw_set = QAWSet.objects.get(NameID=NameID)
+            message = "Answer for result and circuitfunction are both wrong"
+            useranswer = GatesAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction, Input=inputq)
+            useranswer.save()
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
+        else:
+            questionsset = Question.objects.filter(Set__NameID=(str(cat)))
+            question = randint(0, questionsset.count() - 1)
+            question_f = questionsset[question]
+            beginTime = timezone.now()
+            target = (QAWSet.objects.filter(NameID=(str(cat))))[0].Target
+            difficulty = (QAWSet.objects.filter(NameID=(str(cat))))[0].Difficulty
+            imgpath, result, circuitfunction, input = createcircuit(difficulty)
+
+            answerform = GatesAnswerForm(initial={'Question': question_f, 'NameID': (str(cat)), 'BeginTime': beginTime, 'Categorie': (str(cat)), 'Expectedanswer': result, 'Expectedcircuitfunction': circuitfunction, 'Imgpath': imgpath, "Input": input})
+            return render(request, 'gates.html', {'Form': answerform, 'Categorie': (str(cat)), 'Target': target, 'Imgpath': imgpath, 'Question': question_f, "Input": input})
     except Exception as error:
         print(error)
     return redirect('homeview')

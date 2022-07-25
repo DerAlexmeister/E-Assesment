@@ -65,7 +65,9 @@ class MCAnswerForm(forms.Form):
 class TtAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
-   
+    Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Qanswer = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+    Hint = forms.CharField(max_length=1024, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         try:
@@ -84,14 +86,13 @@ class OpenAssemblerAnswerForm(forms.Form):
     Question = forms.CharField(max_length=16384, widget=forms.HiddenInput())
     CodeAnswer = forms.CharField(max_length=16384, label=False, widget=forms.Textarea(attrs={"rows":5, "cols":20}))
    
-
 class GatesAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answer = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)])
-   
+    Answer = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)], widget=forms.TextInput(attrs={'class': 'form-control'}))
     Expectedcircuitfunction = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answerircuitfunction = forms.CharField(max_length=1024)
+    Answerircuitfunction = forms.CharField(max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
     Imgpath = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Expectedanswer = forms.IntegerField(widget=forms.HiddenInput())
+    Input = forms.CharField(max_length=1024, widget=forms.HiddenInput())

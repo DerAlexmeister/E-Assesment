@@ -71,6 +71,7 @@ class Question(models.Model):
 class Answer(models.Model):
     
     Answer = models.TextField(blank=False, null=False)
+    Hint = models.TextField(blank=False, null=False, default='no hint')
     Set = models.ForeignKey(QAWSet, blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -79,6 +80,7 @@ class Answer(models.Model):
 class WrongStatements(models.Model):
     
     Statement = models.TextField(blank=False, null=False)
+    Hint = models.TextField(blank=False, null=False, default='no hint')
     Set = models.ForeignKey(QAWSet, blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -140,16 +142,6 @@ class OpenAssemblerCodeQuestions(models.Model):
     def __str__(self):
         return "{}: {}".format(self.id, self.Question)
 
-class GatesQuestions(models.Model):
-
-    Question = models.CharField(max_length=1024, blank=False, null=False)
-    Created = models.DateTimeField(default=timezone.now)
-    Gatesnumber = models.IntegerField(blank=False, null=False)
-    Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return "{}: {}".format(self.id, self.Gatesnumber)
-
 class CalculusSingleUserAnswer(models.Model):
     UserID = models.CharField(max_length=1024, default='None',blank=False, null=False)
     Duration = models.IntegerField(default=0,blank=False, null=False)
@@ -208,6 +200,7 @@ class TruthTableUserAnswer(models.Model):
     Duration = models.IntegerField(default=0,blank=False, null=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
     AllCorrect = models.BooleanField(blank=False, null=False)
+    Question = models.CharField(max_length=1024, blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
     Topic = models.CharField(max_length=24, choices=TOPICS, default='None', null=False, blank=False)
 
@@ -218,8 +211,9 @@ class SingleTruthTableUserAnswer(models.Model):
     UserID = models.CharField(max_length=1024, default='None',blank=False, null=False)
     Duration = models.IntegerField(default=0,blank=False, null=False)
     Set = models.ForeignKey(QAWSet, blank=False, null=True, on_delete=models.CASCADE)
-    Question = models.CharField(max_length=1024, blank=False, null=False)
+    Statement = models.CharField(max_length=1024, blank=False, null=False)
     Answer = models.CharField(max_length=1024, blank=False, null=False)
+    Expectedanswer = models.CharField(max_length=1024, blank=False, null=False)
     Correct = models.BooleanField(blank=False, null=False)
     AllAnswers = models.ForeignKey(TruthTableUserAnswer, blank=False, null=True, default=None, on_delete=models.CASCADE)
     Solved = models.DateTimeField(default=timezone.now)
@@ -286,6 +280,7 @@ class GatesAnswer(models.Model):
     Imgpath = models.CharField(max_length=1024, null=False, blank=False)
     Expectedcircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
     Answerircuitfunction = models.CharField(max_length=1024, null=False, blank=False)
+    Input = models.CharField(max_length=1024, null=False, blank=False)
 
     def __str__(self):
         return "{} - Status: {}".format(self.Solved, self.Correct)
