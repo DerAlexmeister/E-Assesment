@@ -37,6 +37,7 @@ class NormalFormGuess(models.Model):
 
     Duration = models.IntegerField(default=0, blank=False, null=False)
     Solved = models.DateTimeField(default=timezone.now)
+    AllCorrect = models.BooleanField(blank=False, null=False)
 
     question = models.ForeignKey(NormalFormQuestion, on_delete=models.CASCADE)
     answer = models.ForeignKey(NormalFormAnswer, on_delete=models.CASCADE)

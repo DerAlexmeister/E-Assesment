@@ -170,6 +170,19 @@
           
 </div>
 </div>
+
+<div class="card">
+  <div id="container"  style="width: 100%; height: 40%">
+      <canvas id="pie-chart-normalforms"  style="width: 100%; height: 100%"></canvas>
+    </div>
+<div class="card-body">
+  <br>
+  <h5 class="card-title">Normal Forms</h5>
+  <hr>
+  <p class="card-text">Here you can see how much Normal Forms Questions have been answered right or wrong.</p>
+          
+</div>
+</div>
       </div>
       
 
@@ -344,6 +357,21 @@
               responsive: true
             }
           };
+
+          var config_NormalForm = {
+            type: 'doughnut',
+            data: {
+              datasets: [{
+                data: {{successRate_All|get__array_valueByIndex:10}},
+                backgroundColor: ['#1ef87a', '#f90000'],
+                label: 'Statistic for normal forms'
+              }],
+              labels: {{ labels|safe }}
+            },
+            options: {
+              responsive: true
+            }
+          };
   
           
          
@@ -470,7 +498,10 @@
               window.myPie = new Chart(ctx_Gates, config_Gates);    
               
               var ctx_Calculus = document.getElementById('pie-chart-calculus').getContext('2d');
-              window.myPie = new Chart(ctx_Calculus, config_Calculus);  
+              window.myPie = new Chart(ctx_Calculus, config_Calculus); 
+              
+              var ctx_NormalForms = document.getElementById('pie-chart-normalforms').getContext('2d');
+              window.myPie = new Chart(ctx_NormalForms, config_NormalForm);  
           
   
           };

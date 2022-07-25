@@ -115,4 +115,5 @@ def normal_form(request):
         )
 
     else:
+        
         return generate_task(task, qaw, request, cat)

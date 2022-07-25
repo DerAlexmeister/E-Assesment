@@ -29,6 +29,7 @@ ITEMTYPES = (
     ('Calculus','Calculus'),
     ('Assembler','Assembler'),
     ('Gates','Gates'),
+    ('NormalForm','NormalForm'),
 )
 
 CALCTYPES = (
