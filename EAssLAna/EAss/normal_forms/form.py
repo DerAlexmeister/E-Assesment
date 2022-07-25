@@ -12,7 +12,7 @@ PARSERS = {
 
 
 class NormalForm(forms.Form):
-    guess = forms.CharField(label_suffix=" = ")
+    guess = forms.CharField(label_suffix=" = ", required=False)
 
     def __init__(self, question, *args, **kwargs):
         super().__init__(*args, **kwargs)

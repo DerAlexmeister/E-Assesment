@@ -5,21 +5,47 @@ from django.shortcuts import render
 from . form import NormalForm
 from . import model
 
-from .normal_form import Question
+from .normal_form import CONJUNCTION, DISJUNCTION, Question
 from .generator import generate_randomly, generate_adaptively, Difficulty
-from .assessment import ASSESSMENTS
+from .assessment import ASSESSMENTS, DifferenceAssessment
 
 
 QUESTION_KEY = 'question'
 
+SYMBOLS = {
+    DISJUNCTION: ('∧', '∨', '*', '+'),
+    CONJUNCTION: ('∨', '∧', '+', '*')
+}
 
-def render_question(request, question, answer, category, correction = None):
+def generate_task(task, request, cat, correction = None):
+    n = task.normal_form
+    question = generate_adaptively(n)
+    request.session[QUESTION_KEY] = question.to_dict()
+
+    return render_question(
+        request,
+        question,
+        NormalForm(question),
+        cat,
+        False,
+        correction,
+    )
+
+
+def render_question(request, question, answer, category, finished, correction = None):
+    real_inner, real_outer, inner, outer = SYMBOLS[question.normal_form]
+
     return render(request, 'normal_form.html', {
         'question': question,
-        'table': question.function.table.to_html(),
+        'table': question.function.table.to_html(classes='table table-striped table-bordered table-hover table-sm'),
         'input': answer,
         'category': category,
         'correction': correction,
+        'real_inner': real_inner,
+        'real_outer': real_outer,
+        'outer': outer,
+        'inner': inner,
+        'finished': finished,
     })
 
 
@@ -31,13 +57,22 @@ def normal_form(request):
               .first()
               #.get(str(cat))
 
+    print(task.assessment)
     if request.method == 'POST':
-        assessment = ASSESSMENTS[task.assessment]
+        if 'new' in request.POST:
+            return generate_task(task, request, cat)
+
         question = Question.from_dict(request.session[QUESTION_KEY])
         answer = NormalForm(question, request.POST)
 
+        finished = False
         if answer.is_valid():
             guess = answer.cleaned_data['guess']
+            if 'check' in request.POST:
+                assessment = DifferenceAssessment()
+            else:
+                finished = True
+                assessment = ASSESSMENTS[task.assessment]
             correction = assessment.assess(guess, qaw=task.Set)
         else:
             correction = answer.errors.get('guess')
@@ -47,6 +82,7 @@ def normal_form(request):
             question,
             answer,
             cat,
+            finished,
             correction,
         )
 
@@ -60,4 +96,5 @@ def normal_form(request):
             question,
             NormalForm(question),
             cat,
+            False,
         )
