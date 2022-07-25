@@ -64,7 +64,7 @@ class GradingAssessment(Assessment):
             correction = model.NormalFormCorrection(guess=guess_model, UserID=guess_model.UserID, points=counter, total_points=len(solution.clauses))
             correction.save()
 
-        return f"You have {counter} of {len(solution.clauses)} correct!"
+        return f"{counter}/{len(solution.clauses)}"
 
 
 
@@ -125,6 +125,21 @@ class DifferenceAssessment(Assessment):
         )
         return f"<p>f(a)  =    {clause}</p>"
 
+class GradingAndDifferenceAssessment(Assessment):
+    def __init__(self):
+        self._grading = GradingAssessment()
+        self._difference = DifferenceAssessment()
+
+    def assess(self, guess: Guess, guess_model, penalty, **kwargs) -> str:
+        grading = self._grading.assess(guess, guess_model, penalty, **kwargs)
+        difference = self._difference.assess(guess, **kwargs)
+
+        return f"""
+        Correct solution ({grading}):
+            {difference}
+        </p>
+        """
+
 
 @dataclass
 class RememberingAssessment(Assessment):
@@ -159,5 +174,6 @@ ASSESSMENTS = {
     'boolean': RememberingAssessment(BooleanAssessment()),
     'grading': RememberingAssessment(GradingAssessment()),
     'correcting_boolean': RememberingAssessment(CorrectingBooleanAssessment()),
+    'grading_difference': RememberingAssessment(GradingAndDifferenceAssessment()),
     'difference': DifferenceAssessment(),
 }

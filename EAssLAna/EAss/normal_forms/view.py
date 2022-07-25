@@ -17,9 +17,9 @@ SYMBOLS = {
     CONJUNCTION: ('∨', '∧', '+', '*')
 }
 
-def generate_task(task, request, cat, correction = None):
+def generate_task(task, qaw, request, cat, correction = None):
     n = task.normal_form
-    question = generate_adaptively(n)
+    question = generate_adaptively(n, qaw, request.user)
     request.session[QUESTION_KEY] = question.to_dict()
 
     return render_question(
@@ -51,14 +51,12 @@ def render_question(request, question, answer, category, finished, correction = 
 
 def normal_form(request):
     cat = request.GET.get('t', '')
-    task = model.NormalForm\
-              .objects\
-              .filter(Set__NameID=(str(cat)))\
-              .first()
+    qaw = model.QAWSet.objects.get(NameID=str(cat))
+    task = model.NormalForm.objects.get(Set=qaw.id)
 
     if request.method == 'POST':
         if 'new' in request.POST:
-            return generate_task(task, request, cat)
+            return generate_task(task, qaw, request, cat)
 
         question = Question.from_dict(request.session[QUESTION_KEY])
         answer = NormalForm(question, request.POST)
@@ -91,8 +89,4 @@ def normal_form(request):
         )
 
     else:
-        n = task.normal_form
-        question = generate_adaptively(n)
-        request.session[QUESTION_KEY] = question.to_dict()
-
-        return generate_task(task, request, cat)
+        return generate_task(task, qaw, request, cat)
