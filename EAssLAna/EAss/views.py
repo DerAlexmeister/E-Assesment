@@ -377,9 +377,22 @@ def clozeTextGenerator(request):
         cloze_form = ClozeForm(len(cloze.gaps), request.POST)
         cloze_items = []
 
-        print(cloze.gaps)
+
         for i, gap in enumerate(cloze.gaps):
-            cloze_items.extend([text_style(gap.preceeding_text), cloze_form[ClozeForm.get_gap_key(i)], text_style(gap.succeeding_text) ])
+            guess = gaps[i]
+
+            answer = cloze_form.data[ClozeForm.get_gap_key(i)]
+            solution_text = "{" + ", ".join(map(str, gap.solutions)) +"}"
+            if normalise(guess) in map(normalise, gap.solutions):
+                correction = f"<span style=\"color:green\">{answer}</span>"
+            else:
+                correction = f"""
+                    <span style=\"color:red;text-decoration:line-through\">{answer}</span>
+                    <span style=\"color:green">{solution_text}</span>
+                """
+            print(correction)
+
+            cloze_items.extend([text_style(gap.preceeding_text), correction, text_style(gap.succeeding_text) ])
 
         return render(request, 'cloze_text.html',  {
             'cloze_items': cloze_items,
@@ -401,7 +414,6 @@ def clozeTextGenerator(request):
 
         cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': str(cat)})
         cloze_items = []
-        print(cloze.gaps)
 
 
         for i, gap in enumerate(cloze.gaps):
