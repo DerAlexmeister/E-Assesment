@@ -30,9 +30,7 @@
 
         function loadTableData(items) {
             const table = document.getElementById("testBody");
-            console.log(items)
             inputasArray.forEach( item => {
-                console.log(item)
                 var splitKeyValueInputArray = item.split("=")
                 let row = table.insertRow();
                 let input = row.insertCell(0);
@@ -47,11 +45,11 @@
 
         {% if correct %}
             <div class="alert alert-success" role="alert">
-                {{message}}
+                ✔️ {{message}}
             </div>
         {% else %}
             <div class="alert alert-danger" role="alert">
-                {{message}}
+                ❌ {{message}}
             </div>
         {% endif %}
 
@@ -220,7 +218,8 @@
             
             <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
-                {{Form}}
+                {{ Form.as_p }}
+                <br>
                 <button type="submit" class="btn btn-info">Answer</button>
             </form>
         </p>

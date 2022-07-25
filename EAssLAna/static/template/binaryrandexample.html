@@ -129,6 +129,8 @@
                     <form action="/eassessments/{{Target}}/" method="post">
                         {% csrf_token %}
                         {{Form.Answer}}
+                        {{Form.NameID}}
+                        {{Form.BeginTime}}
                         {{Form.Question}}<br><br>
                         <button type="submit" class="btn btn-success">Submit your answer</button>
                     </form>

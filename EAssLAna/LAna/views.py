@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, time
 
 from django.shortcuts import render
 from django.shortcuts import redirect
@@ -7,6 +7,8 @@ from EAss.models import CalculusSingleUserAnswer
 from EAss.models import OpenAssemblerAnswer
 
 from EAss.assembly import parser
+
+from EAss.models import QAWSet
 
 def assemblerAnalysis(request):
     try:
@@ -92,14 +94,35 @@ def handleAssemblerAnalytics(request):
     return redirect('lahomeview')
 
 def index(request):
+    if not request.user.is_authenticated:
+        return redirect("/")
     try:
-        calc_c, calc_ic = calcUserCIR(CalculusSingleUserAnswer.objects.all().order_by('-Solved'))
-        ass_c, ass_ic = calcUserCIR(OpenAssemblerAnswer.objects.all().order_by('-Solved'))
-        data = {
-            "labels": ['Correct', 'Incorrect'], 
-            "datacalc": [calc_c, calc_ic],
-            "dataassembler": [ass_c, ass_ic],
-        }
+      
+
+
+        return render(request, 'laindex.html', data)
+    except Exception as error:
+        print(error)
+    return redirect('lahomeview')
+
+def index(request):
+    if not request.user.is_authenticated:
+        return redirect("/")
+    try:
+        topics, data = ['Computer-Models', 'Gates', 'Calculus', 'Optimization', 'Assembler', 'Quantencomputing'], {}
+
+        for topic in topics:
+            data[topic.replace("-", "")] = assets if (assets := QAWSet.objects.filter(Topic=topic)) is not None and len(assets) else []
+
+
+
+        if request.user.is_superuser:
+            user = "Teacher"
+        else:
+            user = request.user.id
+
+        data["labels"] = ['Correct', 'Incorrect']
+        data["user"] = user
         return render(request, 'laindex.html', data)
     except Exception as error:
         print(error)

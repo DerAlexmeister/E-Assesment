@@ -1,21 +1,31 @@
-<!DOCTYPE html>
-<html>
-    <body>
-        <h1>Normal forms</h1>
+{% extends "master.html" %}
+
+{% block title %} Index E-Assessments {% endblock %}
+
+{% block content %}
+
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px; padding-right: 40px;">
         <div>
-            <p> A boolean function {{question.function_name}}({{question.function.variables|join:", "}})
-                is given by the following truth table. Derive its <b>{{question.normal_form}}</b> normal form.
+            <p> A boolean function {{question.function_name}}
+                ({{question.function.variables|join:", "}})
+                is given by the following truth table.
+                Derive its <b>{{question.normal_form}}</b> normal form.
             </p>
             {{table|safe}}
         </div>
         <div>
-            <p>Denote AND as "*", OR as "+" and NOT as "-". </p>
-            <form action="/eassessments/normalform/", method="post">
+            <p>Denote conjunction as *, disjunction as + and negation as -. </p>
+            <form action="/eassessments/normalform/?t={{category}}", method="post">
                 {% csrf_token %}
                 {{input}}
                 <br>
                 <button type="submit">Save</button>
             </form>
         </div>
-    </body>
-</html>
+        {% if correction %}
+        {{correction|safe}}
+        {% endif %}
+
+</div>
+
+{% endblock %}

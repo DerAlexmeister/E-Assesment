@@ -1,46 +1,63 @@
-import numpy as np
-import pandas as pd
-
-from django.shortcuts import render
 from django.http.response import HttpResponse
 
-from random import choice
+from django.shortcuts import render
 
-from .form import NormalForm
-from .normal_form import BooleanAssessment, TruthTable, Question, DISJUNCTION, CONJUNCTION
-from ..core import generateNumbers
+from . form import NormalForm
+from . import model
+
+from .normal_form import Question
+from .generator import generate_randomly, generate_adaptively, Difficulty
+from .assessment import ASSESSMENTS
+
+
+QUESTION_KEY = 'question'
+
+
+def render_question(request, question, answer, category, correction = None):
+    return render(request, 'normal_form.html', {
+        'question': question,
+        'table': question.function.table.to_html(),
+        'input': answer,
+        'category': category,
+        'correction': correction,
+    })
 
 
 def normal_form(request):
+    cat = request.GET.get('t', '')
+    task = model.NormalForm\
+              .objects\
+              .filter(Set__NameID=(str(cat)))\
+              .first()
+              #.get(str(cat))
+
     if request.method == 'POST':
-        assessment = BooleanAssessment()
-        table = TruthTable.from_dict(request.session['table'])
-        normal_form = request.session['normal_form']
+        assessment = ASSESSMENTS[task.assessment]
+        question = Question.from_dict(request.session[QUESTION_KEY])
+        answer = NormalForm(question, request.POST)
 
-        question = Question(normal_form, table)
-        guess = NormalForm(table.variables, request.POST)
-
-        if guess.is_valid():
-            return render(request, 'normal_form.html', {
-                'question': question,
-                'table': question.function.table.to_html(),
-                'input': guess,
-            })
+        if answer.is_valid():
+            guess = answer.cleaned_data['guess']
+            correction = assessment.assess(guess, qaw=task.Set)
         else:
-            return HttpResponse(guess.errors.get('guess'))
+            correction = answer.errors.get('guess')
+
+        return render_question(
+            request,
+            question,
+            answer,
+            cat,
+            correction,
+        )
+
     else:
-        variables = {"a", "b"}
-        results = generateNumbers(1, 2**len(variables))
-        table = TruthTable.create(variables, "f", results)
-        normal_form = choice([DISJUNCTION, CONJUNCTION])
+        n = task.normal_form
+        question = generate_adaptively(n)
+        request.session[QUESTION_KEY] = question.to_dict()
 
-        question = Question(normal_form, table)
-
-        request.session['table'] = table.to_dict()
-        request.session['normal_form'] = normal_form
-
-        return render(request, 'normal_form.html', {
-            'question': question,
-            'table': question.function.table.to_html(),
-            'input': NormalForm(question.function.variables),
-        })
+        return render_question(
+            request,
+            question,
+            NormalForm(question),
+            cat,
+        )

@@ -1,0 +1,11 @@
+{% load template_tags %}
+
+<!-- Load Variables via template tags -->
+{% get_SuccessRate_Week user as successRate_Week %}
+{% get_SuccessRate_Today user as successRate_Today %}
+{% get_SuccessRate_All user as successRate_All %}
+
+{% get_UserAnsweredTopics_Count user as AnsweredTopics %}
+
+<h2>Your Progress</h2>
+{% include "laindex_person.html" %}

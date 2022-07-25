@@ -14,6 +14,7 @@ from .views import generateTruthTables
 from .views import returnMasterTemplate
 from .views import generateOpenAssemblerQuestions
 from .views import generateGateQuestions
+from .normal_forms.view import normal_form
 
 urlpatterns = [
     ## Production
@@ -26,6 +27,7 @@ urlpatterns = [
     path('ttgenerator/', generateTruthTables),
     path('oagenerator/', generateOpenAssemblerQuestions),
     path('gatesgenerator/', generateGateQuestions),
+    path('normalform/', normal_form),
 
     ## Examples 
     path('example/', generateMCExample),
