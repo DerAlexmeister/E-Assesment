@@ -2,9 +2,14 @@ import urllib.parse
 import json
 
 from django.http.response import HttpResponse
+from django.contrib.auth import login, authenticate
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import auth
+from .forms import SignUpForm
+
+
+
 
 
 def user_login(request):
@@ -30,5 +35,18 @@ def user_login(request):
 def user_logout(request):
     print('Loggin out {}'.format(request.user))
     auth.logout(request)
-    print(request.user)
-    return render(request,'logout.html') 
+    return render(request,'logout.html')
+
+def user_signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('homeview')
+    else:
+        form = SignUpForm()
+    return render(request, 'registration/signup.html', {'form': form})

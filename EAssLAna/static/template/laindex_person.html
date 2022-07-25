@@ -1,33 +1,55 @@
 {% load template_tags %}
 
-<div class="card-group">
+{% get_SuccessRate_Week user as successRate_Week %}
+{% get_SuccessRate_Today user  as successRate_Today %}
+{% get_SuccessRate_All user  as successRate_All %}
 
-    <div class="card">
-      <div id="container" style="width: 300px; height: 150px;">
-            {% if successRate_Today|get__array_valueByIndex:0 > 60 %}
-            <h2 class="text-success">{{successRate_Today|get__array_valueByIndex:0}}%</h2>
+{% get_UserAnsweredTopics_Count user as AnsweredTopics %}
+
+{% with today_successRate=successRate_Today|get__array_valueByIndex:0 %}
+{% with today_answerCount=successRate_Today|get__array_valueByIndex:1 %}
+{% with today_correct_answerCount=successRate_Today|get__array_valueByIndex:2 %}
+{% with today_incorrect_answerCount=successRate_Today|get__array_valueByIndex:3 %}
+
+
+<div class="card-group"  style="width: 100%; height: 500px">
+
+    <div class="card" >
+      <div id="container" style="width: 100%; height: 100%; padding-left: 80px; padding-top: 80px; padding-right: 80px;">
+      
+            {% if today_successRate > 60 %}
+            <h1 class="text-success">{{today_successRate}%</h1>
+            {% elif today_successRate > 30 %}
+            <h1 class="text-warning">{{today_successRate}}%</h1>
             {% else %} 
-                  {% if successRate_Today|get__array_valueByIndex:0 %}
-                  <p class="text-warning">{{successRate_Today|get__array_valueByIndex:0}}%</p>
-                  {% else %} 
-                  <p class="text-danger">{{successRate_Today|get__array_valueByIndex:0}}%</p>
-                  {% endif %}
+            <h1 class="text-danger">{{today_successRate}}%</h1>
             {% endif %}
-          <h3>Answer Count: {{successRate_Today|get__array_valueByIndex:1}}</h3>
-          <h3>Correctly Answered: {{successRate_Today|get__array_valueByIndex:2}}</h3>
-          <h3>Incorrectly Answered: {{successRate_Today|get__array_valueByIndex:3}}</h3>
-        </div>
+          <h3>Answer Count: {{today_answerCount}}</h3>
+          <div class="alert alert-success" role="alert">
+            ✔️ Correctly Answered: {{today_correct_answerCount}}
+          </div>
 
+            <div class="alert alert-danger" role="alert">
+              ❌ Incorrectly Answered: {{today_incorrect_answerCount}}</div>
+        </div>
+        <div class="card-body">
+          <br>
+          <h5 class="card-title">Today's Progress</h5>
+          <hr>
+          <p class="card-text">Here you can see how much Questions have been answered correctly today.</p>
+        </div>
+       
     </div>
   
-    <div class="card">
-      <div id="container" style="width: 300px; height: 150px;">
-        <canvas id="pie-linechart-week" width="300" height="200"></canvas>
+    <div class="card" style="flex-grow:2">
+      <div id="container"  style="width: 100%; height: 100%">
+        <canvas id="pie-linechart-week"  style="width: 100%; height: 100%"></canvas>
       </div>
     <div class="card-body">
       <br>
       <h5 class="card-title">Weekly Progress</h5>
-      <p class="card-text">Here you can see how much Questions you have answered right or wrong.</p>
+      <hr>
+      <p class="card-text">Here you can see how much Questions have been answered right this week.</p>
     </div>
     </div>
   
@@ -35,114 +57,181 @@
   <br>
   
   <h2>Task Types Overview</h2>
-        <div class="card-group">
+        <div class="card-group" style="width: 100%; height: 400px">
           
           <div class="card">
-            <div id="container" style="width: 300px; height: 150px;">
-                <canvas id="pie-chart-sc"></canvas>
+            <div id="container" style="width: 100%; height: 100%">
+                <canvas id="pie-chart-sc" style="width: 100%; height: 100%"></canvas>
               </div>
           <div class="card-body">
             <br>
-            <h5 class="card-title">single choice overview</h5>
-            <p class="card-text">Here you can see how much Single Choice Questions you have answered right or wrong.</p>
-            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+            <h5 class="card-title">Single Choice</h5>
+            <hr>
+            <p class="card-text">Here you can see how much Single Choice Questions have been answered right or wrong.</p>
           </div>
           </div>
   
           <div class="card">
-            <div id="container" style="width: 300px; height: 150px;">
-                <canvas id="pie-chart-mc"></canvas>
+            <div id="container" style="width: 100%; height: 100%">
+                <canvas id="pie-chart-mc" style="width: 100%; height: 100%"></canvas>
               </div>
           <div class="card-body">
             <br>
-            <h5 class="card-title">multiple choice overview</h5>
-            <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
-            <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+            <h5 class="card-title">Multiple Choice</h5>
+            <hr>
+            <p class="card-text">Here you can see how much Multiple Choice Questions have been answered right or wrong.</p>
           </div>
         </div>
   
   
       <div class="card">
-        <div id="container" style="width: 300px; height: 150px;">
-            <canvas id="pie-chart-cloze"></canvas>
+        <div id="container"  style="width: 100%; height: 40%">
+            <canvas id="pie-chart-cloze"  style="width: 100%; height: 100%"></canvas>
           </div>
       <div class="card-body">
         <br>
-        <h5 class="card-title">cloze overview</h5>
-        <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
-        <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        <h5 class="card-title">Cloze Text</h5>
+        <hr>
+        <p class="card-text">Here you can see how much Single Choice Questions have been answered right or wrong.</p>
+          
       </div>
     </div>
   
   
     <div class="card">
-        <div id="container" style="width: 300px; height: 150px;">
-            <canvas id="pie-chart-truthtable"></canvas>
+        <div id="container"  style="width: 100%; height: 40%">
+            <canvas id="pie-chart-truthtable"  style="width: 100%; height: 100%"></canvas>
           </div>
       <div class="card-body">
         <br>
-        <h5 class="card-title">truth table overview</h5>
-        <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
-        <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+        <h5 class="card-title">Truth Table</h5>
+        <hr>
+        <p class="card-text">Here you can see how much Single Choice Questions have been answered right or wrong.</p>
+
+        
       </div>
     </div>
   
     <div class="card">
-      <div id="container" style="width: 300px; height: 150px;">
-          <canvas id="pie-chart-oassembler"></canvas>
+      <div id="container"  style="width: 100%; height: 40%">
+          <canvas id="pie-chart-oassembler"  style="width: 100%; height: 100%"></canvas>
         </div>
     <div class="card-body">
       <br>
-      <h5 class="card-title">open assembler table overview</h5>
-      <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
-      <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+      <h5 class="card-title">Open Assembler</h5>
+      <hr>
+      <p class="card-text">Here you can see how much Open Assembler Questions have been answered right or wrong.</p>
+      
+
+      {% if not successRate_All|get__array_valueByIndex:7|get_list_empty %}
+      {% if request.user.is_superuser %}
+        {% if user == "Teacher" %}
+        
+        <p class="card-text" ><a href="/learninganalytics/assembleranalysis" class="btn btn-info">View more</a></p>
+
+        {% else %}
+        <p class="card-text" ><a href="/learninganalytics/assembleranalysis?u={{user}}" class="btn btn-info">View more</a></p>
+
+        {% endif %}
+
+      {% else %}
+      <p class="card-text" ><a href="/learninganalytics/assembleranalysis" class="btn btn-info">View more</a></p>
+
+    {% endif %}
+    {% endif %}
+
+
+
     </div>
   </div>
   
   <div class="card">
-    <div id="container" style="width: 300px; height: 150px;">
-        <canvas id="pie-chart-gates"></canvas>
+    <div id="container"  style="width: 100%; height: 40%">
+        <canvas id="pie-chart-gates"  style="width: 100%; height: 100%"></canvas>
       </div>
   <div class="card-body">
     <br>
-    <h5 class="card-title">gates overview</h5>
-    <p class="card-text">Here you can see how much Multiple Choice Questions you have answered right or wrong.</p>
-    <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
+    <h5 class="card-title">Gates</h5>
+    <hr>
+    <p class="card-text">Here you can see how much Gate Questions have been answered right or wrong.</p>
+          
   </div>
   </div>
+
+<div class="card">
+  <div id="container"  style="width: 100%; height: 40%">
+      <canvas id="pie-chart-calculus"  style="width: 100%; height: 100%"></canvas>
+    </div>
+<div class="card-body">
+  <br>
+  <h5 class="card-title">Calculus</h5>
+  <hr>
+  <p class="card-text">Here you can see how much Calculus Questions have been answered right or wrong.</p>
+          
+</div>
+</div>
       </div>
+      
+
   
-      <br><br>
+      <br>
+      <br>
+      <br>
+
   
-        <div class="card-group-two">
-        <h2>Broader Overview</h2>
-        <div class="card">
-          <div id="container" style="width: 300px; height: 150px;">
-              <canvas id="topics-radar-bin"></canvas>
+      
+      <h2>Topics Overview</h2>
+    <div class="card-group" style="width: 100%; height: 900px">
+
+        
+        <div class="card"  style="width: 100%; height: 100%">
+          <div id="container"  style="width: 100%; height: 100%">
+              <canvas id="topics-radar-bin"  style="width: 100%; height: 100%"></canvas>
             </div>
         <div class="card-body">
           <br>
-          <h5 class="card-title">topics overview</h5>
+          <h5 class="card-title">Topics Overview</h5>
+          <hr>
           <p class="card-text">Here you can see your learning percentage concering the different available topics to learn from and practice.</p>
-          <p class="card-text"><a href="#" class="btn btn-info">View more</a></p>
         </div>
       </div>
-    </div>
-  
-        <br>
-        <br>
-        <h2>Questions Analytics</h2>
 
-        <div class="card">
+      <!-- <div class="card">
+        <div id="container"  style="width: 100%; height: 40%">
+          <div class="vstack gap-3">
+            <div class="bg-light border">A</div>
+            <div class="bg-light border">Second item</div>
+            <div class="bg-light border">Third item</div>
+          </div>
+          </div>
+      <div class="card-body">
+        <br>
+        <h5 class="card-title">gates</h5>
+        <p class="card-text">.</p>
+      </div> -->
+      
+    </div>
+  </div>
+        <br>
+        <br>
+
+        <h2>Question Specific</h2>
+        <div class="card-group" style="width: 100%; height: 100%">
+        <div class="card" style="width: 100%; height: 100%">
             
             <div id="container" style="padding-left: 10px; padding-top: 10px;">
                 {% include "index-analytics.html" %}
               </div>
-         
-          </div>
-
+              <div class="card-body">
+               
+                <h5 class="card-title">Questions Overview</h5>
+                <hr>
+                <p class="card-text">Here you can see the average duration and current success rate of each solved question.</p>
+              </div>
             </div>
-        
+            </div>
+        </div>
+        </div>
         
         <script>
           
@@ -154,12 +243,13 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:3}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for single choice'
               }],
               labels: {{ labels|safe }}
             },
             options: {
-              responsive: true
+              responsive: true,
+        
             }
           };
   
@@ -169,7 +259,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:4}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for multiple choice'
               }],
               labels: {{ labels|safe }}
             },
@@ -184,7 +274,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:5}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for cloze text'
               }],
               labels: {{ labels|safe }}
             },
@@ -200,7 +290,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:6}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for truth table'
               }],
               labels: {{ labels|safe }}
             },
@@ -215,7 +305,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:7}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for assembler'
               }],
               labels: {{ labels|safe }}
             },
@@ -223,8 +313,7 @@
               responsive: true
             }
           };
-  
-          
+
           var config_Gates = {
             type: 'doughnut',
             data: {
@@ -239,22 +328,41 @@
               responsive: true
             }
           };
+
+          var config_Calculus = {
+            type: 'doughnut',
+            data: {
+              datasets: [{
+                data: {{successRate_All|get__array_valueByIndex:8}},
+                backgroundColor: ['#1ef87a', '#f90000'],
+                label: 'Statistic for calculus'
+              }],
+              labels: {{ labels|safe }}
+            },
+            options: {
+              responsive: true
+            }
+          };
+  
+          
+         
   
           const data_AnsweredQuestions_Week = {
             labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday','Saturday','Sunday'],
             datasets: [
               {
-              label: 'Overall',
+              label: 'All',
               data: {{successRate_Week|get__array_valueByIndex:0}},
               fill: false,
-              borderColor: 'rgb(75, 192, 192)',
+              borderColor: 'rgb(90, 12, 192)',
+             
               tension: 0.1
             },
             {
               label: 'Correct',
               data: {{successRate_Week|get__array_valueByIndex:1}},
               fill: false,
-              borderColor: 'rgb(90, 12, 192)',
+              borderColor: 'rgb(75, 192, 192)',
               tension: 0.1
             }
               ]
@@ -273,7 +381,14 @@
                 display: true,
                 text: 'Chart.js Line Chart'
               }
-            }
+            },
+            scales: {
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+              }]
+          }
           },
         };
         
@@ -282,22 +397,23 @@
             datasets: [{  label: 'Correct',
               data: {{AnsweredTopics|get__array_valueByIndex:2|safe}},
               fill: true,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgb(54, 162, 235)',
-              pointBackgroundColor: 'rgb(54, 162, 235)',
+              backgroundColor: 'rgb(75, 192, 192)',
+              borderColor: 'rgb(75, 192, 192)',
+              pointBackgroundColor: 'rgb(75, 192, 192)',
               pointBorderColor: '#fff',
               pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: 'rgb(54, 162, 235)'
+              pointHoverBorderColor: 'rgb(75, 192, 192)',
             },{
               label: 'All',
               data: {{AnsweredTopics|get__array_valueByIndex:1|safe}},
               fill: true,
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgb(255, 99, 132)',
-              pointBackgroundColor: 'rgb(255, 99, 132)',
+              backgroundColor: 'rgb(90, 12, 192)',
+              borderColor: 'rgb(90, 12, 192)',
+              pointBackgroundColor: 'rgb(90, 12, 192)',
               pointBorderColor: '#fff',
               pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: 'rgb(255, 99, 132)'
+              pointHoverBorderColor: 'rgb(90, 12, 192)',
+              
             }
             ]
           };
@@ -310,7 +426,16 @@
                 line: {
                   borderWidth: 3
                 }
-              }
+              },
+              scale: {
+                ticks: {
+                    beginAtZero: true,
+                    min: 0,
+                    stepSize: 1
+                   }
+                }
+            
+        
             },
           };
   
@@ -341,10 +466,17 @@
               window.myPie = new Chart(ctx_OpenAssembler, config_OpenAssembler);
   
               var ctx_Gates = document.getElementById('pie-chart-gates').getContext('2d');
-              window.myPie = new Chart(ctx_Gates, config_Gates);     
+              window.myPie = new Chart(ctx_Gates, config_Gates);    
+              
+              var ctx_Calculus = document.getElementById('pie-chart-calculus').getContext('2d');
+              window.myPie = new Chart(ctx_Calculus, config_Calculus);  
           
   
           };
         </script>
     
   </div>
+{% endwith %}
+{% endwith %}
+{% endwith %}
+{% endwith %}

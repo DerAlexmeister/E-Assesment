@@ -1,12 +1,59 @@
 {% load template_tags %}
 
-<!-- Load Variables via template tags -->
-{% get_SuccessRate_Week_Admin as successRate_Week %}
-{% get_SuccessRate_Today_Admin  as successRate_Today %}
-{% get_SuccessRate_All_Admin  as successRate_All %}
+{% get_user_data user as student_person_data %}
+{% get_users as users %}
+{% with username=student_person_data|get__array_valueByIndex:0 realname=student_person_data|get__array_valueByIndex:1 %}
+           
 
-{% get_UserAnsweredTopics_Count_Admin as AnsweredTopics %}
+<div class="container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#home">
+            {% if request.user.is_superuser %}
+            {% if user == "Teacher" %}
+               <h2>All Students</h2>
+            {% else %}
+               <h2>#{{user}}: {{username}}</h2>
+             {% endif %}
+           {% endif %}</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Select student</a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/learninganalytics/">Everyone</a>
+            <div class="dropdown-divider"></div>
 
-<h2>Students' Progress</h2>
+            {% for user in users %}
+              {% if not user.is_superuser %}
+                <a class="dropdown-item" href="/learninganalytics/?t={{user.id}}">#{{user.id}}: {{user.id|get_user_username}}: {{user.id|get_user_realname}}</a>
+              {% endif %}
+            {% endfor %}
 
-{% include "laindex_person.html" %}
+          </div>
+        </li>
+      </ul>
+    
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div class="tab-pane container active" id="home"><div id="SHI">
+          <br>
+          {% if request.user.is_superuser %}
+           {% if user == "Teacher" %}
+              <h2>Everyones' Progress</h2>
+           {% else %}
+              <h2>{{realname}}'s Progress</h2>
+            {% endif %}
+          {% endif %}
+         
+          {% include "laindex_person.html" %}</div>
+        <div class="tab-pane container fade" id="menu1">The Manchester Baby, also known as the Small-Scale Experimental Machine, was the world's first electronic stored-program computer. It was built at the University of Manchester, UK, by Frederic C. Williams, Tom Kilburn, and Geoff Tootill, and ran its first program on 21 June 1948, seventy-one years ago</div>
+        <div class="tab-pane container fade" id="menu2">...</div>
+      </div>
+
+  </div>
+  {% endwith %}
+
+
+
+
+

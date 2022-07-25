@@ -1,0 +1,26 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
+    
+  <h2>Sign up</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-lg active">Sign up</button>
+    <a href="/accounts/login" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Log In</a>
+
+  </form>
+  </div>
+{% endblock %}
