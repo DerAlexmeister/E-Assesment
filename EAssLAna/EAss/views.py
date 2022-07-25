@@ -317,6 +317,7 @@ def generateMCQuestions(request):
         print(error)
     return redirect('homeview')
 
+
 ######
 def clozeTextGenerator(request):
     if not request.user.is_authenticated:
@@ -346,7 +347,7 @@ def clozeTextGenerator(request):
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
 
-        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Topic=str(cat), AllCorrect=iscorrect)
+        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Topic=str(cat), AllCorrect=iscorrect)
         useranswer.save()
 
         for guess, solution in zip(gaps, cloze.gaps):
@@ -375,10 +376,14 @@ def clozeTextGenerator(request):
         cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': (str(cat))}, )
         cloze_items = []
 
+        def text_style(text):
+            return f"<span style=\"line-height: 3\">{text}</span>"
+
         for i, gap in enumerate(cloze.gaps):
-            cloze_items.extend([gap.preceeding_text, cloze_form[ClozeForm.get_gap_key(i)], gap.succeeding_text, ])
+            cloze_items.extend([text_style(gap.preceeding_text), cloze_form[ClozeForm.get_gap_key(i)], text_style(gap.succeeding_text) ])
 
         return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": (str(cat)), "Target": qaw.Target})
+
 
 def generateTruthTables(request):
     if not request.user.is_authenticated:
@@ -490,6 +495,7 @@ def generateTruthTables(request):
     except Exception as error:
         print(error)
     return redirect('homeview')
+
 
 def generateGateQuestions(request):
     if not request.user.is_authenticated:
@@ -669,6 +675,7 @@ def generateMCExample(request):
     except Exception as error:
         print(error)
     return render(request, 'multiplechoiceexample.html')
+
 
 def generateBinaryExpression(request):
     try:
