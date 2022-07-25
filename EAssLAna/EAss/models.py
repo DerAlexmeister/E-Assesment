@@ -37,17 +37,6 @@ CALCTYPES = (
     ('Octa', 'Octa'),
 )
 
-GATES = (
-    ('NOT','NOT'),
-    ('AND', 'AND'),
-    ('OR', 'OR'),
-    ('NAND', 'NAND'),
-    ('NOR', 'NOR'),
-    ('XOR', 'XOR'),
-    ('XNOR', 'XNOR'),
-    ('Normal Form', 'Normal Form')
-)
-
 class QAWSet(models.Model):
 
     title = models.CharField(max_length=16384, blank=False, null=False)
