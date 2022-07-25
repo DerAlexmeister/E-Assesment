@@ -48,7 +48,10 @@ def equalizeLists(alist, blist):
 def handleAssemblerAnalytics(request):
     try:
         target = request.GET.get('t', '')
+        specific_userID = request.GET.get('u', '')
+
         if request.method == "GET" and target != '':
+
             answer = OpenAssemblerAnswer.objects.get(id=target)
             u_parsed = parser(answer.Answer)
             u_parsed.eval()
@@ -87,36 +90,49 @@ def handleAssemblerAnalytics(request):
                 }
             return render(request, 'assemblerdetails.html', data)
         else:
-            data = {"AssemblerAnswers": OpenAssemblerAnswer.objects.all().order_by('-Solved'),}
+            if not request.user.is_superuser:
+                answers = OpenAssemblerAnswer.objects.filter(UserID=request.user.id)
+            else:
+                if specific_userID != '':
+                    print(specific_userID)
+                    answers = OpenAssemblerAnswer.objects.filter(UserID=specific_userID)
+                else:
+                    print("no")
+                    answers = OpenAssemblerAnswer.objects.all().order_by('-Solved')
+
+            data = {"AssemblerAnswers": answers,}
             return render(request, 'assemblerov.html', data)
     except Exception as error:
         print(error)
     return redirect('lahomeview')
 
-def index(request):
-    if not request.user.is_authenticated:
-        return redirect("/")
-    try:
+# def index(request):
+#     if not request.user.is_authenticated:
+#         return redirect("/")
+#     try:
       
 
 
-        return render(request, 'laindex.html', data)
-    except Exception as error:
-        print(error)
-    return redirect('lahomeview')
+#         return render(request, 'laindex.html', data)
+#     except Exception as error:
+#         print(error)
+#     return redirect('lahomeview')
 
 def index(request):
     if not request.user.is_authenticated:
         return redirect("/")
     try:
+        target = request.GET.get('t', '')
+       
         topics, data = ['Computer-Models', 'Gates', 'Calculus', 'Optimization', 'Assembler', 'Quantencomputing'], {}
 
         for topic in topics:
             data[topic.replace("-", "")] = assets if (assets := QAWSet.objects.filter(Topic=topic)) is not None and len(assets) else []
 
 
-
-        if request.user.is_superuser:
+        if request.method == "GET" and target != '':
+            user = target
+        elif request.user.is_superuser:
             user = "Teacher"
         else:
             user = request.user.id

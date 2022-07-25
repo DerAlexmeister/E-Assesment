@@ -18,6 +18,57 @@ register = template.Library()
 tz = pytz.timezone('Europe/Berlin')
 
 @register.filter
+def get_list_empty(list):
+    try:
+        for i in list:
+            if i != 0 and i != None:
+                return False
+        return True
+    except:
+        return False
+   
+
+
+@register.simple_tag
+def get_users():
+    User = get_user_model()
+    return User.objects.all()
+
+@register.filter
+def get_user_realname(user_id):
+    if user_id == "Teacher":
+        return None
+    try:
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+        return user.get_full_name()
+    except  User.DoesNotExist:
+        return None
+
+
+@register.filter
+def get_user_username(user_id):
+    if user_id == "Teacher":
+        return None
+    try:
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+        return user.get_username()
+    except  User.DoesNotExist:
+        return None
+
+@register.simple_tag
+def get_user_data(user_id):
+    if user_id == "Teacher":
+        return None
+    try:
+        User = get_user_model()
+        user = User.objects.get(id=user_id)
+        return [user.get_username(), user.get_full_name()]
+    except  User.DoesNotExist:
+        return None
+
+@register.filter
 def get_week():
   
   cur_day = datetime.now()
@@ -129,8 +180,14 @@ def get_Topic_SpecificQuestion_UserData(qawset,user_id):
     else:
         answers = get_Topic_SpecificQuestion_Answers(qawset.ItemType,user_id)
 
+    if(answers == None):
+        return None
     correct, incorrect = get_SuccessRate_Specific(answers)
-    return [get_Percentage(correct,correct+incorrect),correct,incorrect]
+    if(correct+incorrect == 0):
+        return None
+    else:
+        duration = get_Duration_Specific(answers)
+        return [int(get_Percentage(correct,correct+incorrect)),correct,incorrect,duration]
 
 
 @register.simple_tag
@@ -155,6 +212,9 @@ def get_Topic_SpecificQuestion_Answers_Admin(answerType):
     if(answerType == "Gates"):
         answers = GatesAnswer.objects.all()
 
+    if(answerType == "Calculus"):
+        answers = CalculusSingleUserAnswer.objects.all()
+
     return answers
 
 @register.simple_tag
@@ -178,6 +238,9 @@ def get_Topic_SpecificQuestion_Answers(answerType,user_id):
 
     if(answerType == "Gates"):
         answers = GatesAnswer.objects.filter(UserID=user_id)
+
+    if(answerType == "Calculus"):
+        answers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
 
     return answers  
 
@@ -222,19 +285,21 @@ def get_SuccessRate_Today_Admin():
             except:
                 pass
 
-    return [get_Percentage(valuesToday[1],valuesToday[0]),valuesToday[0],valuesToday[1],valuesToday[2]]
+    return [int(get_Percentage(valuesToday[1],valuesToday[0])),valuesToday[0],valuesToday[1],valuesToday[2]]
 
 
 
 
 @register.simple_tag
 def get_SuccessRate_Today(user_id):
+    if user_id == "Teacher":
+        return get_SuccessRate_Today_Admin();
     date_min, date_max = get_TimeRange_Today()
     valuesToday = get_SuccessRate_All_DateRange(user_id, date_min, date_max)
     if valuesToday[0] == 0:
         return [0,0,0,0]
     else:
-        return [get_Percentage(valuesToday[1],valuesToday[0]),valuesToday[0],valuesToday[1],valuesToday[2]]
+        return [int(get_Percentage(valuesToday[1],valuesToday[0])),valuesToday[0],valuesToday[1],valuesToday[2]]
 
 
 @register.simple_tag
@@ -258,6 +323,8 @@ def get_SuccessRate_Week_Admin():
 
 @register.simple_tag
 def get_SuccessRate_Week(user_id):
+    if user_id == "Teacher":
+        return get_SuccessRate_Week_Admin();
     week_dates = get_week()
     week_dates_All = []
     week_dates_Correct = []
@@ -322,8 +389,10 @@ def get_Duration_Specific(answers_set):
     if count == 0:
         return 0
     else:
-
-        return int(Duration/count)
+        td_str = str(timedelta(seconds=int(Duration/count)))
+        td_split = td_str.split(':')
+        td_str = td_split[0]+ ' H '+ td_split[1]+ ' M '+ td_split[2]+ ' S'
+        return td_str
 
 @register.simple_tag
 def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
@@ -388,9 +457,18 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
     except:
         gatesCorrect = 0
         gatesIncorrect = 0
+
+    try:
+        calculusAnswers = GatesAnswer.objects.filter(UserID=user_id)
+        calculusCorrect, calculusIncorrect =  get_SuccessRate_Specific_DateRange(calculusAnswers,date_min,date_max)
+        correct += calculusCorrect
+        incorrect += calculusIncorrect
+    except:
+        calculusCorrect = 0
+        calculusIncorrect = 0
         
 
-    return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect]]
+    return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect]]
 
 
 @register.simple_tag
@@ -412,6 +490,8 @@ def get_SuccessRate_All_Admin():
     openAssemblerIncorrect = 0
     gatesCorrect = 0
     gatesIncorrect = 0
+    calculusCorrect = 0
+    calculusIncorrect = 0
 
 
     for user in users:
@@ -438,24 +518,29 @@ def get_SuccessRate_All_Admin():
 
             gatesCorrect += val[8][0]
             gatesIncorrect += val[8][1]
+
+            calculusCorrect += val[9][0]
+            calculusIncorrect += val[9][1]
     
 
 
     output = [correct+incorrect, correct, incorrect,
     [get_Percentage(scCorrect,(scCorrect+scIncorrect)),get_Percentage(scIncorrect,(scCorrect+scIncorrect))],
-    [get_Percentage(mcCorrect,(mcCorrect+mcIncorrect)),get_Percentage(scIncorrect,(mcCorrect+mcIncorrect))],
-    [get_Percentage(clozeCorrect,(mcCorrect+clozeIncorrect)),get_Percentage(clozeIncorrect,(clozeCorrect+clozeIncorrect))],
+    [get_Percentage(mcCorrect,(mcCorrect+mcIncorrect)),get_Percentage(mcIncorrect,(mcCorrect+mcIncorrect))],
+    [get_Percentage(clozeCorrect,(clozeCorrect+clozeIncorrect)),get_Percentage(clozeIncorrect,(clozeCorrect+clozeIncorrect))],
     [get_Percentage(truthTableCorrect,(truthTableCorrect+truthTableIncorrect)),get_Percentage(truthTableIncorrect,(truthTableCorrect+truthTableIncorrect))],
-    [get_Percentage(openAssemblerCorrect,(openAssemblerCorrect+truthTableIncorrect)),get_Percentage(truthTableIncorrect,(openAssemblerCorrect+truthTableIncorrect))],
-    [get_Percentage(gatesCorrect,(gatesCorrect+gatesIncorrect)),get_Percentage(scIncorrect,(gatesCorrect+gatesIncorrect))]
+    [get_Percentage(openAssemblerCorrect,(openAssemblerCorrect+openAssemblerIncorrect)),get_Percentage(openAssemblerIncorrect,(openAssemblerCorrect+openAssemblerIncorrect))],
+    [get_Percentage(gatesCorrect,(gatesCorrect+gatesIncorrect)),get_Percentage(gatesIncorrect,(gatesCorrect+gatesIncorrect))],
+    [get_Percentage(calculusCorrect,(calculusCorrect+calculusIncorrect)),get_Percentage(calculusIncorrect,(calculusCorrect+calculusIncorrect))]
     ]
 
-    #print(output)
     return output
 
 
 @register.simple_tag
 def get_SuccessRate_All(user_id):
+    if user_id == "Teacher":
+        return get_SuccessRate_All_Admin();
     correct = 0
     incorrect = 0
 
@@ -517,10 +602,18 @@ def get_SuccessRate_All(user_id):
     except:
         gatesCorrect = 0
         gatesIncorrect = 0
+
+    try:
+        calculusAnswers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
+        calculusCorrect, calculusIncorrect = get_SuccessRate_Specific(calculusAnswers)
+        correct += calculusCorrect
+        incorrect += calculusIncorrect
+    except:
+        calculusCorrect = 0
+        calculusIncorrect = 0
         
 
-
-    output = [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect]]
+    output = [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect, calculusIncorrect]]
     #print(output)
     return output
 
@@ -552,6 +645,9 @@ def get_UserAnsweredTopics_Count_Admin():
 
 @register.simple_tag
 def get_UserAnsweredTopics_Count(user_id):
+    if user_id == "Teacher":
+        return get_UserAnsweredTopics_Count_Admin();
+    
     topics = get_Topics()
     topics_count_dict = []
     topics_count_dict_correct = []
@@ -633,29 +729,40 @@ def get_UserAnsweredTopics_Count(user_id):
                 pass
     except:
         pass
+    
+    try:
+        calculusAnswers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
+        for item in calculusAnswers:
+            qawSets = item.Set
+            try:
+                topics_count_dict[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
+    except:
+        pass
 
     return [topics, topics_count_dict,topics_count_dict_correct]
 
-@register.filter
-def get_AllUserAnsweredTopics_Count():
-    userModel = get_user_model()
-    allusers = userModel.objects.all()
 
-    topics_dict_peruser = {}
-    everyone_topics_dict = {}
-    for key, value in TOPICS:
-        everyone_topics_dict[key] = 0
-    #print(everyone_topics_dict)
-    for studentuser in allusers:
-        if not studentuser.is_superuser:
-            topics_dict_peruser[studentuser.id] = getUserAnsweredTopics_Count(studentuser.id)
-            
-            for key, value in topics_dict_peruser[studentuser.id].items():
-                everyone_topics_dict[key] += value
-    #print(everyone_topics_dict)
-    #print(topics_dict_peruser)
+@register.simple_tag
+def get_UserAnsweredTopics_MostConfident(topics_array):
+    topic_name = None
+    percentage_correct = 0
+    n = 0
+    for topic in topics_array[0]:
+        tmp_perc = topics_array[2][n]/topics_array[1][n]
+        if(tmp_perc > percentage_correct):
+            percentage_correct = tmp_perc
+            topic_name = topics_array[0]
+        n+=1
 
-    return topics_dict_peruser, everyone_topics_dict
+    if topic_name == None: 
+        return None
+    
+    return [topic_name, percentage_correct]
+
+
+
 
 
 
