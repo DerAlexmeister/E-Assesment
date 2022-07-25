@@ -18,7 +18,7 @@
       <div id="container" style="width: 100%; height: 100%; padding-left: 80px; padding-top: 80px; padding-right: 80px;">
       
             {% if today_successRate > 60 %}
-            <h1 class="text-success">{{today_successRate}%</h1>
+            <h1 class="text-success">{{today_successRate}}%</h1>
             {% elif today_successRate > 30 %}
             <h1 class="text-warning">{{today_successRate}}%</h1>
             {% else %} 
@@ -221,6 +221,7 @@
             
             <div id="container" style="padding-left: 10px; padding-top: 10px;">
                 {% include "index-analytics.html" %}
+                <br><br>
               </div>
               <div class="card-body">
                
@@ -320,7 +321,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:8}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for gates'
               }],
               labels: {{ labels|safe }}
             },
@@ -333,7 +334,7 @@
             type: 'doughnut',
             data: {
               datasets: [{
-                data: {{successRate_All|get__array_valueByIndex:8}},
+                data: {{successRate_All|get__array_valueByIndex:9}},
                 backgroundColor: ['#1ef87a', '#f90000'],
                 label: 'Statistic for calculus'
               }],

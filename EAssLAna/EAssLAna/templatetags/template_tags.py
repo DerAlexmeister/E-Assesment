@@ -459,15 +459,15 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
         gatesIncorrect = 0
 
     try:
-        calculusAnswers = GatesAnswer.objects.filter(UserID=user_id)
-        calculusCorrect, calculusIncorrect =  get_SuccessRate_Specific_DateRange(calculusAnswers,date_min,date_max)
+        calculusAnswersAll = CalculusSingleUserAnswer.objects.all()
+        calculusAnswers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
+        calculusCorrect, calculusIncorrect = get_SuccessRate_Specific_DateRange(calculusAnswers,date_min,date_max)
         correct += calculusCorrect
         incorrect += calculusIncorrect
     except:
         calculusCorrect = 0
         calculusIncorrect = 0
         
-
     return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect]]
 
 
@@ -541,6 +541,7 @@ def get_SuccessRate_All_Admin():
 def get_SuccessRate_All(user_id):
     if user_id == "Teacher":
         return get_SuccessRate_All_Admin();
+
     correct = 0
     incorrect = 0
 
