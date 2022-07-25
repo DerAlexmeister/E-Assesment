@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<div style="position:absolute; left:0px; right:0px; top:0px; width:100%; padding-left: 40px; padding-top: 40px;">
-
+<div style="position:absolute; left:0px; right:0px; top:0px; width:50%; padding-left: 40px; padding-top: 40px; margin-left:20%; margin-right:20%">
+    <h3>Cloze</h3>
     {% if message %}
         {% if correct %}
             <div class="alert alert-success" role="alert">
@@ -18,17 +18,22 @@
         {% endif %}
     {% else %}
         <p class="form-group">
-            
             <form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
-                {% for cloze in cloze_items %}
-                {{cloze}}
-                {% endfor %}
-                {{form.cloze_id}}
+                <div>
+                    Please fill the gaps of the following cloze:
+                </div>
+                <div>
+                    {% for cloze in cloze_items %}
+                    {{cloze|safe}}
+                    {% endfor %}
+                    {{form.cloze_id}}
+                </div>
                 {{form.NameID}}
                 {{form.BeginTime}}
-                <br><br>
-                <button type="submit" class="btn btn-info">Answer</button>
+                <div style="text-align: right; margin-top: 50px">
+                    <button type="submit" class="btn btn-info">Submit</button>
+                </div>
             </form>
         </p>
     {% endif %}

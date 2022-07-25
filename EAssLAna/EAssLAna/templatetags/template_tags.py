@@ -8,6 +8,7 @@ import pytz
 from datetime import datetime, timedelta, time, date
 
 from EAss.models import *
+from EAss.normal_forms.model import NormalFormGuess
 
 register = template.Library()
 
@@ -215,11 +216,17 @@ def get_Topic_SpecificQuestion_Answers_Admin(answerType):
     if(answerType == "Calculus"):
         answers = CalculusSingleUserAnswer.objects.all()
 
+    if(answerType == "NormalForm"):
+        answers = NormalFormGuess.objects.all()
+        print("ANSWERS")
+        print(answers)
+
     return answers
 
 @register.simple_tag
 def get_Topic_SpecificQuestion_Answers(answerType,user_id):
     answers = None
+    print(answers)
     
     if(answerType == "SingleChoice"):
         answers = SingleChoiceUserAnswer.objects.filter(UserID=user_id)
@@ -241,6 +248,9 @@ def get_Topic_SpecificQuestion_Answers(answerType,user_id):
 
     if(answerType == "Calculus"):
         answers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
+
+    if(answerType == "NormalForm"):
+        answers = NormalFormGuess.objects.filter(UserID=user_id)
 
     return answers  
 
@@ -459,7 +469,6 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
         gatesIncorrect = 0
 
     try:
-        calculusAnswersAll = CalculusSingleUserAnswer.objects.all()
         calculusAnswers = CalculusSingleUserAnswer.objects.filter(UserID=user_id)
         calculusCorrect, calculusIncorrect = get_SuccessRate_Specific_DateRange(calculusAnswers,date_min,date_max)
         correct += calculusCorrect
@@ -467,8 +476,23 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
     except:
         calculusCorrect = 0
         calculusIncorrect = 0
+
+    try:
+        normalFormGuess = NormalFormGuess.objects.filter(UserID=user_id)
+        normalFormGuessALL = NormalFormGuess.objects.all()
+        print(normalFormGuessALL)
+        print(normalFormGuess)
+        normalformCorrect, normalformIncorrect = get_SuccessRate_Specific_DateRange(normalFormGuess,date_min,date_max)
+        correct += normalformCorrect
+        incorrect += normalformIncorrect
+    except:
+        normalformCorrect = 0
+        normalformIncorrect = 0
+
+    print([correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect],[normalformCorrect,normalformIncorrect]]
+)
         
-    return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect]]
+    return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect],[normalformCorrect,normalformIncorrect]]
 
 
 @register.simple_tag
@@ -492,6 +516,8 @@ def get_SuccessRate_All_Admin():
     gatesIncorrect = 0
     calculusCorrect = 0
     calculusIncorrect = 0
+    normalformsCorrect = 0
+    normalformsIncorrect = 0
 
 
     for user in users:
@@ -521,6 +547,9 @@ def get_SuccessRate_All_Admin():
 
             calculusCorrect += val[9][0]
             calculusIncorrect += val[9][1]
+
+            normalformsCorrect += val[10][0]
+            normalformsIncorrect += val[10][1]
     
 
 
@@ -531,7 +560,8 @@ def get_SuccessRate_All_Admin():
     [get_Percentage(truthTableCorrect,(truthTableCorrect+truthTableIncorrect)),get_Percentage(truthTableIncorrect,(truthTableCorrect+truthTableIncorrect))],
     [get_Percentage(openAssemblerCorrect,(openAssemblerCorrect+openAssemblerIncorrect)),get_Percentage(openAssemblerIncorrect,(openAssemblerCorrect+openAssemblerIncorrect))],
     [get_Percentage(gatesCorrect,(gatesCorrect+gatesIncorrect)),get_Percentage(gatesIncorrect,(gatesCorrect+gatesIncorrect))],
-    [get_Percentage(calculusCorrect,(calculusCorrect+calculusIncorrect)),get_Percentage(calculusIncorrect,(calculusCorrect+calculusIncorrect))]
+    [get_Percentage(calculusCorrect,(calculusCorrect+calculusIncorrect)),get_Percentage(calculusIncorrect,(calculusCorrect+calculusIncorrect))],
+    [get_Percentage(normalformsCorrect,(normalformsCorrect+normalformsIncorrect)),get_Percentage(normalformsIncorrect,(normalformsCorrect+normalformsIncorrect))]
     ]
 
     return output
@@ -612,10 +642,18 @@ def get_SuccessRate_All(user_id):
     except:
         calculusCorrect = 0
         calculusIncorrect = 0
+
+    try:
+        normalFormGuess = NormalFormGuess.objects.filter(UserID=user_id)
+        normalformCorrect, normalformIncorrect = get_SuccessRate_Specific(normalFormGuess)
+        correct += normalformCorrect
+        incorrect += normalformIncorrect
+    except:
+        normalformCorrect = 0
+        normalformIncorrect = 0
         
 
-    output = [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect, calculusIncorrect]]
-    #print(output)
+    output = [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect, calculusIncorrect], [normalformCorrect,normalformIncorrect]]
     return output
 
 @register.simple_tag
@@ -741,6 +779,18 @@ def get_UserAnsweredTopics_Count(user_id):
                 pass
     except:
         pass
+
+    try:
+        normalFormGuess = NormalFormGuess.objects.filter(UserID=user_id)
+        for item in normalFormGuess:
+            qawSets = item.Set
+            try:
+                topics_count_dict[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
+    except:
+        pass
+
 
     return [topics, topics_count_dict,topics_count_dict_correct]
 

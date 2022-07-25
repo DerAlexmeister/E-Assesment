@@ -33,7 +33,7 @@ def getProgress(form, qaw, user):
         updateProgress(VARIABLE_RATE, correction.points, correction.total_points)
         for correction in model.NormalFormCorrection.objects\
             .filter(guess__Set__id=qaw.id)
-            .filter(guess__UserID=user)
+            .filter(guess__UserID=user.id)
             .filter(guess__question__normal_form=form)
     ), 0), 1)
     term_progress = min(max(sum(

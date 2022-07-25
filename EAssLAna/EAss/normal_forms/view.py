@@ -87,14 +87,12 @@ def normal_form(request):
                 raw_request = request.body.decode("UTF-8")
                 raw_request_split = raw_request.split("&")
                 NameID = ""
-                print(raw_request)
                 for element in raw_request_split:
                     if element.startswith("NameID="):
                         NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))
                     if element.startswith("BeginTime="):
                         beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
-                print(NameID)
 
                 qaw = model.QAWSet.objects.get(NameID=NameID)
                 finished = True
@@ -115,4 +113,5 @@ def normal_form(request):
         )
 
     else:
+        
         return generate_task(task, qaw, request, cat)
