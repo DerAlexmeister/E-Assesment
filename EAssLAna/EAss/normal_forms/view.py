@@ -25,7 +25,7 @@ def generate_task(task, request, cat, correction = None):
     return render_question(
         request,
         question,
-        NormalForm(question),
+        NormalForm(question, initial={'penalty': 0}),
         cat,
         False,
         correction,
@@ -55,9 +55,7 @@ def normal_form(request):
               .objects\
               .filter(Set__NameID=(str(cat)))\
               .first()
-              #.get(str(cat))
 
-    print(task.assessment)
     if request.method == 'POST':
         if 'new' in request.POST:
             return generate_task(task, request, cat)
@@ -68,12 +66,18 @@ def normal_form(request):
         finished = False
         if answer.is_valid():
             guess = answer.cleaned_data['guess']
+            penalty = answer.cleaned_data['penalty']
             if 'check' in request.POST:
                 assessment = DifferenceAssessment()
+                answer = NormalForm(question, initial={
+                    'penalty': penalty + 1,
+                    'guess': answer.data['guess'],
+                })
             else:
                 finished = True
                 assessment = ASSESSMENTS[task.assessment]
-            correction = assessment.assess(guess, qaw=task.Set)
+
+            correction = assessment.assess(guess, qaw=task.Set, user=request.user, penalty=penalty)
         else:
             correction = answer.errors.get('guess')
 
@@ -91,10 +95,4 @@ def normal_form(request):
         question = generate_adaptively(n)
         request.session[QUESTION_KEY] = question.to_dict()
 
-        return render_question(
-            request,
-            question,
-            NormalForm(question),
-            cat,
-            False,
-        )
+        return generate_task(task, request, cat)

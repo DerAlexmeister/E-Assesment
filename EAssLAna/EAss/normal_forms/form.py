@@ -13,6 +13,7 @@ PARSERS = {
 
 class NormalForm(forms.Form):
     guess = forms.CharField(label_suffix=" = ", required=False)
+    penalty = forms.IntegerField(widget=forms.HiddenInput(), min_value=0)
 
     def __init__(self, question, *args, **kwargs):
         super().__init__(*args, **kwargs)

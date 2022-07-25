@@ -50,7 +50,7 @@ class BooleanAssessment(Assessment):
 
 
 class GradingAssessment(Assessment):
-    def assess(self, guess: Guess, guess_model, **kwargs) -> str:
+    def assess(self, guess: Guess, guess_model, penalty, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -59,8 +59,9 @@ class GradingAssessment(Assessment):
             if g == e:
                 counter += 1
 
+        counter = max(counter - penalty, 0)
         if guess_model:
-            correction = model.NormalFormCorrection(guess=guess_model, points=counter, total_points=len(solution.clauses))
+            correction = model.NormalFormCorrection(guess=guess_model, UserID=guess_model.UserID, points=counter, total_points=len(solution.clauses))
             correction.save()
 
         return f"You have {counter} of {len(solution.clauses)} correct!"
@@ -129,7 +130,7 @@ class DifferenceAssessment(Assessment):
 class RememberingAssessment(Assessment):
     assessment: Assessment
 
-    def assess(self, guess: Guess, qaw, **kwargs) -> str:
+    def assess(self, guess: Guess, qaw, user, **kwargs) -> str:
         question = model.NormalFormQuestion(normal_form=guess.question.normal_form)
         question.save()
 
@@ -148,18 +149,15 @@ class RememberingAssessment(Assessment):
                 literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
                 literal.save()
 
-        guess_model = model.NormalFormGuess(qaw=qaw, question=question, answer=answer)
+        guess_model = model.NormalFormGuess(qaw=qaw, UserID=user, question=question, answer=answer)
         guess_model.save()
 
         return self.assessment.assess(guess, **{'guess_model': guess_model, **kwargs})
 
 
 ASSESSMENTS = {
-    name: RememberingAssessment(assessment)
-    for name, assessment in {
-        'boolean': BooleanAssessment(),
-        'grading': GradingAssessment(),
-        'correcting_boolean': CorrectingBooleanAssessment(),
-        'difference': DifferenceAssessment(),
-    }.items()
+    'boolean': RememberingAssessment(BooleanAssessment()),
+    'grading': RememberingAssessment(GradingAssessment()),
+    'correcting_boolean': RememberingAssessment(CorrectingBooleanAssessment()),
+    'difference': DifferenceAssessment(),
 }
