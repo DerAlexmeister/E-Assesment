@@ -387,7 +387,7 @@ def generateTruthTables(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect, message, correctcounter = True, "Your answer is completely correct.", 0
+            iscorrect, message, correctcounter = True, "Your answers were completely correct.", 0
             
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
             checklist2 = [i['Statement'] for i in WrongStatements.objects.filter(Set__NameID=(str(cat))).values()]
@@ -437,14 +437,14 @@ def generateTruthTables(request):
                     eanswer = "False"
                     if x[0] in checklist:
                        eanswer = "True"
-                    iscorrect, message = False, "Your answer partly is wrong."
+                    iscorrect, message = False, "Your answers were partly correct."
                     qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
                     singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=False, Answer=x[1], Statement=x[0], Expectedanswer=eanswer, AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 statistic += str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="True").count()) + "=" + str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="False").count()) + ";"
 
             if correctcounter == 0:
-                message = "Your answer is partly correct." 
+                message = "Your answers were completely wrong." 
             qanswer = qanswer[:-1]
             statistic = statistic[:-1]
             lastanswer = lastanswer[:-1]
