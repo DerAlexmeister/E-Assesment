@@ -387,9 +387,10 @@ def generateTruthTables(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect, message, correctcounter = True, "Your answer is correct.", 0
+            iscorrect, message, correctcounter = True, "Your answer is completely correct.", 0
             
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
+            checklist2 = [i['Statement'] for i in WrongStatements.objects.filter(Set__NameID=(str(cat))).values()]
 
             NameID = ""
             question_f = ""
@@ -414,7 +415,6 @@ def generateTruthTables(request):
             useranswer.save()
 
             for i in range(1, 4):
-                answercorrect = False
                 y = raw_request_split[i]
                 x = urllib.parse.unquote_plus(urllib.parse.unquote(y)).split("=")
                 if SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).exists():
@@ -423,19 +423,28 @@ def generateTruthTables(request):
                 else:
                     lastanswer += "not answered yet;"
                     lastanswerdate += "not answered yet;"
-                if x[0] in checklist:
-                    answercorrect = True
+                if x[0] in checklist and x[1] == "True":       
                     correctcounter += 1
                     qanswer += x[0] + "=" + x[1] + "=" "True" + ";"
-                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="True", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=True, Answer=x[1], Statement=x[0], Expectedanswer="False", AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer.save()
+                elif x[0] in checklist2 and x[1] == "False": 
+                    correctcounter += 1
+                    qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=True, Answer=x[1], Statement=x[0], Expectedanswer="False", AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 else:
-                    iscorrect, message = False, "Your answer is wrong."
+                    eanswer = "False"
+                    if x[0] in checklist:
+                       eanswer = "True"
+                    iscorrect, message = False, "Your answer partly is wrong."
                     qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
-                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="False", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=False, Answer=x[1], Statement=x[0], Expectedanswer=eanswer, AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 statistic += str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="True").count()) + "=" + str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="False").count()) + ";"
 
+            if correctcounter == 0:
+                message = "Your answer is partly correct." 
             qanswer = qanswer[:-1]
             statistic = statistic[:-1]
             lastanswer = lastanswer[:-1]
@@ -446,7 +455,7 @@ def generateTruthTables(request):
 
             message += " You answered {}/{} statements correctly.".format(correctcounter, "3")
            
-            return render(request, 'truthtableexample.html', {'message': message, 'Question': question_f, 'Qanswer': qanswer, 'Statistic': statistic, 'Lastanswer': lastanswer, 'Lastanswerdate': lastanswerdate})
+            return render(request, 'truthtableexample.html', {'message': message, 'Question': question_f, 'Qanswer': qanswer, 'correct': iscorrect, 'Statistic': statistic, 'Lastanswer': lastanswer, 'Lastanswerdate': lastanswerdate})
         else:
             hint = ""
             qanswer = ""

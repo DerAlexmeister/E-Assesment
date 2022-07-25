@@ -53,7 +53,7 @@
             </div>
         {% endif %}
 
-        {% if Gateanswer != "0" or Gateanswer != "1" %}
+        {% if Gateanswer != "0" and Gateanswer != "1" %}
         <div class="alert alert-danger" role="alert">
             The result can only be 0 or 1!
         </div>
@@ -221,6 +221,35 @@
             <hr>
             <h4 style="padding-bottom: 10px;">Gate circuit image</h4>
             <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="300px"></p>
+            <br>
+
+            <table id="myTable" class="table table-bordered table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Input</th>
+                        <th scope="col">Inputvalue</th>
+                    </tr>
+                </thead>
+                <tbody id="testBody"></tbody>
+            </table>
+            <script>
+                var inputstring = "{{Input}}"
+                var inputasArray = inputstring.split(";")
+        
+                function loadTableData(items) {
+                    const table = document.getElementById("testBody");
+                    inputasArray.forEach( item => {
+                        var splitKeyValueInputArray = item.split("=")
+                        let row = table.insertRow();
+                        let input = row.insertCell(0);
+                        input.innerHTML = splitKeyValueInputArray[0];
+                        let inputvalue = row.insertCell(1);
+                        inputvalue.innerHTML = splitKeyValueInputArray[1];
+                    });
+                }
+        
+                loadTableData(inputasArray);
+            </script>
             
             <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
