@@ -10,9 +10,9 @@
     <div class="alert alert-secondary" role="alert">
         {{Question}}
     </div>
-
-    <br>
-    <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="200px"></p>
+    <hr>
+    <h4 style="padding-bottom: 10px;">Gate circuit image</h4>
+    <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="300px"></p>
     <br>
 
     <table id="myTable" class="table table-bordered table-dark">
@@ -53,6 +53,12 @@
             </div>
         {% endif %}
 
+        {% if Gateanswer != "0" or Gateanswer != "1" %}
+        <div class="alert alert-danger" role="alert">
+            The result can only be 0 or 1!
+        </div>
+        {% endif %}
+
             <table class="table table-bordered table-dark">
                 <thead>
                     <tr>
@@ -65,7 +71,7 @@
                     <tr>
                         <th scope="row">Answer for gate circuit</th>
                         <td>{{Expectedanswer}}</td>
-                        <td>{{Answer}}</td>
+                        <td>{{Gateanswer}}</td>
                     </tr>
                     <tr>
                         <th scope="row">Answer for function</th>
@@ -213,8 +219,8 @@
                 {{Question}}
             </div>
             <hr>
-
-            <br><img src={{Imgpath}} alt="/static/imgs/test.png" height="200px"><br>
+            <h4 style="padding-bottom: 10px;">Gate circuit image</h4>
+            <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="300px"></p>
             
             <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}

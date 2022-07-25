@@ -415,7 +415,8 @@ def generateTruthTables(request):
 
             for i in range(1, 4):
                 answercorrect = False
-                x = raw_request_split[i].split("=")
+                y = raw_request_split[i]
+                x = urllib.parse.unquote_plus(urllib.parse.unquote(y)).split("=")
                 if SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).exists():
                     lastanswer += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Answer) + ";"
                     lastanswerdate += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Solved) + ";"
@@ -488,7 +489,7 @@ def generateGateQuestions(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect = False 
+            iscorrect, message = False, "Answer for result and circuitfunction are both wrong"
             inputq = ""
             question = ""
             expectedanswer = ""
@@ -508,8 +509,8 @@ def generateGateQuestions(request):
                     imgpath += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Imgpath=", "")))
                 if element.startswith("Expectedanswer="):
                     expectedanswer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedanswer=", "")))
-                if element.startswith("Answer="):
-                    answer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answer=", "")))
+                if element.startswith("Gateanswer="):
+                    answer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Gateanswer=", "")))
                 if element.startswith("Expectedcircuitfunction="):
                     expectedcircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedcircuitfunction=", "")))
                 if element.startswith("Answerircuitfunction="):
@@ -534,10 +535,9 @@ def generateGateQuestions(request):
                 iscorrect = False
 
             qaw_set = QAWSet.objects.get(NameID=NameID)
-            message = "Answer for result and circuitfunction are both wrong"
             useranswer = GatesAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction, Input=inputq)
             useranswer.save()
-            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Gateanswer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
         else:
             questionsset = Question.objects.filter(Set__NameID=(str(cat)))
             question = randint(0, questionsset.count() - 1)

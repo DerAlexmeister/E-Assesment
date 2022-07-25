@@ -1,6 +1,10 @@
 import random
 from schemdraw.parsing import logicparse
 import uuid
+import os
+
+from django.conf import settings
+
 
 def andfunc(a, b):
     if (a == 1) and (b == 1):
@@ -132,8 +136,10 @@ def creategatecircuit(depth, gatecount):
     input = input[:-1]
     circuitfunction = av[0]
     result = avresult[0]
-    imgpath = "/static/imgs/" + "image-" + str(uuid.uuid4()) + ".svg"
-    simgpath = "EAssLAna" + imgpath
+    t = uuid.uuid4()
+    imgpath = "static/imgs/" + "image-" + str(t) + ".svg"
+    simgpath = os.path.join(settings.BASE_DIR , imgpath)
+    imgpath = "/static/imgs/" + "image-" + str(t) + ".svg"
     d.save(simgpath)            
     return imgpath, result, circuitfunction, input
 
