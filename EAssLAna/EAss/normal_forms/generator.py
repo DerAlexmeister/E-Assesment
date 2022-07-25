@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from random import sample
 
 from . import model
-from .normal_form import TruthTable, Question, NORMAL_FORMS
+from .normal_form import TruthTable, Question
 
 
 @dataclass
@@ -32,7 +32,7 @@ def getProgress(form, qaw, user):
     variable_progress = min(max(sum(
         updateProgress(VARIABLE_RATE, correction.points, correction.total_points)
         for correction in model.NormalFormCorrection.objects\
-            .filter(guess__qaw__id=qaw.id)
+            .filter(guess__Set__id=qaw.id)
             .filter(guess__UserID=user)
             .filter(guess__question__normal_form=form)
     ), 0), 1)

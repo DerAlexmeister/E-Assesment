@@ -163,7 +163,7 @@ class RememberingAssessment(Assessment):
                 literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
                 literal.save()
 
-        guess_model = model.NormalFormGuess(qaw=qaw, UserID=user, Duration=duration, question=question, answer=answer)
+        guess_model = model.NormalFormGuess(Set=qaw, UserID=user, Duration=duration, question=question, answer=answer)
         guess_model.save()
 
         return self.assessment.assess(guess, **{'guess_model': guess_model, **kwargs})
