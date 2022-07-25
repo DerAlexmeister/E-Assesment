@@ -722,6 +722,11 @@ def get_UserAnsweredTopics_Count(user_id):
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
+            try:
+                if(item.AllCorrect):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
     except:
         pass
 
@@ -731,6 +736,11 @@ def get_UserAnsweredTopics_Count(user_id):
             qawSets = item.Set
             try:
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
+            try:
+                if(item.AllCorrect):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
     except:
@@ -744,6 +754,11 @@ def get_UserAnsweredTopics_Count(user_id):
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
+            try:
+                if(item.AllCorrect):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
     except:
         pass
 
@@ -753,6 +768,11 @@ def get_UserAnsweredTopics_Count(user_id):
             qawSets = item.Set
             try:
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
+            try:
+                if(item.Correct):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
     except:
@@ -766,6 +786,11 @@ def get_UserAnsweredTopics_Count(user_id):
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
+            try:
+                if(item.Correct):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
     except:
         pass
     
@@ -777,6 +802,11 @@ def get_UserAnsweredTopics_Count(user_id):
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
+            try:
+                if(item.Correct):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
     except:
         pass
 
@@ -786,6 +816,11 @@ def get_UserAnsweredTopics_Count(user_id):
             qawSets = item.Set
             try:
                 topics_count_dict[topics.index(item.Set.Topic)] += 1 
+            except:
+                pass
+            try:
+                if(item.AllCorrect):
+                    topics_count_dict_correct[topics.index(item.Set.Topic)] += 1 
             except:
                 pass
     except:
