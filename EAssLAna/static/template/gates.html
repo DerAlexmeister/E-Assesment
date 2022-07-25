@@ -250,6 +250,14 @@
         
                 loadTableData(inputasArray);
             </script>
+            <br>
+
+            <ul class="list-group">
+                <li class="list-group-item">Note: The result can only be 0 or 1.</li>
+                <li class="list-group-item">Also please use brackets for the circuit function:</li>
+                <li class="list-group-item">Example 1: (a or b)</li>
+                <li class="list-group-item">Example 2: ((a and b) or c)</li>
+            </ul>
             
             <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
