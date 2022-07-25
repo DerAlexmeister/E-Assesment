@@ -322,11 +322,15 @@ def generateMCQuestions(request):
 def clozeTextGenerator(request):
     if not request.user.is_authenticated:
         return redirect("/")
+    def normalise(string: str):
+        return list(filter(None, string.lower().split(" ")))
+    def text_style(text):
+        return f"<span style=\"line-height: 3\">{text}</span>"
 
     cat = request.GET.get('t', '')
     if request.method == 'POST':
         endtime = datetime.now()
-        iscorrect, message = True, "Your answer is correct."
+        iscorrect = True
         NameID = ""
 
         raw_request = request.body.decode("UTF-8")
@@ -342,7 +346,10 @@ def clozeTextGenerator(request):
 
 
         qaw_set = QAWSet.objects.get(NameID=NameID)
-        cloze = c.from_model(qaw_set)
+        cloze_model = Cloze.objects\
+            .filter(qaw__NameID=NameID)\
+            .order_by('position')
+        cloze = c.from_model(cloze_model)
 
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
@@ -350,39 +357,57 @@ def clozeTextGenerator(request):
         useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Topic=str(cat), AllCorrect=iscorrect)
         useranswer.save()
 
+
         for guess, solution in zip(gaps, cloze.gaps):
 
-            if guess in solution.solutions: 
+            if normalise(guess) in map(normalise, solution.solutions):
                 count += 1
                 singleuseranswer = SingleFieldClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Correct=True, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
                 singleuseranswer.save()
             else:
                 singleuseranswer = SingleFieldClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Correct=False, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
                 singleuseranswer.save()
-                iscorrect, message = False, "Your answer is wrong." 
+                iscorrect = False
         
         useranswer.AllCorrect = iscorrect
         useranswer.save()
 
-        message += " You answered {}/{} gaps correctly.".format(count, maximal)
+        message = " You answered {}/{} gaps correctly.".format(count, maximal)
 
-        return HttpResponse(message)
-    else:
-        qaw = Cloze.objects.first().qaw #TODO fix this
-
-        cloze = c.from_model(qaw)
-        beginTime = timezone.now()
-
-        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': (str(cat))}, )
+        cloze_form = ClozeForm(len(cloze.gaps), request.POST)
         cloze_items = []
 
-        def text_style(text):
-            return f"<span style=\"line-height: 3\">{text}</span>"
+        print(cloze.gaps)
+        for i, gap in enumerate(cloze.gaps):
+            cloze_items.extend([text_style(gap.preceeding_text), cloze_form[ClozeForm.get_gap_key(i)], text_style(gap.succeeding_text) ])
+
+        return render(request, 'cloze_text.html',  {
+            'cloze_items': cloze_items,
+            'form': cloze_form,
+            'NameID': str(cat),
+            'Target': qaw_set.Target,
+            'message': message,
+            'correct': iscorrect
+        })
+
+    else:
+        qaw_set = QAWSet.objects.get(NameID=str(cat))
+        cloze_model = Cloze.objects\
+            .filter(qaw__NameID=str(cat))\
+            .order_by('position')
+
+        cloze = c.from_model(cloze_model)
+        beginTime = timezone.now()
+
+        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': str(cat)})
+        cloze_items = []
+        print(cloze.gaps)
+
 
         for i, gap in enumerate(cloze.gaps):
             cloze_items.extend([text_style(gap.preceeding_text), cloze_form[ClozeForm.get_gap_key(i)], text_style(gap.succeeding_text) ])
 
-        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": (str(cat)), "Target": qaw.Target})
+        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": str(cat), 'Target': qaw_set.Target})
 
 
 def generateTruthTables(request):

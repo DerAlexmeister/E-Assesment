@@ -6,17 +6,6 @@
 
 <div style="position:absolute; left:0px; right:0px; top:0px; width:50%; padding-left: 40px; padding-top: 40px; margin-left:20%; margin-right:20%">
     <h3>Cloze</h3>
-    {% if message %}
-        {% if correct %}
-            <div class="alert alert-success" role="alert">
-                {{message}}
-            </div>
-        {% else %}
-            <div class="alert alert-danger" role="alert">
-                {{message}}
-            </div>
-        {% endif %}
-    {% else %}
         <p class="form-group">
             <form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}
@@ -31,14 +20,23 @@
                 </div>
                 {{form.NameID}}
                 {{form.BeginTime}}
+                {% if message %}
+                    {% if correct %}
+                    <div class="alert alert-success" role="alert" style="margin-top: 40px">
+                        {{message}}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger" role="alert" style="margin-top: 40px">
+                        {{message}}
+                    </div>
+                    {% endif %}
+                {% else %}
                 <div style="text-align: right; margin-top: 50px">
                     <button type="submit" class="btn btn-info">Submit</button>
                 </div>
+                {% endif %}
             </form>
         </p>
-    {% endif %}
-        
-    </p>
 </div>
 
 {% endblock %}
