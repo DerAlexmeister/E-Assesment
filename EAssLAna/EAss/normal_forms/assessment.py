@@ -50,7 +50,7 @@ class BooleanAssessment(Assessment):
 
 
 class GradingAssessment(Assessment):
-    def assess(self, guess: Guess, guess_model, **kwargs) -> str:
+    def assess(self, guess: Guess, guess_model, penalty, **kwargs) -> str:
         solution = SOLUTIONS_CALCULATORS[guess.question.normal_form](
             guess.question.function,
         )
@@ -59,11 +59,12 @@ class GradingAssessment(Assessment):
             if g == e:
                 counter += 1
 
+        counter = max(counter - penalty, 0)
         if guess_model:
-            correction = model.NormalFormCorrection(guess=guess_model, points=counter, total_points=len(solution.clauses))
+            correction = model.NormalFormCorrection(guess=guess_model, UserID=guess_model.UserID, points=counter, total_points=len(solution.clauses))
             correction.save()
 
-        return f"You have {counter} of {len(solution.clauses)} correct!"
+        return f"{counter}/{len(solution.clauses)}"
 
 
 
@@ -98,41 +99,53 @@ class DifferenceAssessment(Assessment):
             guess.question.function,
         )
 
-        if guess.answer == solution:
-            return "You are correct!"
-        else:
-            response = []
-            for g in guess.answer.clauses:
-                if g in solution.clauses:
-                    response.append((g, True))
-                    solution.clauses.remove(g)
-                else:
-                    response.append((g, False))
-
-            if guess.question.normal_form == DISJUNCTION:
-                inner = "*"
-                outer = "+"
-            elif guess.question.normal_form == CONJUNCTION:
-
-                inner = "+"
-                outer = "*"
+        response = []
+        for g in guess.answer.clauses:
+            if g in solution.clauses:
+                response.append((g, True))
+                solution.clauses.remove(g)
             else:
-                raise Exception("Unknown normal form")
+                response.append((g, False))
 
-            clause = f" {outer} ".join(
-                f"""<span style="color:{"green" if right else "red"}">
-                {f"{inner} ".join(str(lit) for lit in clause)}
-                </span>"""
-                for clause, right in response
-            )
-            return f"<p>Not every thing is correct: {clause}</p>"
+        if guess.question.normal_form == DISJUNCTION:
+            inner = "*"
+            outer = "+"
+        elif guess.question.normal_form == CONJUNCTION:
+
+            inner = "+"
+            outer = "*"
+        else:
+            raise Exception("Unknown normal form")
+
+        clause = f" {outer} ".join(
+            f"""<span style="color:{"green" if right else "red"}">
+               {f"{inner} ".join(str(lit) for lit in clause)}
+               </span>"""
+            for clause, right in response
+        )
+        return f"<p>f(a)  =    {clause}</p>"
+
+class GradingAndDifferenceAssessment(Assessment):
+    def __init__(self):
+        self._grading = GradingAssessment()
+        self._difference = DifferenceAssessment()
+
+    def assess(self, guess: Guess, guess_model, penalty, **kwargs) -> str:
+        grading = self._grading.assess(guess, guess_model, penalty, **kwargs)
+        difference = self._difference.assess(guess, **kwargs)
+
+        return f"""
+        Correct solution ({grading}):
+            {difference}
+        </p>
+        """
 
 
 @dataclass
 class RememberingAssessment(Assessment):
     assessment: Assessment
 
-    def assess(self, guess: Guess, qaw, **kwargs) -> str:
+    def assess(self, guess: Guess, qaw, user, **kwargs) -> str:
         question = model.NormalFormQuestion(normal_form=guess.question.normal_form)
         question.save()
 
@@ -151,18 +164,16 @@ class RememberingAssessment(Assessment):
                 literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
                 literal.save()
 
-        guess_model = model.NormalFormGuess(qaw=qaw, question=question, answer=answer)
+        guess_model = model.NormalFormGuess(qaw=qaw, UserID=user, question=question, answer=answer)
         guess_model.save()
 
         return self.assessment.assess(guess, **{'guess_model': guess_model, **kwargs})
 
 
 ASSESSMENTS = {
-    name: RememberingAssessment(assessment)
-    for name, assessment in {
-        'boolean': BooleanAssessment(),
-        'grading': GradingAssessment(),
-        'correcting_boolean': CorrectingBooleanAssessment(),
-        'difference': DifferenceAssessment(),
-    }.items()
+    'boolean': RememberingAssessment(BooleanAssessment()),
+    'grading': RememberingAssessment(GradingAssessment()),
+    'correcting_boolean': RememberingAssessment(CorrectingBooleanAssessment()),
+    'grading_difference': RememberingAssessment(GradingAndDifferenceAssessment()),
+    'difference': DifferenceAssessment(),
 }

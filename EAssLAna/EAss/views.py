@@ -140,7 +140,7 @@ def generateBinaryQuestions(request):
             NameID = ""
             for element in raw_request_split:
                 if element.startswith("NameID="):
-                    NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
+                    NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
                 if element.startswith("BeginTime="):
                     beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
