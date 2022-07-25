@@ -32,7 +32,7 @@ class NormalFormLiteral(models.Model):
 
 
 class NormalFormGuess(models.Model):
-    qaw = models.ForeignKey(QAWSet, on_delete=CASCADE)
+    Set = models.ForeignKey(QAWSet, on_delete=CASCADE)
     UserID = models.CharField(max_length=1024, default='None',blank=False, null=False)
 
     Duration = models.IntegerField(default=0, blank=False, null=False)
