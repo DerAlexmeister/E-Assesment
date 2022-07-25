@@ -5,7 +5,6 @@ from . import model
 from .normal_form import Guess, TruthTable, Literal, NormalForm, DISJUNCTION, CONJUNCTION
 
 
-
 def to_dnf(formula: TruthTable) -> NormalForm:
     clauses = []
     for _, assignment in formula.table[formula.results==1].iterrows():
@@ -145,7 +144,7 @@ class GradingAndDifferenceAssessment(Assessment):
 class RememberingAssessment(Assessment):
     assessment: Assessment
 
-    def assess(self, guess: Guess, qaw, user, **kwargs) -> str:
+    def assess(self, guess: Guess, qaw, user, duration, **kwargs) -> str:
         question = model.NormalFormQuestion(normal_form=guess.question.normal_form)
         question.save()
 
@@ -164,7 +163,7 @@ class RememberingAssessment(Assessment):
                 literal = model.NormalFormLiteral(term=term, variable=lit.variable, sign=lit.sign)
                 literal.save()
 
-        guess_model = model.NormalFormGuess(qaw=qaw, UserID=user, question=question, answer=answer)
+        guess_model = model.NormalFormGuess(qaw=qaw, UserID=user, Duration=duration, question=question, answer=answer)
         guess_model.save()
 
         return self.assessment.assess(guess, **{'guess_model': guess_model, **kwargs})
