@@ -101,7 +101,17 @@ def normal_form(request):
 
             correction = assessment.assess(guess, qaw=task.Set, user=request.user, penalty=penalty, **params)
         else:
-            correction = answer.errors.get('guess')
+            correction = """
+            <div class="alert alert-danger" role="alert" style="margin-top: 40px">
+                The input could not be parsed! Please make sure you use the format described below."
+            </div>
+            """
+            answer = NormalForm(question, initial={
+                'penalty': answer.data['penalty'],
+                'guess': answer.data['guess'],
+                'BeginTime': answer.data['BeginTime'],
+                'NameID': answer.data['NameID'],
+            })
 
         return render_question(
             request,
