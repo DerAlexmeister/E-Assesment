@@ -479,7 +479,7 @@ def generateTruthTables(request):
                     if x[0] in checklist:
                        eanswer = "True"
                     iscorrect, message = False, "Your answers were partly correct."
-                    qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
+                    qanswer += x[0] + "=" + x[1] + "=" + eanswer + ";"
                     singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=False, Answer=x[1], Statement=x[0], Expectedanswer=eanswer, AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 statistic += str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="True").count()) + "=" + str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="False").count()) + ";"
