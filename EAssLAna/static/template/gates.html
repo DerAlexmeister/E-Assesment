@@ -10,9 +10,9 @@
     <div class="alert alert-secondary" role="alert">
         {{Question}}
     </div>
-
-    <br>
-    <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.svg" height="200px"></p>
+    <hr>
+    <h4 style="padding-bottom: 10px;">Gate circuit image</h4>
+    <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="300px"></p>
     <br>
 
     <table id="myTable" class="table table-bordered table-dark">
@@ -53,6 +53,12 @@
             </div>
         {% endif %}
 
+        {% if Gateanswer != "0" and Gateanswer != "1" %}
+        <div class="alert alert-danger" role="alert">
+            The result can only be 0 or 1!
+        </div>
+        {% endif %}
+
             <table class="table table-bordered table-dark">
                 <thead>
                     <tr>
@@ -65,7 +71,7 @@
                     <tr>
                         <th scope="row">Answer for gate circuit</th>
                         <td>{{Expectedanswer}}</td>
-                        <td>{{Answer}}</td>
+                        <td>{{Gateanswer}}</td>
                     </tr>
                     <tr>
                         <th scope="row">Answer for function</th>
@@ -213,8 +219,45 @@
                 {{Question}}
             </div>
             <hr>
+            <h4 style="padding-bottom: 10px;">Gate circuit image</h4>
+            <p style="text-align:center;"><img src={{Imgpath}} alt="/static/imgs/test.png" height="300px"></p>
+            <br>
 
-            <br><img src={{Imgpath}} alt="/static/imgs/test.svg" height="200px"><br>
+            <table id="myTable" class="table table-bordered table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Input</th>
+                        <th scope="col">Inputvalue</th>
+                    </tr>
+                </thead>
+                <tbody id="testBody"></tbody>
+            </table>
+            <script>
+                var inputstring = "{{Input}}"
+                var inputasArray = inputstring.split(";")
+        
+                function loadTableData(items) {
+                    const table = document.getElementById("testBody");
+                    inputasArray.forEach( item => {
+                        var splitKeyValueInputArray = item.split("=")
+                        let row = table.insertRow();
+                        let input = row.insertCell(0);
+                        input.innerHTML = splitKeyValueInputArray[0];
+                        let inputvalue = row.insertCell(1);
+                        inputvalue.innerHTML = splitKeyValueInputArray[1];
+                    });
+                }
+        
+                loadTableData(inputasArray);
+            </script>
+            <br>
+
+            <ul class="list-group">
+                <li class="list-group-item">Note: The result can only be 0 or 1.</li>
+                <li class="list-group-item">Also please use brackets for the circuit function:</li>
+                <li class="list-group-item">Example 1: (a or b)</li>
+                <li class="list-group-item">Example 2: ((a and b) or c)</li>
+            </ul>
             
             <br><form action="/eassessments/{{Target}}/", method="post">
                 {% csrf_token %}

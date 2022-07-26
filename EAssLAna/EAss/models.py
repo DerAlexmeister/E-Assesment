@@ -29,23 +29,13 @@ ITEMTYPES = (
     ('Calculus','Calculus'),
     ('Assembler','Assembler'),
     ('Gates','Gates'),
+    ('NormalForm','NormalForm'),
 )
 
 CALCTYPES = (
     ('None','None'),
     ('Bin', 'Bin'),
     ('Octa', 'Octa'),
-)
-
-GATES = (
-    ('NOT','NOT'),
-    ('AND', 'AND'),
-    ('OR', 'OR'),
-    ('NAND', 'NAND'),
-    ('NOR', 'NOR'),
-    ('XOR', 'XOR'),
-    ('XNOR', 'XNOR'),
-    ('Normal Form', 'Normal Form')
 )
 
 class QAWSet(models.Model):
@@ -103,10 +93,8 @@ class OctaStatement(models.Model):
         return "Random expression: {}".format(self.MaxValue)
 
 class Gap(models.Model):
-
-    preceeding_text = models.TextField(blank=False)
-    succeeding_text = models.TextField(blank=False)
-    Set = models.ForeignKey(QAWSet, blank=False, null=True, default=None, on_delete=models.CASCADE)
+    preceeding_text = models.TextField(blank=True)
+    succeeding_text = models.TextField(blank=True)
 
     def __str__(self):
         return "{} [...] {}".format(self.preceeding_text, self.succeeding_text)
@@ -120,7 +108,6 @@ class GapSolution(models.Model):
         return "{}".format(self.solution)
 
 class Cloze(models.Model):
-
     qaw = models.ForeignKey(QAWSet, on_delete=models.CASCADE)
     gap = models.ForeignKey(Gap, on_delete=models.CASCADE)
     position = models.PositiveIntegerField()

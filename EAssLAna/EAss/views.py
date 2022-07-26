@@ -140,7 +140,7 @@ def generateBinaryQuestions(request):
             NameID = ""
             for element in raw_request_split:
                 if element.startswith("NameID="):
-                    NameID += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
+                    NameID = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("NameID=", "")))   
                 if element.startswith("BeginTime="):
                     beginTime = urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("BeginTime=", "")))
 
@@ -317,15 +317,20 @@ def generateMCQuestions(request):
         print(error)
     return redirect('homeview')
 
+
 ######
 def clozeTextGenerator(request):
     if not request.user.is_authenticated:
         return redirect("/")
+    def normalise(string: str):
+        return list(filter(None, string.lower().split(" ")))
+    def text_style(text):
+        return f"<span style=\"line-height: 3\">{text}</span>"
 
     cat = request.GET.get('t', '')
     if request.method == 'POST':
         endtime = datetime.now()
-        iscorrect, message = True, "Your answer is correct."
+        iscorrect = True
         NameID = ""
 
         raw_request = request.body.decode("UTF-8")
@@ -341,44 +346,80 @@ def clozeTextGenerator(request):
 
 
         qaw_set = QAWSet.objects.get(NameID=NameID)
-        cloze = c.from_model(qaw_set)
+        cloze_model = Cloze.objects\
+            .filter(qaw__NameID=NameID)\
+            .order_by('position')
+        cloze = c.from_model(cloze_model)
 
         gaps = [request.POST[ClozeForm.get_gap_key(i)] for i in range(len(cloze.gaps))]
         maximal, count = len(cloze.gaps), 0
 
-        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Topic=str(cat), AllCorrect=iscorrect)
+        useranswer = ClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Topic=str(cat), AllCorrect=iscorrect)
         useranswer.save()
+
 
         for guess, solution in zip(gaps, cloze.gaps):
 
-            if guess in solution.solutions: 
+            if normalise(guess) in map(normalise, solution.solutions):
                 count += 1
                 singleuseranswer = SingleFieldClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Correct=True, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
                 singleuseranswer.save()
             else:
                 singleuseranswer = SingleFieldClozeUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id,Correct=False, ExpectedAnswer=solution, UserAnswer=guess, AllGaps=useranswer)
                 singleuseranswer.save()
-                iscorrect, message = False, "Your answer is wrong." 
+                iscorrect = False
         
         useranswer.AllCorrect = iscorrect
         useranswer.save()
 
-        message += " You answered {}/{} gaps correctly.".format(count, maximal)
+        message = " You answered {}/{} gaps correctly.".format(count, maximal)
 
-        return HttpResponse(message)
-    else:
-        qaw = Cloze.objects.first().qaw #TODO fix this
-
-        cloze = c.from_model(qaw)
-        beginTime = timezone.now()
-
-        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': (str(cat))}, )
+        cloze_form = ClozeForm(len(cloze.gaps), request.POST)
         cloze_items = []
 
-        for i, gap in enumerate(cloze.gaps):
-            cloze_items.extend([gap.preceeding_text, cloze_form[ClozeForm.get_gap_key(i)], gap.succeeding_text, ])
 
-        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": (str(cat)), "Target": qaw.Target})
+        for i, gap in enumerate(cloze.gaps):
+            guess = gaps[i]
+
+            answer = cloze_form.data[ClozeForm.get_gap_key(i)]
+            solution_text = "{" + ", ".join(map(str, gap.solutions)) +"}"
+            if normalise(guess) in map(normalise, gap.solutions):
+                correction = f"<span style=\"color:green\">{answer}</span>"
+            else:
+                correction = f"""
+                    <span style=\"color:red;text-decoration:line-through\">{answer}</span>
+                    <span style=\"color:green">{solution_text}</span>
+                """
+
+            cloze_items.extend([text_style(gap.preceeding_text), correction, text_style(gap.succeeding_text) ])
+
+        return render(request, 'cloze_text.html',  {
+            'cloze_items': cloze_items,
+            'form': cloze_form,
+            'NameID': str(cat),
+            'Target': qaw_set.Target,
+            'message': message,
+            'correct': iscorrect
+        })
+
+    else:
+        qaw_set = QAWSet.objects.get(NameID=str(cat))
+        cloze_model = Cloze.objects\
+            .filter(qaw__NameID=str(cat))\
+            .order_by('position')
+
+        cloze = c.from_model(cloze_model)
+        beginTime = timezone.now()
+
+        cloze_form = ClozeForm(len(cloze.gaps), initial={'cloze_id': (str(cat)),'BeginTime': beginTime, 'NameID': str(cat)})
+        cloze_items = []
+
+
+        for i, gap in enumerate(cloze.gaps):
+            cloze_items.extend([text_style(gap.preceeding_text), cloze_form[ClozeForm.get_gap_key(i)], text_style(gap.succeeding_text) ])
+
+        return render(request, 'cloze_text.html',  {'cloze_items': cloze_items, 'form': cloze_form, "NameID": str(cat), 'Target': qaw_set.Target})
+
 
 def generateTruthTables(request):
     if not request.user.is_authenticated:
@@ -387,9 +428,10 @@ def generateTruthTables(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect, message, correctcounter = True, "Your answer is correct.", 0
+            iscorrect, message, correctcounter = True, "Your answers were completely correct.", 0
             
             checklist = [i['Answer'] for i in Answer.objects.filter(Set__NameID=(str(cat))).values()]
+            checklist2 = [i['Statement'] for i in WrongStatements.objects.filter(Set__NameID=(str(cat))).values()]
 
             NameID = ""
             question_f = ""
@@ -414,27 +456,36 @@ def generateTruthTables(request):
             useranswer.save()
 
             for i in range(1, 4):
-                answercorrect = False
-                x = raw_request_split[i].split("=")
+                y = raw_request_split[i]
+                x = urllib.parse.unquote_plus(urllib.parse.unquote(y)).split("=")
                 if SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).exists():
                     lastanswer += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Answer) + ";"
                     lastanswerdate += str((SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0]).order_by('Solved'))[0].Solved) + ";"
                 else:
                     lastanswer += "not answered yet;"
                     lastanswerdate += "not answered yet;"
-                if x[0] in checklist:
-                    answercorrect = True
+                if x[0] in checklist and x[1] == "True":       
                     correctcounter += 1
                     qanswer += x[0] + "=" + x[1] + "=" "True" + ";"
-                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="True", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=True, Answer=x[1], Statement=x[0], Expectedanswer="False", AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer.save()
+                elif x[0] in checklist2 and x[1] == "False": 
+                    correctcounter += 1
+                    qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=True, Answer=x[1], Statement=x[0], Expectedanswer="False", AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 else:
-                    iscorrect, message = False, "Your answer is wrong."
+                    eanswer = "False"
+                    if x[0] in checklist:
+                       eanswer = "True"
+                    iscorrect, message = False, "Your answers were partly correct."
                     qanswer += x[0] + "=" + x[1] + "=" "False" + ";"
-                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=answercorrect, Answer="False", Statement=x[0], Expectedanswer=x[1], AllAnswers=useranswer, Topic=str(cat))
+                    singleuseranswer = SingleTruthTableUserAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime, Set=qaw_set, UserID=request.user.id, Correct=False, Answer=x[1], Statement=x[0], Expectedanswer=eanswer, AllAnswers=useranswer, Topic=str(cat))
                     singleuseranswer.save()
                 statistic += str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="True").count()) + "=" + str(SingleTruthTableUserAnswer.objects.filter(UserID=request.user.id, Statement=x[0], Answer="False").count()) + ";"
 
+            if correctcounter == 0:
+                message = "Your answers were completely wrong." 
             qanswer = qanswer[:-1]
             statistic = statistic[:-1]
             lastanswer = lastanswer[:-1]
@@ -445,7 +496,7 @@ def generateTruthTables(request):
 
             message += " You answered {}/{} statements correctly.".format(correctcounter, "3")
            
-            return render(request, 'truthtableexample.html', {'message': message, 'Question': question_f, 'Qanswer': qanswer, 'Statistic': statistic, 'Lastanswer': lastanswer, 'Lastanswerdate': lastanswerdate})
+            return render(request, 'truthtableexample.html', {'message': message, 'Question': question_f, 'Qanswer': qanswer, 'correct': iscorrect, 'Statistic': statistic, 'Lastanswer': lastanswer, 'Lastanswerdate': lastanswerdate})
         else:
             hint = ""
             qanswer = ""
@@ -481,6 +532,7 @@ def generateTruthTables(request):
         print(error)
     return redirect('homeview')
 
+
 def generateGateQuestions(request):
     if not request.user.is_authenticated:
         return redirect("/")
@@ -488,7 +540,7 @@ def generateGateQuestions(request):
         cat = request.GET.get('t', '')
         if request.method == "POST":
             endtime = datetime.now()
-            iscorrect = False 
+            iscorrect, message = False, "Answer for result and circuitfunction are both wrong"
             inputq = ""
             question = ""
             expectedanswer = ""
@@ -508,8 +560,8 @@ def generateGateQuestions(request):
                     imgpath += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Imgpath=", "")))
                 if element.startswith("Expectedanswer="):
                     expectedanswer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedanswer=", "")))
-                if element.startswith("Answer="):
-                    answer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Answer=", "")))
+                if element.startswith("Gateanswer="):
+                    answer += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Gateanswer=", "")))
                 if element.startswith("Expectedcircuitfunction="):
                     expectedcircuitfunction += urllib.parse.unquote_plus(urllib.parse.unquote(element.replace("Expectedcircuitfunction=", "")))
                 if element.startswith("Answerircuitfunction="):
@@ -534,10 +586,9 @@ def generateGateQuestions(request):
                 iscorrect = False
 
             qaw_set = QAWSet.objects.get(NameID=NameID)
-            message = "Answer for result and circuitfunction are both wrong"
             useranswer = GatesAnswer(Duration=calculateTimeDuration(beginTime,endtime), Solved=endtime,Set=qaw_set, UserID=request.user.id, Expectedanswer=expectedanswer, Answer=answer, Correct=iscorrect, Question=question, Topic="Gates", Imgpath=imgpath, Expectedcircuitfunction=expectedcircuitfunction, Answerircuitfunction=answercircuitfunction, Input=inputq)
             useranswer.save()
-            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Answer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
+            return render(request, 'gates.html', {'message': message, 'correct': iscorrect, 'Question': question, 'Expectedanswer': expectedanswer, 'Gateanswer':answer, 'Imgpath':imgpath, 'Expectedcircuitfunction':expectedcircuitfunction, 'Answerircuitfunction':answercircuitfunction, 'Input': inputq})
         else:
             questionsset = Question.objects.filter(Set__NameID=(str(cat)))
             question = randint(0, questionsset.count() - 1)
@@ -660,6 +711,7 @@ def generateMCExample(request):
     except Exception as error:
         print(error)
     return render(request, 'multiplechoiceexample.html')
+
 
 def generateBinaryExpression(request):
     try:

@@ -35,9 +35,7 @@ def to_model(cloze: Cloze, qaw: models.QAWSet):
             solution_model.save()
 
 
-def from_model(model: models.QAWSet) -> Cloze:
-    clozes = model.cloze_set\
-        .order_by('position')
+def from_model(clozes) -> Cloze:
 
     gaps = []
     for cloze in clozes:

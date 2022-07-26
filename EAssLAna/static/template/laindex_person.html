@@ -18,7 +18,7 @@
       <div id="container" style="width: 100%; height: 100%; padding-left: 80px; padding-top: 80px; padding-right: 80px;">
       
             {% if today_successRate > 60 %}
-            <h1 class="text-success">{{today_successRate}%</h1>
+            <h1 class="text-success">{{today_successRate}}%</h1>
             {% elif today_successRate > 30 %}
             <h1 class="text-warning">{{today_successRate}}%</h1>
             {% else %} 
@@ -170,6 +170,19 @@
           
 </div>
 </div>
+
+<div class="card">
+  <div id="container"  style="width: 100%; height: 40%">
+      <canvas id="pie-chart-normalforms"  style="width: 100%; height: 100%"></canvas>
+    </div>
+<div class="card-body">
+  <br>
+  <h5 class="card-title">Normal Forms</h5>
+  <hr>
+  <p class="card-text">Here you can see how much Normal Forms Questions have been answered right or wrong.</p>
+          
+</div>
+</div>
       </div>
       
 
@@ -221,6 +234,7 @@
             
             <div id="container" style="padding-left: 10px; padding-top: 10px;">
                 {% include "index-analytics.html" %}
+                <br><br>
               </div>
               <div class="card-body">
                
@@ -320,7 +334,7 @@
               datasets: [{
                 data: {{successRate_All|get__array_valueByIndex:8}},
                 backgroundColor: ['#1ef87a', '#f90000'],
-                label: 'Statistic for users calculus'
+                label: 'Statistic for gates'
               }],
               labels: {{ labels|safe }}
             },
@@ -333,9 +347,24 @@
             type: 'doughnut',
             data: {
               datasets: [{
-                data: {{successRate_All|get__array_valueByIndex:8}},
+                data: {{successRate_All|get__array_valueByIndex:9}},
                 backgroundColor: ['#1ef87a', '#f90000'],
                 label: 'Statistic for calculus'
+              }],
+              labels: {{ labels|safe }}
+            },
+            options: {
+              responsive: true
+            }
+          };
+
+          var config_NormalForm = {
+            type: 'doughnut',
+            data: {
+              datasets: [{
+                data: {{successRate_All|get__array_valueByIndex:10}},
+                backgroundColor: ['#1ef87a', '#f90000'],
+                label: 'Statistic for normal forms'
               }],
               labels: {{ labels|safe }}
             },
@@ -385,7 +414,9 @@
             scales: {
               yAxes: [{
                   ticks: {
-                      beginAtZero: true
+                    beginAtZero: true,
+                    min: 0,
+                    stepSize: 1
                   }
               }]
           }
@@ -469,7 +500,10 @@
               window.myPie = new Chart(ctx_Gates, config_Gates);    
               
               var ctx_Calculus = document.getElementById('pie-chart-calculus').getContext('2d');
-              window.myPie = new Chart(ctx_Calculus, config_Calculus);  
+              window.myPie = new Chart(ctx_Calculus, config_Calculus); 
+              
+              var ctx_NormalForms = document.getElementById('pie-chart-normalforms').getContext('2d');
+              window.myPie = new Chart(ctx_NormalForms, config_NormalForm);  
           
   
           };

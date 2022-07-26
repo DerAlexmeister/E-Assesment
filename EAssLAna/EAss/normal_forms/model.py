@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models.deletion import CASCADE
 
+from django.utils import timezone
+
 from ..models import QAWSet
 from .normal_form import CONJUNCTION, DISJUNCTION, NORMAL_FORMS
 from .assessment import ASSESSMENTS
@@ -30,13 +32,20 @@ class NormalFormLiteral(models.Model):
 
 
 class NormalFormGuess(models.Model):
-    qaw = models.ForeignKey(QAWSet, on_delete=CASCADE)
+    Set = models.ForeignKey(QAWSet, on_delete=CASCADE)
+    UserID = models.CharField(max_length=1024, default='None',blank=False, null=False)
+
+    Duration = models.IntegerField(default=0, blank=False, null=False)
+    Solved = models.DateTimeField(default=timezone.now)
+    AllCorrect = models.BooleanField(blank=False, null=False)
+
     question = models.ForeignKey(NormalFormQuestion, on_delete=models.CASCADE)
     answer = models.ForeignKey(NormalFormAnswer, on_delete=models.CASCADE)
 
 
 class NormalFormCorrection(models.Model):
     guess = models.ForeignKey(NormalFormGuess, on_delete=models.CASCADE)
+    UserID = models.CharField(max_length=1024, default='None',blank=False, null=False)
     points = models.IntegerField()
     total_points = models.IntegerField()
 

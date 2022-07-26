@@ -1,6 +1,4 @@
-from wsgiref.validate import validator
 from django import forms
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
 from EAss.models import QAWSet
@@ -26,7 +24,7 @@ class ClozeForm(forms.Form):
         super().__init__(*args, **kwargs)
         for i in range(num_gaps):
             field_name = ClozeForm.get_gap_key(i)
-            self.fields[field_name] = forms.CharField()
+            self.fields[field_name] = forms.CharField(required=False)
 
     @staticmethod
     def get_gap_key(index: int) -> str:
@@ -90,9 +88,14 @@ class GatesAnswerForm(forms.Form):
     NameID = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     BeginTime = forms.DateTimeField(widget=forms.HiddenInput())
     Question = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answer = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)], widget=forms.TextInput(attrs={'class': 'form-control'}))
+    Gateanswer = forms.IntegerField()
     Expectedcircuitfunction = forms.CharField(max_length=1024, widget=forms.HiddenInput())
-    Answerircuitfunction = forms.CharField(max_length=1024, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    Answerircuitfunction = forms.CharField(max_length=1024)
     Imgpath = forms.CharField(max_length=1024, widget=forms.HiddenInput())
     Expectedanswer = forms.IntegerField(widget=forms.HiddenInput())
     Input = forms.CharField(max_length=1024, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(GatesAnswerForm, self).__init__(*args, **kwargs)
+        self.fields['Gateanswer'].label = "Answer for result in gate circuit image"
+        self.fields['Answerircuitfunction'].label = "Answer for circuitfunction of gate circuit image"
