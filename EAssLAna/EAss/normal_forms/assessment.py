@@ -92,7 +92,7 @@ class CorrectingBooleanAssessment(Assessment):
 
         clause = f" {outer} ".join(
             f"""<span style="color:{"green" if right else "red"}">
-               {f"{inner} ".join(str(lit) for lit in clause)}
+               {f" {inner} ".join(str(lit) for lit in clause)}
                </span>"""
             for clause, right in response
         )
@@ -117,7 +117,6 @@ class DifferenceAssessment(Assessment):
             inner = "*"
             outer = "+"
         elif guess.question.normal_form == CONJUNCTION:
-
             inner = "+"
             outer = "*"
         else:
@@ -125,7 +124,7 @@ class DifferenceAssessment(Assessment):
 
         clause = f" {outer} ".join(
             f"""<span style="color:{"green" if right else "red"}">
-               {f"{inner} ".join(str(lit) for lit in clause)}
+               {f" {inner} ".join(str(lit) for lit in clause)}
                </span>"""
             for clause, right in response
         )

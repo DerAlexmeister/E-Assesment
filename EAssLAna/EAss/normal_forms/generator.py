@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from random import sample
 
 from . import model
-from .normal_form import TruthTable, Question
+from .normal_form import DISJUNCTION, TruthTable, Question
 
 
 @dataclass
@@ -51,9 +51,14 @@ def generate_randomly(difficulty: Difficulty):
     numbers = np.arange(num_input, dtype=np.uint8)
     bits = np.unpackbits(numbers[:, np.newaxis], axis=1)[:, -difficulty.num_variables:]
 
-    results = np.zeros(num_input, dtype=np.uint8)
     ones = sample(range(num_input), difficulty.num_terms)
-    results[ones] = 1
+    if difficulty.normal_form == DISJUNCTION:
+        results = np.zeros(num_input, dtype=np.uint8)
+        results[ones] = 1
+    else:
+        results = np.ones(num_input, dtype=np.uint8)
+        results[ones] = 0
+
 
     table = np.column_stack((bits, results))
 
