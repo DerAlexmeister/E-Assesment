@@ -2,7 +2,7 @@
 
 Learning and Assessment Plattform for RA.
 
-## Foldersturcture
+## Folder structure
 
 - EAss: E-Assessment App
 - LAna: Learning Analytics App
@@ -11,6 +11,11 @@ Learning and Assessment Plattform for RA.
 -> Accessing the E-Assessment-Part: http://127.0.0.1:8000/eassessments
 
 -> Accessing the Learning-Analytics-Part: http://127.0.0.1:8000/learninganalytics
+
+## Prepared User accounts (User/Password)
+
+- admin/admin
+- PSchroed/6LuZHPdQsxYeMbz
 
 ## Requriements
 

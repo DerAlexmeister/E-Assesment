@@ -24,7 +24,7 @@ class ClozeForm(forms.Form):
         super().__init__(*args, **kwargs)
         for i in range(num_gaps):
             field_name = ClozeForm.get_gap_key(i)
-            self.fields[field_name] = forms.CharField()
+            self.fields[field_name] = forms.CharField(required=False)
 
     @staticmethod
     def get_gap_key(index: int) -> str:

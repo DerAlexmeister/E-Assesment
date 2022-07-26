@@ -218,15 +218,11 @@ def get_Topic_SpecificQuestion_Answers_Admin(answerType):
 
     if(answerType == "NormalForm"):
         answers = NormalFormGuess.objects.all()
-        print("ANSWERS")
-        print(answers)
-
     return answers
 
 @register.simple_tag
 def get_Topic_SpecificQuestion_Answers(answerType,user_id):
     answers = None
-    print(answers)
     
     if(answerType == "SingleChoice"):
         answers = SingleChoiceUserAnswer.objects.filter(UserID=user_id)
@@ -357,8 +353,6 @@ def get_Answers_ByTimeRange(answers_set,date_min,date_max):
 
 @register.filter
 def get_SuccessRate_Specific_DateRange(answers_set,date_min,date_max):
-    #print(date_min.strftime('%Y-%m-%d')) 
-    #print(date_max.strftime('%Y-%m-%d'))
     answers_daterange = get_Answers_ByTimeRange(answers_set,date_min,date_max)
     return get_SuccessRate_Specific(answers_daterange)
 
@@ -479,18 +473,12 @@ def get_SuccessRate_All_DateRange(user_id, date_min,date_max):
 
     try:
         normalFormGuess = NormalFormGuess.objects.filter(UserID=user_id)
-        normalFormGuessALL = NormalFormGuess.objects.all()
-        print(normalFormGuessALL)
-        print(normalFormGuess)
         normalformCorrect, normalformIncorrect = get_SuccessRate_Specific_DateRange(normalFormGuess,date_min,date_max)
         correct += normalformCorrect
         incorrect += normalformIncorrect
     except:
         normalformCorrect = 0
         normalformIncorrect = 0
-
-    print([correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect],[normalformCorrect,normalformIncorrect]]
-)
         
     return [correct+incorrect, correct, incorrect, [scCorrect,scIncorrect], [mcCorrect,mcIncorrect], [clozeCorrect,clozeIncorrect], [truthTableCorrect,truthTableIncorrect], [openAssemblerCorrect,openAssemblerIncorrect], [gatesCorrect, gatesIncorrect], [calculusCorrect,calculusIncorrect],[normalformCorrect,normalformIncorrect]]
 
