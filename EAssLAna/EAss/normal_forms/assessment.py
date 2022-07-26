@@ -73,23 +73,30 @@ class CorrectingBooleanAssessment(Assessment):
             guess.question.function,
         )
 
-        if guess.answer == solution:
-            return "You are correct!"
-        else:
-            if guess.question.normal_form == DISJUNCTION:
-                inner = "*"
-                outer = "+"
-            elif guess.question.normal_form == CONJUNCTION:
-                inner = "+"
-                outer = "*"
+        response = []
+        for s in solution.clauses:
+            if s in guess.answer.clauses:
+                response.append((s, True))
+                solution.clauses.remove(s)
             else:
-                raise Exception("Unknown normal form")
+                response.append((s, False))
 
-            clause = f" {outer} ".join(
-                f" {inner} ".join(str(lit) for lit in clause)
-                for clause in guess.answer.clauses
-            )
-            return f"<p>The correct solution is {clause}</p>"
+        if guess.question.normal_form == DISJUNCTION:
+            inner = "*"
+            outer = "+"
+        elif guess.question.normal_form == CONJUNCTION:
+            inner = "+"
+            outer = "*"
+        else:
+            raise Exception("Unknown normal form")
+
+        clause = f" {outer} ".join(
+            f"""<span style="color:{"green" if right else "red"}">
+               {f"{inner} ".join(str(lit) for lit in clause)}
+               </span>"""
+            for clause, right in response
+        )
+        return f"<p>f(a)  =    {clause}</p>"
 
 
 class DifferenceAssessment(Assessment):
@@ -124,10 +131,10 @@ class DifferenceAssessment(Assessment):
         )
         return f"<p>f(a)  =    {clause}</p>"
 
-class GradingAndDifferenceAssessment(Assessment):
+class GradingAndCorrectionAssessment(Assessment):
     def __init__(self):
         self._grading = GradingAssessment()
-        self._difference = DifferenceAssessment()
+        self._difference = CorrectingBooleanAssessment()
 
     def assess(self, guess: Guess, guess_model, penalty, **kwargs) -> str:
         grading = self._grading.assess(guess, guess_model, penalty, **kwargs)
@@ -177,6 +184,6 @@ ASSESSMENTS = {
     'boolean': RememberingAssessment(BooleanAssessment()),
     'grading': RememberingAssessment(GradingAssessment()),
     'correcting_boolean': RememberingAssessment(CorrectingBooleanAssessment()),
-    'grading_difference': RememberingAssessment(GradingAndDifferenceAssessment()),
+    'grading_correction': RememberingAssessment(GradingAndCorrectionAssessment()),
     'difference': DifferenceAssessment(),
 }

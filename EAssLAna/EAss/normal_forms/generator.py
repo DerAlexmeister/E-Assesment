@@ -16,10 +16,10 @@ class Difficulty:
 
 VARIABLES = ["a", "b", "c", "d", "e"]
 
-MINIMAL_NUM_VARIABLES = 1
+MINIMAL_NUM_VARIABLES = 2
 MINIMAL_NUM_TERMS = 1
-VARIABLE_RATE = 0.17
-TERM_RATE = 0.17
+VARIABLE_RATE = .5
+TERM_RATE = .5
 
 def updateProgress(rate, points, total_points):
     half = total_points/2
