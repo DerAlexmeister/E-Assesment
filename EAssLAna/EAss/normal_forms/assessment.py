@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from dataclasses import dataclass
 
 from . import model
@@ -73,11 +74,13 @@ class CorrectingBooleanAssessment(Assessment):
             guess.question.function,
         )
 
+        guess = deepcopy(guess)
+
         response = []
         for s in solution.clauses:
             if s in guess.answer.clauses:
                 response.append((s, True))
-                solution.clauses.remove(s)
+                guess.answer.clauses.remove(s)
             else:
                 response.append((s, False))
 
@@ -129,6 +132,7 @@ class DifferenceAssessment(Assessment):
             for clause, right in response
         )
         return f"<p>f(a)  =    {clause}</p>"
+
 
 class GradingAndCorrectionAssessment(Assessment):
     def __init__(self):
